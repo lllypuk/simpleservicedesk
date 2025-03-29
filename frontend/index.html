@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+    <main class="container">
+        <h1>Todo List</h1>
+        
+        <form hx-post="/api/todos/create" hx-target="#todo-list" hx-swap="beforeend">
+            <input type="text" name="title" placeholder="Add new todo..." required>
+            <button type="submit">Add</button>
+        </form>
+
+        <div id="todo-list" hx-get="/api/todos" hx-trigger="load">
+            <!-- Todos will be loaded here -->
+        </div>
+    </main>
+</body>
+</html>
