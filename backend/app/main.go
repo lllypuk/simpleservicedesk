@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/lllypuk/simpleservicedesk/backend/app/db"
 	"github.com/lllypuk/simpleservicedesk/backend/app/handlers"
@@ -25,16 +24,20 @@ func main() {
 	}
 	defer db.Client.Disconnect(context.Background())
 
-	// Get absolute path to frontend directory
-	frontendPath := filepath.Join("..", "frontend")
+	// Serve static files from frontend directory
+	fs := http.FileServer(http.Dir("../../frontend"))
+	http.Handle("/", http.StripPrefix("/", fs))
 
-	// Serve static files
-	fs := http.FileServer(http.Dir(frontendPath))
-	http.Handle("/", fs)
+	// Handle refresh by serving index.html
+	http.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "../../frontend/index.html")
+	})
 
 	// API routes
 	http.HandleFunc("/api/todos", handlers.GetTodos)
 	http.HandleFunc("/api/todos/create", handlers.CreateTodo)
+	http.HandleFunc("/api/todos/update", handlers.UpdateTodo)
+	http.HandleFunc("/api/todos/delete", handlers.DeleteTodo)
 
 	fmt.Println("Server listening on :8081")
 	if err := http.ListenAndServe(":8081", nil); err != nil {

@@ -16,9 +16,45 @@
             <button type="submit">Add</button>
         </form>
 
-        <div id="todo-list" hx-get="/api/todos" hx-trigger="load">
+        <div id="todo-list" hx-get="/api/todos" hx-trigger="load, every 5s">
             <!-- Todos will be loaded here -->
         </div>
+
+        <style>
+            .todo-item {
+                display: flex;
+                align-items: center;
+                margin: 0.5rem 0;
+            }
+            .todo-title {
+                flex-grow: 1;
+                margin: 0 1rem;
+            }
+            .completed {
+                text-decoration: line-through;
+            }
+        </style>
+
+        <template id="todo-template">
+            <div class="todo-item">
+                <input type="checkbox"
+                       hx-post="/api/todos/update"
+                       hx-vars="id:'${id}', completed:this.checked"
+                       hx-target="#todo-list"
+                       hx-swap="innerHTML"
+                       ${completed ? 'checked' : ''}>
+                <span class="todo-title ${completed ? 'completed' : ''}">
+                    ${title}
+                </span>
+                <button hx-post="/api/todos/delete"
+                        hx-vars="id:'${id}'"
+                        hx-target="#todo-list"
+                        hx-swap="innerHTML"
+                        hx-confirm="Are you sure you want to delete this todo?">
+                    Delete
+                </button>
+            </div>
+        </template>
     </main>
 </body>
 </html>
