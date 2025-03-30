@@ -10,14 +10,18 @@
 <body>
     <main class="container">
         <h1>Todo List</h1>
-        
-        <form hx-post="/api/todos/create" hx-target="#todo-list" hx-swap="beforeend">
+
+        <!-- Updated hx-post endpoint -->
+        <form hx-post="/api/todos" hx-target="#todo-list" hx-swap="beforeend"
+              _="on htmx:afterRequest reset() me"> <!-- Reset form after successful submission -->
             <input type="text" name="title" placeholder="Add new todo..." required>
             <button type="submit">Add</button>
         </form>
 
-        <div id="todo-list" hx-get="/api/todos" hx-trigger="load, every 5s">
-            <!-- Todos will be loaded here -->
+        <!-- Load initial list and handle updates via HTMX swaps -->
+        <div id="todo-list" hx-get="/api/todos" hx-trigger="load">
+            <!-- Todos will be loaded here by HTMX -->
+            <!-- The backend now returns HTML fragments for create/update/delete -->
         </div>
 
         <style>
@@ -25,6 +29,9 @@
                 display: flex;
                 align-items: center;
                 margin: 0.5rem 0;
+                padding: 0.5rem; /* Add some padding */
+                border: 1px solid #e1e1e1; /* Add a light border */
+                border-radius: 4px; /* Rounded corners */
             }
             .todo-title {
                 flex-grow: 1;
@@ -32,29 +39,31 @@
             }
             .completed {
                 text-decoration: line-through;
+                color: grey; /* Dim completed items */
+            }
+            /* Style for the delete button */
+            .todo-item button {
+                background-color: #f44336; /* Red background */
+                color: white;
+                border: none;
+                padding: 0.3rem 0.6rem;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 0.8em;
+            }
+            .todo-item button:hover {
+                background-color: #d32f2f; /* Darker red on hover */
+            }
+            /* Add some space below the form */
+            form {
+                margin-bottom: 1rem;
             }
         </style>
 
-        <template id="todo-template">
-            <div class="todo-item">
-                <input type="checkbox"
-                       hx-post="/api/todos/update"
-                       hx-vars="id:'${id}', completed:this.checked"
-                       hx-target="#todo-list"
-                       hx-swap="innerHTML"
-                       ${completed ? 'checked' : ''}>
-                <span class="todo-title ${completed ? 'completed' : ''}">
-                    ${title}
-                </span>
-                <button hx-post="/api/todos/delete"
-                        hx-vars="id:'${id}'"
-                        hx-target="#todo-list"
-                        hx-swap="innerHTML"
-                        hx-confirm="Are you sure you want to delete this todo?">
-                    Delete
-                </button>
-            </div>
-        </template>
+        <!-- Removed unused template block -->
+
     </main>
+    <!-- Include Hyperscript for form reset -->
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 </body>
 </html>
