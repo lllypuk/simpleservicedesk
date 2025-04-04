@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <!-- Pico.css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
+    <style>
+        /* Add any custom styles here if needed */
+        body { padding: 20px; }
+        main { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><strong>{{ .Title }}</strong></li>
+            </ul>
+            <ul>
+                <!-- Login/logout info or actions can be added here later -->
+                <!-- Removed non-functional Login button -->
+            </ul>
+        </nav>
+        <hr>
+    </header>
+
+    <main class="container">
+        <h1>Service Requests</h1>
+
+        <!-- Area to load requests via HTMX -->
+        <div id="request-list"
+             hx-get="/api/requests"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <p>Loading requests...</p>
+             <progress></progress> <!-- PicoCSS progress indicator -->
+        </div>
+
+        <!-- TODO: Add form for creating new requests -->
+
+    </main>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <script>
+        // Add any custom JS here if needed
+        // Example: Handle auth errors from HTMX requests
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            if (evt.detail.xhr.status === 401) {
+                // Handle unauthorized access - maybe redirect to login or show message
+                console.error("HTMX request unauthorized:", evt.detail.xhr.responseText);
+                // You might want to clear the target element or display a login prompt
+                evt.detail.target.innerHTML = "<p class='error'>Authentication required. Please log in.</p>";
+            } else {
+                 console.error("HTMX Error:", evt.detail.error);
+                 evt.detail.target.innerHTML = `<p class='error'>Error loading content (${evt.detail.xhr.status}).</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
