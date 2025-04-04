@@ -2,11 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"log"
-	"net/http"
+	"log" // Keep for status codes, might remove later if Fiber provides constants
 	"strings"
 
-	"github.com/go-chi/chi/v5" // Import chi
+	"github.com/gofiber/fiber/v2" // Import Fiber
 	"github.com/lllypuk/simpleservicedesk/backend/app/db"
 	"github.com/lllypuk/simpleservicedesk/backend/app/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,18 +23,11 @@ func NewTodoHandler(store db.TodoStore) *TodoHandler {
 
 // CreateTodo handles the creation of a new Todo item.
 // It expects a 'title' form value and returns an HTML fragment of the new item.
-func (h *TodoHandler) CreateTodo(w http.ResponseWriter, r *http.Request) {
-	// It's good practice to parse the form first
-	if err := r.ParseForm(); err != nil {
-		log.Printf("Error parsing form: %v", err)
-		http.Error(w, "Failed to parse form", http.StatusBadRequest)
-		return
-	}
-
-	title := strings.TrimSpace(r.FormValue("title"))
+func (h *TodoHandler) CreateTodo(c *fiber.Ctx) error {
+	// Fiber automatically parses the form, access directly
+	title := strings.TrimSpace(c.FormValue("title"))
 	if title == "" {
-		http.Error(w, "Title is required", http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).SendString("Title is required")
 	}
 
 	todo := models.Todo{
@@ -44,132 +36,117 @@ func (h *TodoHandler) CreateTodo(w http.ResponseWriter, r *http.Request) {
 		// CreatedAt and UpdatedAt are set by the store
 	}
 
-	createdTodo, err := h.store.Create(r.Context(), &todo)
+	// Use Fiber context for request context
+	createdTodo, err := h.store.Create(c.Context(), &todo)
 	if err != nil {
 		log.Printf("Error creating todo: %v", err)
-		http.Error(w, "Failed to create todo", http.StatusInternalServerError)
-		return
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to create todo")
 	}
 
 	// Return the HTML fragment for the new todo item for HTMX
-	w.WriteHeader(http.StatusCreated)
-	writeTodoItemHTML(w, createdTodo) // Use helper to generate HTML
+	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML) // Set content type
+	return c.Status(fiber.StatusCreated).SendString(generateTodoItemHTML(createdTodo))
 }
 
 // GetTodos handles retrieving all Todo items and rendering them as HTML fragments.
-func (h *TodoHandler) GetTodos(w http.ResponseWriter, r *http.Request) {
-	todos, err := h.store.GetAll(r.Context())
+func (h *TodoHandler) GetTodos(c *fiber.Ctx) error {
+	todos, err := h.store.GetAll(c.Context())
 	if err != nil {
 		log.Printf("Error getting todos: %v", err)
-		http.Error(w, "Failed to retrieve todos", http.StatusInternalServerError)
-		return
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to retrieve todos")
 	}
 
-	w.Header().Set("Content-Type", "text/html")
-	w.WriteHeader(http.StatusOK)
+	var htmlBuilder strings.Builder
 	for _, todo := range todos {
-		writeTodoItemHTML(w, &todo) // Use helper
+		htmlBuilder.WriteString(generateTodoItemHTML(&todo))
 	}
+
+	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+	return c.Status(fiber.StatusOK).SendString(htmlBuilder.String())
 }
 
 // UpdateTodo handles updating a Todo item's completion status.
 // It expects the 'id' from the URL path and 'completed' form value.
 // It returns an HTML fragment of the updated item.
-func (h *TodoHandler) UpdateTodo(w http.ResponseWriter, r *http.Request) {
-	// Get ID from URL parameter
-	idStr := chi.URLParam(r, "id")
+func (h *TodoHandler) UpdateTodo(c *fiber.Ctx) error {
+	// Get ID from URL parameter using Fiber's Params method
+	idStr := c.Params("id")
 	if idStr == "" {
-		// This shouldn't happen with chi routing, but check anyway
-		http.Error(w, "ID is required in URL path", http.StatusBadRequest)
-		return
+		// Fiber's routing usually ensures this, but check defensively
+		return c.Status(fiber.StatusBadRequest).SendString("ID is required in URL path")
 	}
 
 	objID, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID format in URL path", http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid ID format in URL path")
 	}
 
-	// Parse form to get the 'completed' status
-	if err := r.ParseForm(); err != nil {
-		log.Printf("Error parsing form for update: %v", err)
-		http.Error(w, "Failed to parse form", http.StatusBadRequest)
-		return
-	}
-	completedStr := r.FormValue("completed")
+	// Get 'completed' status from form value
+	completedStr := c.FormValue("completed")
 	// We expect 'completed' to be present for this handler based on the HTML
 	if completedStr == "" {
-		http.Error(w, "'completed' form value is required", http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).SendString("'completed' form value is required")
 	}
 
 	// Fetch the existing todo to update its fields
-	existingTodo, err := h.store.GetByID(r.Context(), objID)
+	existingTodo, err := h.store.GetByID(c.Context(), objID)
 	if err != nil {
 		log.Printf("Error finding todo %s for update: %v", idStr, err)
 		if strings.Contains(err.Error(), "not found") {
-			http.Error(w, "Todo not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to find todo for update", http.StatusInternalServerError)
+			return c.Status(fiber.StatusNotFound).SendString("Todo not found")
 		}
-		return
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to find todo for update")
 	}
 
 	// Update the completion status
 	existingTodo.Completed = (completedStr == "true")
-	// Title is not updated here, assuming separate mechanism if needed
+	// Title is not updated here
 
 	// Update the todo in the store (this also updates UpdatedAt)
-	updatedTodo, err := h.store.Update(r.Context(), objID, existingTodo)
+	updatedTodo, err := h.store.Update(c.Context(), objID, existingTodo)
 	if err != nil {
 		log.Printf("Error updating todo %s: %v", idStr, err)
 		if strings.Contains(err.Error(), "not found") { // Check again in case of race condition
-			http.Error(w, "Todo not found during update", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to update todo", http.StatusInternalServerError)
+			return c.Status(fiber.StatusNotFound).SendString("Todo not found during update")
 		}
-		return
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to update todo")
 	}
 
 	// Return the HTML fragment for the updated todo item for HTMX swap
-	w.Header().Set("Content-Type", "text/html")
-	w.WriteHeader(http.StatusOK)
-	writeTodoItemHTML(w, updatedTodo)
+	c.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+	return c.Status(fiber.StatusOK).SendString(generateTodoItemHTML(updatedTodo))
 }
 
 // DeleteTodo handles deleting a Todo item.
 // It expects the 'id' from the URL path.
-func (h *TodoHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
+func (h *TodoHandler) DeleteTodo(c *fiber.Ctx) error {
 	// Get ID from URL parameter
-	idStr := chi.URLParam(r, "id")
+	idStr := c.Params("id")
 	if idStr == "" {
-		http.Error(w, "ID is required in URL path", http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).SendString("ID is required in URL path")
 	}
 
 	objID, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID format in URL path", http.StatusBadRequest)
-		return
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid ID format in URL path")
 	}
 
-	err = h.store.Delete(r.Context(), objID)
+	err = h.store.Delete(c.Context(), objID)
 	if err != nil {
 		log.Printf("Error deleting todo %s: %v", idStr, err)
 		if strings.Contains(err.Error(), "not found") {
-			http.Error(w, "Todo not found for deletion", http.StatusNotFound)
-		} else {
-			http.Error(w, "Failed to delete todo", http.StatusInternalServerError)
+			return c.Status(fiber.StatusNotFound).SendString("Todo not found for deletion")
 		}
-		return
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to delete todo")
 	}
 
 	// Return success with empty body. HTMX handles the swap.
-	w.WriteHeader(http.StatusOK)
+	return c.SendStatus(fiber.StatusOK) // Send only status
 }
 
-// writeTodoItemHTML is a helper function to write a single todo item as an HTML fragment.
-func writeTodoItemHTML(w http.ResponseWriter, todo *models.Todo) {
+// generateTodoItemHTML generates the HTML fragment string for a single todo item.
+// Renamed from writeTodoItemHTML and returns a string instead of writing to a writer.
+func generateTodoItemHTML(todo *models.Todo) string {
 	checkedAttr := ""
 	completedClass := ""
 	if todo.Completed {
@@ -180,7 +157,9 @@ func writeTodoItemHTML(w http.ResponseWriter, todo *models.Todo) {
 	targetID := "todo-" + idHex
 
 	// Use PUT for update, DELETE for delete, targeting the specific item div
-	fmt.Fprintf(w, `
+	// Note: The hx-vals for completed now sends "true" or "false" as strings,
+	// which the UpdateTodo handler expects.
+	return fmt.Sprintf(`
 <div class="todo-item" id="%s">
 	<input type="checkbox"
 		   hx-put="/api/todos/%s"

@@ -3,13 +3,15 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	// "net/http" // No longer needed for server/routing
+	"os"
+	// "path/filepath" // No longer needed for FileServer helper
+	// "strings" // No longer needed for FileServer helper
+
+	"github.com/gofiber/fiber/v2"                    // Import Fiber
+	"github.com/gofiber/fiber/v2/middleware/logger"  // Fiber logger middleware
+	"github.com/gofiber/fiber/v2/middleware/recover" // Fiber recover middleware
 	"github.com/lllypuk/simpleservicedesk/backend/app/db"
 	"github.com/lllypuk/simpleservicedesk/backend/app/handlers"
 )
@@ -41,35 +43,43 @@ func main() {
 	todoStore := db.NewMongoTodoStore(client)
 	todoHandler := handlers.NewTodoHandler(todoStore)
 
-	// Initialize Chi router
-	r := chi.NewRouter()
+	// Initialize Fiber app
+	app := fiber.New()
 
 	// Middleware
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)    // Logs requests
-	r.Use(middleware.Recoverer) // Recovers from panics
+	app.Use(recover.New()) // Recovers from panics
+	app.Use(logger.New())  // Logs requests (includes request ID)
+	// Note: RealIP handling often depends on proxy setup (e.g., X-Forwarded-For)
+	// Fiber's Ctx.IP() tries to get the real IP.
 
-	// API routes
-	r.Route("/api/todos", func(r chi.Router) {
-		r.Get("/", todoHandler.GetTodos)    // GET /api/todos
-		r.Post("/", todoHandler.CreateTodo) // POST /api/todos (Changed from /create)
-		// Note: Update and Delete handlers need adjustment for URL param ID
-		r.Put("/{id}", todoHandler.UpdateTodo)    // PUT /api/todos/{id} (Changed from /update)
-		r.Delete("/{id}", todoHandler.DeleteTodo) // DELETE /api/todos/{id} (Changed from /delete)
-	})
+	// API routes group
+	api := app.Group("/api")     // Group for API routes
+	todos := api.Group("/todos") // Group for Todo routes
+
+	todos.Get("/", todoHandler.GetTodos)         // GET /api/todos
+	todos.Post("/", todoHandler.CreateTodo)      // POST /api/todos
+	todos.Put("/:id", todoHandler.UpdateTodo)    // PUT /api/todos/:id (Fiber uses :param)
+	todos.Delete("/:id", todoHandler.DeleteTodo) // DELETE /api/todos/:id (Fiber uses :param)
 
 	// --- Static file serving ---
-	// Define the path relative to the 'backend' directory where 'go run' is executed
+	// Define the path relative to the 'backend' directory
 	frontendDir := "../frontend"
 	log.Printf("Serving static files from: %s", frontendDir)
 
-	// Serve static files using chi's FileServer helper
 	// Ensure the path exists before trying to serve
 	if _, err := os.Stat(frontendDir); os.IsNotExist(err) {
 		log.Fatalf("Frontend directory not found at %s. Ensure you are running 'go run app/main.go' from the 'backend' directory.", frontendDir)
 	}
-	FileServer(r, "/", http.Dir(frontendDir))
+
+	// Serve static files using Fiber's Static middleware
+	// The first argument is the prefix, the second is the root directory.
+	// "/" prefix means requests like /style.css will look for ../frontend/style.css
+	// We also configure it to serve index.html for SPA-like behavior (requests to non-existent files serve index.html)
+	app.Static("/", frontendDir, fiber.Static{
+		Index: "index.html", // Serve index.html for "/"
+		// NotFoundFile: "index.html", // Serve index.html if file not found (for SPA routing)
+		Compress: true, // Enable compression
+	})
 
 	// --- Start Server ---
 	port := os.Getenv("PORT")
@@ -78,48 +88,11 @@ func main() {
 	}
 
 	log.Printf("Server listening on :%s", port)
-	if err := http.ListenAndServe(":"+port, r); err != nil {
-		log.Fatalf("Error starting server: %v", err)
+	// Use app.Listen to start the Fiber server
+	if err := app.Listen(":" + port); err != nil {
+		log.Fatalf("Error starting Fiber server: %v", err)
 	}
 }
 
-// FileServer conveniently sets up a static file server that serves files
-// including index.html from the root and handles requests for paths that
-// don't exist by serving index.html (useful for SPAs).
-func FileServer(r chi.Router, public string, static http.FileSystem) {
-	// Ensure the path is absolute or relative to the current working directory
-	if strings.ContainsAny(public, "{}*") {
-		panic("FileServer does not permit URL parameters.")
-	}
-
-	root, _ := static.Open("/")
-	if root == nil {
-		panic("Static file directory does not exist or is not accessible.")
-	}
-	root.Close() // We just checked existence
-
-	fs := http.StripPrefix(public, http.FileServer(static))
-
-	if public != "/" && public[len(public)-1] != '/' {
-		r.Get(public, http.RedirectHandler(public+"/", http.StatusMovedPermanently).ServeHTTP)
-		public += "/"
-	}
-	r.Get(public+"*", func(w http.ResponseWriter, r *http.Request) {
-		// Check if the requested file exists
-		file := strings.TrimPrefix(r.URL.Path, public)
-		f, err := static.Open(file)
-		if os.IsNotExist(err) {
-			// File doesn't exist, serve index.html
-			http.ServeFile(w, r, filepath.Join(public, "index.html")) // Assuming index.html is in the root of static dir
-			return
-		} else if err != nil {
-			// Other error (e.g., permission denied)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		f.Close() // Close the file after checking existence
-
-		// File exists, serve it
-		fs.ServeHTTP(w, r)
-	})
-}
+// FileServer helper function is no longer needed as Fiber's app.Static handles this.
+// Removed the function definition.
