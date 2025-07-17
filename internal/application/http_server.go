@@ -3,6 +3,7 @@ package application
 import (
 	"log/slog"
 	"net/http"
+	"simpleservicedesk/generated/openapi"
 	"simpleservicedesk/internal/application/users"
 	"simpleservicedesk/pkg/echomiddleware"
 
@@ -28,6 +29,9 @@ func SetupHTTPServer(userRepo UserRepository) *echo.Echo {
 
 	server := httpServer{}
 	server.UserHandlers = users.SetupHandlers(userRepo)
+
+	// Register user routes generated from OpenAPI
+	openapi.RegisterHandlers(e, server)
 
 	return e
 }
