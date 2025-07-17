@@ -2,11 +2,12 @@ package echomiddleware
 
 import (
 	"context"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"log/slog"
 	"net/http"
 	"simpleservicedesk/pkg/contextkeys"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 const (

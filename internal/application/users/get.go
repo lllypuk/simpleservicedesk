@@ -11,7 +11,7 @@ import (
 	"simpleservicedesk/internal/domain/users"
 )
 
-func (h UserHandlers) GetUsersId(c echo.Context, id openapitypes.UUID) error {
+func (h UserHandlers) GetUsersID(c echo.Context, id openapitypes.UUID) error {
 	user, err := h.repo.GetUser(c.Request().Context(), id)
 	if err != nil {
 		msg := err.Error()

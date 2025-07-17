@@ -3,8 +3,9 @@ package users_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/suite"
 	"simpleservicedesk/internal/application"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type UsersSuite struct {

@@ -8,13 +8,17 @@ import (
 )
 
 func main() {
+	logger := slog.Default()
+
 	cfg, err := internal.LoadConfig()
 	if err != nil {
-		slog.Error("Could not load config", "err", err)
+		logger.Error("Could not load config", "err", err)
 		os.Exit(1)
 	}
-	if err := internal.Run(cfg); err != nil {
-		slog.Error("Failed to run server", "err", err)
+
+	err = internal.Run(cfg)
+	if err != nil {
+		logger.Error("Failed to run server", "err", err)
 		os.Exit(1)
 	}
 }

@@ -2,8 +2,9 @@ package application
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"simpleservicedesk/internal/domain/users"
+
+	"github.com/google/uuid"
 )
 
 type UserRepository interface {

@@ -9,6 +9,7 @@ import (
 
 type ServerSuite struct {
 	suite.Suite
+
 	HTTPServer *echo.Echo
 	UsersRepo  *usersInfra.InMemoryRepo
 }

@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,11 +11,13 @@ import (
 	"simpleservicedesk/internal/application"
 	usersInfra "simpleservicedesk/internal/infrastructure/users"
 
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+
 	"golang.org/x/sync/errgroup"
 )
 
 func Run(cfg Config) error {
-
 	g, ctx := errgroup.WithContext(context.Background())
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
 	defer stop()

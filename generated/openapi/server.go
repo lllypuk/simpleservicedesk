@@ -19,7 +19,7 @@ type ServerInterface interface {
 	PostUsers(ctx echo.Context) error
 	// Get a user by ID
 	// (GET /users/{id})
-	GetUsersId(ctx echo.Context, id openapi_types.UUID) error
+	GetUsersID(ctx echo.Context, id openapi_types.UUID) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -48,7 +48,7 @@ func (w *ServerInterfaceWrapper) GetUsersId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersId(ctx, id)
+	err = w.Handler.GetUsersID(ctx, id)
 	return err
 }
 

@@ -3,8 +3,9 @@ package echomiddleware
 import (
 	"context"
 
-	"github.com/labstack/echo/v4"
 	"simpleservicedesk/pkg/contextkeys"
+
+	"github.com/labstack/echo/v4"
 )
 
 func PutRequestIDContext(next echo.HandlerFunc) echo.HandlerFunc {

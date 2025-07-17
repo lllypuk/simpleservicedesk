@@ -1,17 +1,19 @@
-package users
+package users_test
 
 import (
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+
+	domain "simpleservicedesk/internal/domain/users"
 )
 
 func TestNewUser_Valid(t *testing.T) {
 	id := uuid.New()
 	name := "Alice"
 	email := "alice@example.com"
-	user, err := NewUser(id, name, email)
+	user, err := domain.NewUser(id, name, email)
 	require.NoError(t, err)
 	require.Equal(t, id, user.ID())
 	require.Equal(t, name, user.Name())
@@ -20,22 +22,22 @@ func TestNewUser_Valid(t *testing.T) {
 
 func TestNewUser_InvalidName(t *testing.T) {
 	id := uuid.New()
-	_, err := NewUser(id, "", "test@example.com")
+	_, err := domain.NewUser(id, "", "test@example.com")
 	require.Error(t, err)
-	require.ErrorIs(t, err, ErrUserValidation)
+	require.ErrorIs(t, err, domain.ErrUserValidation)
 }
 
 func TestNewUser_InvalidEmail(t *testing.T) {
 	id := uuid.New()
-	_, err := NewUser(id, "Bob", "")
+	_, err := domain.NewUser(id, "Bob", "")
 	require.Error(t, err)
-	require.ErrorIs(t, err, ErrUserValidation)
+	require.ErrorIs(t, err, domain.ErrUserValidation)
 }
 
 func TestCreateUser(t *testing.T) {
 	name := "Carol"
 	email := "carol@example.com"
-	user, err := CreateUser(name, email)
+	user, err := domain.CreateUser(name, email)
 	require.NoError(t, err)
 	require.NotEqual(t, uuid.Nil, user.ID())
 	require.Equal(t, name, user.Name())
@@ -43,7 +45,7 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestSendToEmail_NotImplemented(t *testing.T) {
-	user, err := CreateUser("Dave", "dave@example.com")
+	user, err := domain.CreateUser("Dave", "dave@example.com")
 	require.NoError(t, err)
 	err = user.SendToEmail("anything")
 	require.Error(t, err)
@@ -51,7 +53,7 @@ func TestSendToEmail_NotImplemented(t *testing.T) {
 }
 
 func TestChangeEmail_Valid(t *testing.T) {
-	user, err := CreateUser("Eve", "eve@example.com")
+	user, err := domain.CreateUser("Eve", "eve@example.com")
 	require.NoError(t, err)
 	newEmail := "eve.new@example.com"
 	err = user.ChangeEmail(newEmail)
@@ -60,11 +62,11 @@ func TestChangeEmail_Valid(t *testing.T) {
 }
 
 func TestChangeEmail_Invalid(t *testing.T) {
-	user, err := CreateUser("Frank", "frank@example.com")
+	user, err := domain.CreateUser("Frank", "frank@example.com")
 	require.NoError(t, err)
 	originalEmail := user.Email()
 	err = user.ChangeEmail("")
 	require.Error(t, err)
-	require.ErrorIs(t, err, ErrUserValidation)
+	require.ErrorIs(t, err, domain.ErrUserValidation)
 	require.Equal(t, originalEmail, user.Email())
 }
