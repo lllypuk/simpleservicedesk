@@ -10,8 +10,9 @@ import (
 )
 
 type user struct {
-	Name  string
-	Email string
+	Name         string
+	Email        string
+	PasswordHash []byte
 }
 
 type InMemoryRepo struct {
@@ -27,6 +28,7 @@ func NewInMemoryRepo() *InMemoryRepo {
 func (r *InMemoryRepo) CreateUser(
 	_ context.Context,
 	email string,
+	passwordHash []byte,
 	createFn func() (*domain.User, error),
 ) (*domain.User, error) {
 	if r.checkUserExist(email) {
@@ -39,8 +41,9 @@ func (r *InMemoryRepo) CreateUser(
 	}
 
 	r.users[u.ID()] = user{
-		Name:  u.Name(),
-		Email: email,
+		Name:         u.Name(),
+		Email:        email,
+		PasswordHash: passwordHash,
 	}
 	return u, nil
 }
@@ -55,7 +58,7 @@ func (r *InMemoryRepo) UpdateUser(
 		return nil, domain.ErrUserNotFound
 	}
 
-	entity, err := domain.NewUser(id, u.Name, u.Email)
+	entity, err := domain.NewUser(id, u.Name, u.Email, u.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +90,7 @@ func (r *InMemoryRepo) GetUser(_ context.Context, id uuid.UUID) (*domain.User, e
 	if !ok {
 		return nil, domain.ErrUserNotFound
 	}
-	user, err := domain.NewUser(id, u.Name, u.Email)
+	user, err := domain.NewUser(id, u.Name, u.Email, u.PasswordHash)
 	if err != nil {
 		return nil, err
 	}

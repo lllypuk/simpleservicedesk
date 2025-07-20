@@ -9,8 +9,9 @@ import (
 
 // CreateUserRequest defines model for CreateUserRequest.
 type CreateUserRequest struct {
-	Email openapi_types.Email `json:"email"`
-	Name  string              `json:"name"`
+	Email    openapi_types.Email `json:"email"`
+	Name     string              `json:"name"`
+	Password string              `json:"password"`
 }
 
 // CreateUserResponse defines model for CreateUserResponse.

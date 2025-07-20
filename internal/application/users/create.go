@@ -8,6 +8,7 @@ import (
 	domain "simpleservicedesk/internal/domain/users"
 
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (h UserHandlers) PostUsers(c echo.Context) error {
@@ -17,9 +18,25 @@ func (h UserHandlers) PostUsers(c echo.Context) error {
 		return err
 	}
 
+	// Валидация пароля на уровне хэндлера
+	if req.Password == "" {
+		msg := "password is required"
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
+	}
+	if len(req.Password) < 6 {
+		msg := "password must be at least 6 characters long"
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		msg := "failed to process password"
+		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
+	}
+
 	email := string(req.Email)
-	user, err := h.repo.CreateUser(ctx, email, func() (*domain.User, error) {
-		return domain.CreateUser(req.Name, email)
+	user, err := h.repo.CreateUser(ctx, email, passwordHash, func() (*domain.User, error) {
+		return domain.CreateUser(req.Name, email, passwordHash)
 	})
 	if err != nil {
 		msg := err.Error()

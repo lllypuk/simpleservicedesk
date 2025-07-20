@@ -15,8 +15,9 @@ import (
 func (s *UsersSuite) TestCreateUser() {
 	s.Run("HTTP", func() {
 		userReq := openapi.CreateUserRequest{
-			Name:  "John Doe",
-			Email: "john.doe@example.com",
+			Name:     "John Doe",
+			Email:    "john.doe@example.com",
+			Password: "password123",
 		}
 		reqBody, _ := json.Marshal(userReq)
 

@@ -22,7 +22,7 @@ func Run(cfg Config) error {
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
 	defer stop()
 
-	startServers(ctx, g, cfg)
+	startServer(ctx, g, cfg)
 
 	if err := g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return fmt.Errorf("server exited with error: %w", err)
@@ -30,7 +30,7 @@ func Run(cfg Config) error {
 	return nil
 }
 
-func startServers(ctx context.Context, g *errgroup.Group, cfg Config) {
+func startServer(ctx context.Context, g *errgroup.Group, cfg Config) {
 	userRepo := usersInfra.NewInMemoryRepo()
 
 	httpServer := application.SetupHTTPServer(userRepo)

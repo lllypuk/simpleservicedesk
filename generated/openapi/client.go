@@ -175,7 +175,7 @@ func NewPostUsersRequestWithBody(server string, contentType string, body io.Read
 	return req, nil
 }
 
-// NewGetUsersIdRequest generates requests for GetUsersID
+// NewGetUsersIdRequest generates requests for GetUsersId
 func NewGetUsersIdRequest(server string, id openapi_types.UUID) (*http.Request, error) {
 	var err error
 
