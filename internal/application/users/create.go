@@ -23,7 +23,7 @@ func (h UserHandlers) PostUsers(c echo.Context) error {
 		msg := "password is required"
 		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
-	if len(req.Password) < 6 {
+	if len(req.Password) < domain.MinPasswordLength {
 		msg := "password must be at least 6 characters long"
 		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}

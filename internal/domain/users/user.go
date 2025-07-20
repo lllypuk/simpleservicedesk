@@ -15,6 +15,8 @@ var (
 	ErrUserAlreadyExist = errors.New("user already exist")
 )
 
+const MinPasswordLength = 6
+
 type User struct {
 	id           uuid.UUID
 	name         string
@@ -69,13 +71,11 @@ func (u *User) ChangeEmail(email string) error {
 	return nil
 }
 
-// CheckPassword проверяет, соответствует ли предоставленный пароль хешу пароля пользователя
 func (u *User) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword(u.passwordHash, []byte(password))
 	return err == nil
 }
 
-// ChangePassword изменяет пароль пользователя
 func (u *User) ChangePassword(newPassword string) error {
 	if err := validatePassword(newPassword); err != nil {
 		return err
@@ -108,8 +108,8 @@ func validatePassword(password string) error {
 	if password == "" {
 		return fmt.Errorf("%w: password is required", ErrUserValidation)
 	}
-	if len(password) < 6 {
-		return fmt.Errorf("%w: password must be at least 6 characters long", ErrUserValidation)
+	if len(password) < MinPasswordLength {
+		return fmt.Errorf("%w: password must be at least %d characters long", ErrUserValidation, MinPasswordLength)
 	}
 	return nil
 }

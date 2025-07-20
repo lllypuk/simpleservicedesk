@@ -21,14 +21,14 @@ func (s *UsersSuite) TestGetUser() {
 	}
 	reqBody, _ := json.Marshal(userReq)
 
-	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
-	s.Require().Equal(http.StatusCreated, rec.Code)
+	request := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
+	request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	recorder := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(recorder, request)
+	s.Require().Equal(http.StatusCreated, recorder.Code)
 
 	var createResp openapi.CreateUserResponse
-	err := json.Unmarshal(rec.Body.Bytes(), &createResp)
+	err := json.Unmarshal(recorder.Body.Bytes(), &createResp)
 	s.Require().NoError(err)
 
 	s.Run("HTTP", func() {
