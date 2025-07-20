@@ -1,6 +1,8 @@
 # Simple ServiceDesk
 
-Простой ServiceDesk
+- [![Go Reference](https://pkg.go.dev/badge/simpleservicedesk)](https://pkg.go.dev/simpleservicedesk) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+Простой веб-сервис на Go для управления пользователями через RESTful API.
 
 ## Содержание
 - [Обзор](#обзор)
@@ -12,12 +14,15 @@
   - [Настройка](#настройка)
   - [Генерация кода](#генерация-кода)
   - [Запуск](#запуск)
+  - [Контейнеризация](#контейнеризация)
+- [Примеры использования](#примеры-использования)
 - [Документация API](#документация-api)
 - [Тестирование](#тестирование)
+- [Contributing](#contributing)
 - [Лицензия](#лицензия)
 
 ## Обзор
-Simple ServiceDesk — это минималистичный веб-сервис на Go, предоставляющий базовые API для управления пользователями и демонстрационный фронтенд с использованием HTMX.
+Simple ServiceDesk — минималистичный веб-сервис на Go, предоставляющий базовые API для управления пользователями.
 
 ## Возможности
 - Создание и получение пользователей через RESTful API
@@ -43,7 +48,7 @@ Simple ServiceDesk — это минималистичный веб-сервис
 
 ### Установка
 ```bash
-git clone <URL_репозитория>
+git clone https://github.com/<YOUR_USERNAME>/simpleservicedesk.git
 cd simpleservicedesk
 ```
 
@@ -72,6 +77,28 @@ go run cmd/server/main.go
 ```
 Сервер будет доступен по адресу `http://localhost:SERVER_PORT`.
 
+### Контейнеризация
+
+Сборка и запуск сервиса в Docker:
+```bash
+docker build -t simpleservicedesk -f build/Dockerfile .
+docker run -d --name simpleservicedesk -p 8080:8080 simpleservicedesk
+```
+
+## Примеры использования
+
+Создать пользователя:
+```bash
+curl -X POST http://localhost:8080/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe","email":"john.doe@example.com"}'
+```
+
+Получить пользователя по ID:
+```bash
+curl http://localhost:8080/users/{id}
+```
+
 ## Документация API
 API описано в файле `api/openapi.yaml`:
 - **POST /users**: Создать нового пользователя
@@ -84,6 +111,10 @@ API описано в файле `api/openapi.yaml`:
 ```bash
 go test ./...
 ```
+
+## Contributing
+
+PRs и issue приветствуются! Пожалуйста, обсудите значительные изменения через issue перед отправкой PR.
 
 ## Лицензия
 Проект лицензирован на условиях MIT License. Подробнее см. в файле [LICENSE](LICENSE).
