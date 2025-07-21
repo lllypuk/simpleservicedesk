@@ -27,18 +27,20 @@ Simple ServiceDesk — минималистичный веб-сервис на G
 ## Возможности
 - Создание и получение пользователей через RESTful API
 - Спецификация OpenAPI 3.0 и генерация кода (сервер и клиент)
-- In-memory репозиторий для быстрой разработки и тестирования
+- Репозитории для In-memory и MongoDB
 - Структурированное логирование с slog
 - Корректное завершение работы (graceful shutdown) и обработка сигналов
+- Контейнеризация с помощью Docker и Docker Compose
 
 ## Архитектура
 - **cmd/server**: точка входа приложения
 - **internal/application**: настройка HTTP-сервера и маршрутов
-- **internal/infrastructure/users**: репозиторий пользователей в памяти
+- **internal/infrastructure/users**: реализация репозиториев пользователей (in-memory, MongoDB)
 - **internal/domain/users**: бизнес-логика и сущности пользователей
 - **pkg**: общие утилиты и middleware
 - **api/openapi.yaml**: спецификация OpenAPI
 - **generated**: сгенерированные типы, сервер и клиент из спецификации OpenAPI
+- **docker-compose.yml**: конфигурация для запуска приложения и MongoDB
 
 ## Начало работы
 
@@ -83,6 +85,11 @@ go run cmd/server/main.go
 ```bash
 docker build -t simpleservicedesk -f build/Dockerfile .
 docker run -d --name simpleservicedesk -p 8080:8080 simpleservicedesk
+```
+
+Запуск приложения и MongoDB с помощью Docker Compose:
+```bash
+docker-compose up --build
 ```
 
 ## Примеры использования

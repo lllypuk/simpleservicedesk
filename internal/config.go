@@ -9,6 +9,12 @@ import (
 
 type Config struct {
 	Server Server
+	Mongo  Mongo
+}
+
+type Mongo struct {
+	URI      string
+	Database string
 }
 
 func LoadConfig() (Config, error) {
@@ -20,6 +26,11 @@ func LoadConfig() (Config, error) {
 	config.Server, err = loadServer()
 	if err != nil {
 		return config, fmt.Errorf("could not load server config: %w", err)
+	}
+
+	config.Mongo, err = loadMongo()
+	if err != nil {
+		return config, fmt.Errorf("could not load mongo config: %w", err)
 	}
 
 	return config, nil
@@ -50,6 +61,13 @@ func loadServer() (Server, error) {
 	server.ReadHeaderTimeout = readHeaderTimeout
 
 	return server, nil
+}
+
+func loadMongo() (Mongo, error) {
+	var mongo Mongo
+	mongo.URI = getEnv("MONGO_URI", "mongodb://localhost:27017")
+	mongo.Database = getEnv("MONGO_DATABASE", "servicedesk")
+	return mongo, nil
 }
 
 func getEnv(key, fallback string) string {
