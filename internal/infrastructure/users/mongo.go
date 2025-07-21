@@ -78,7 +78,10 @@ func (r *MongoRepo) GetUser(ctx context.Context, userID uuid.UUID) (*domain.User
 	return user, nil
 }
 
-func (r *MongoRepo) UpdateUser(ctx context.Context, userID uuid.UUID, updateFn func(*domain.User) (bool, error)) (*domain.User, error) {
+func (r *MongoRepo) UpdateUser(ctx context.Context,
+	userID uuid.UUID,
+	updateFn func(*domain.User) (bool, error)) (*domain.User, error) {
+
 	var mu mongoUser
 	err := r.collection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&mu)
 	if errors.Is(err, mongo.ErrNoDocuments) {
