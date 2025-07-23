@@ -29,9 +29,11 @@ coverage_report:
 	open ./.coverage.html
 
 cpu_profile:
-	go test -cpuprofile=profiles/cpu.prof  ./e2e_test
+	mkdir -p profiles
+	go test -cpuprofile=profiles/cpu.prof -v ./integration_test/...
 	go tool pprof -http=:6061 profiles/cpu.prof
 
 mem_profile:
-	go test -memprofile=profiles/mem.prof ./e2e_test
+	mkdir -p profiles
+	go test -memprofile=profiles/mem.prof -v ./integration_test/...
 	go tool pprof -http=:6061 profiles/mem.prof
