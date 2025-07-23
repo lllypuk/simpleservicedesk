@@ -36,8 +36,8 @@ func (w *ServerInterfaceWrapper) PostUsers(ctx echo.Context) error {
 	return err
 }
 
-// GetUsersId converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersId(ctx echo.Context) error {
+// GetUsersID converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsersID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -81,6 +81,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.POST(baseURL+"/users", wrapper.PostUsers)
-	router.GET(baseURL+"/users/:id", wrapper.GetUsersId)
+	router.GET(baseURL+"/users/:id", wrapper.GetUsersID)
 
 }

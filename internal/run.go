@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	_ "net/http/pprof" //nolint:gosec // pprof port is not exposed to the internet
 	"os"
 	"os/signal"
+	"time"
+
 	"simpleservicedesk/internal/application"
 	usersInfra "simpleservicedesk/internal/infrastructure/users"
-	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -19,6 +21,8 @@ import (
 
 	"golang.org/x/sync/errgroup"
 )
+
+const disconnectTimeout = 5 * time.Second
 
 func Run(cfg Config) error {
 	g, ctx := errgroup.WithContext(context.Background())
@@ -32,9 +36,9 @@ func Run(cfg Config) error {
 	g.Go(func() error {
 		<-ctx.Done()
 		slog.Info("shutting down mongo client")
-		disconnectCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		disconnectCtx, cancel := context.WithTimeout(context.Background(), disconnectTimeout)
 		defer cancel()
-		if err := mongoClient.Disconnect(disconnectCtx); err != nil {
+		if err = mongoClient.Disconnect(disconnectCtx); err != nil {
 			slog.Error("failed to disconnect mongo client", "error", err)
 		}
 		return nil
@@ -44,7 +48,7 @@ func Run(cfg Config) error {
 
 	startServer(ctx, g, cfg, db)
 
-	if err := g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+	if err = g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return fmt.Errorf("server exited with error: %w", err)
 	}
 	return nil

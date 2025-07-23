@@ -33,90 +33,84 @@ Simple ServiceDesk — минималистичный веб-сервис на G
 - Контейнеризация с помощью Docker и Docker Compose
 
 ## Архитектура
-- **cmd/server**: точка входа приложения
-- **internal/application**: настройка HTTP-сервера и маршрутов
-- **internal/infrastructure/users**: реализация репозиториев пользователей (in-memory, MongoDB)
-- **internal/domain/users**: бизнес-логика и сущности пользователей
-- **pkg**: общие утилиты и middleware
-- **api/openapi.yaml**: спецификация OpenAPI
-- **generated**: сгенерированные типы, сервер и клиент из спецификации OpenAPI
-- **docker-compose.yml**: конфигурация для запуска приложения и MongoDB
+Проект следует принципам чистой архитектуры и разделен на следующие слои:
+- **Domain**: Содержит основные бизнес-сущности и логику.
+- **Application**: Координирует бизнес-логику и сценарии использования.
+- **Infrastructure**: Реализует внешние зависимости, такие как базы данных, API-клиенты и т.д.
+- **Generated**: Содержит код, сгенерированный на основе OpenAPI спецификации.
 
 ## Начало работы
 
 ### Требования
-- Go версии 1.20 или выше
-- oapi-codegen (установите с помощью `go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest`)
+- [Go](https://golang.org/dl/) (версия 1.21 или выше)
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Make](https://www.gnu.org/software/make/)
 
 ### Установка
+Клонируйте репозиторий и установите зависимости:
 ```bash
-git clone https://github.com/<YOUR_USERNAME>/simpleservicedesk.git
+git clone https://github.com/your-username/simpleservicedesk.git
 cd simpleservicedesk
+go mod download
 ```
 
 ### Настройка
-Установите необходимые переменные окружения (значения по умолчанию указаны в скобках):
+Проект настраивается с помощью переменных окружения. Создайте файл `.env` в корне проекта по примеру `.env.example` (если он есть) или используйте переменные напрямую:
 ```bash
-ENV_TYPE (default: Testing)
-SERVER_PORT (default: 8080)
-INTERRUPT_TIMEOUT (default: 2s)
-READ_HEADER_TIMEOUT (default: 5s)
+# .env
+APP_ENV=development
+HTTP_SERVER_PORT=8080
+MONGO_URI=mongodb://user:password@localhost:27017
 ```
 
 ### Генерация кода
-Сгенерируйте код по спецификации OpenAPI (типы, заглушки сервера, клиент):
+Для генерации кода сервера и клиента из OpenAPI спецификации выполните:
 ```bash
-go generate ./generated
+make generate
 ```
 
 ### Запуск
-Соберите и запустите сервер:
+#### Локально
+Для запуска сервера локально:
 ```bash
-go build -o server ./cmd/server
-./server
-# или
-go run cmd/server/main.go
+make run
 ```
-Сервер будет доступен по адресу `http://localhost:SERVER_PORT`.
+Сервер будет доступен по адресу `http://localhost:8080`.
 
 ### Контейнеризация
-
-Сборка и запуск сервиса в Docker:
+Для запуска сервиса и базы данных MongoDB в Docker-контейнерах:
 ```bash
-docker build -t simpleservicedesk -f build/Dockerfile .
-docker run -d --name simpleservicedesk -p 8080:8080 simpleservicedesk
-```
-
-Запуск приложения и MongoDB с помощью Docker Compose:
-```bash
-docker-compose up --build
+docker-compose up -d
 ```
 
 ## Примеры использования
+Примеры запросов к API с использованием `curl`.
 
-Создать пользователя:
+### Создание пользователя
 ```bash
 curl -X POST http://localhost:8080/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John Doe","email":"john.doe@example.com"}'
+-H "Content-Type: application/json" \
+-d '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securepassword123"
+}'
 ```
 
-Получить пользователя по ID:
+### Получение пользователя по ID
+Замените `{userId}` на реальный ID пользователя.
 ```bash
-curl http://localhost:8080/users/{id}
+curl -X GET http://localhost:8080/users/{userId}
 ```
 
 ## Документация API
-API описано в файле `api/openapi.yaml`:
-- **POST /users**: Создать нового пользователя
-- **GET /users/{id}**: Получить данные пользователя по ID
-
-Можно использовать инструменты вроде Swagger UI или генерировать клиент на основе спецификации OpenAPI.
+API документировано с использованием спецификации OpenAPI 3.0. Файл спецификации находится здесь: `api/openapi.yaml`.
 
 ## Тестирование
-Запустите модульные и интеграционные тесты:
+Для запуска всех тестов (модульных и интеграционных) выполните:
 ```bash
-go test ./...
+make test
 ```
 
 ## Contributing

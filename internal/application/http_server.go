@@ -3,6 +3,7 @@ package application
 import (
 	"log/slog"
 	"net/http"
+
 	"simpleservicedesk/generated/openapi"
 	"simpleservicedesk/internal/application/users"
 	"simpleservicedesk/pkg/echomiddleware"

@@ -3,8 +3,9 @@ package internal
 import (
 	"fmt"
 	"os"
-	"simpleservicedesk/pkg/environment"
 	"time"
+
+	"simpleservicedesk/pkg/environment"
 )
 
 type Config struct {
@@ -28,11 +29,7 @@ func LoadConfig() (Config, error) {
 		return config, fmt.Errorf("could not load server config: %w", err)
 	}
 
-	config.Mongo, err = loadMongo()
-	if err != nil {
-		return config, fmt.Errorf("could not load mongo config: %w", err)
-	}
-
+	config.Mongo = loadMongo()
 	return config, nil
 }
 
@@ -63,11 +60,11 @@ func loadServer() (Server, error) {
 	return server, nil
 }
 
-func loadMongo() (Mongo, error) {
+func loadMongo() Mongo {
 	var mongo Mongo
 	mongo.URI = getEnv("MONGO_URI", "mongodb://localhost:27017")
 	mongo.Database = getEnv("MONGO_DATABASE", "servicedesk")
-	return mongo, nil
+	return mongo
 }
 
 func getEnv(key, fallback string) string {

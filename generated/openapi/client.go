@@ -95,8 +95,8 @@ type ClientInterface interface {
 
 	PostUsers(ctx context.Context, body PostUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetUsersId request
-	GetUsersId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetUsersID request
+	GetUsersID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) PostUsersWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -123,8 +123,8 @@ func (c *Client) PostUsers(ctx context.Context, body PostUsersJSONRequestBody, r
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetUsersId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetUsersIdRequest(c.Server, id)
+func (c *Client) GetUsersID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetUsersIDRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -175,8 +175,8 @@ func NewPostUsersRequestWithBody(server string, contentType string, body io.Read
 	return req, nil
 }
 
-// NewGetUsersIdRequest generates requests for GetUsersId
-func NewGetUsersIdRequest(server string, id openapi_types.UUID) (*http.Request, error) {
+// NewGetUsersIDRequest generates requests for GetUsersID
+func NewGetUsersIDRequest(server string, id openapi_types.UUID) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -257,8 +257,8 @@ type ClientWithResponsesInterface interface {
 
 	PostUsersWithResponse(ctx context.Context, body PostUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUsersResponse, error)
 
-	// GetUsersIdWithResponse request
-	GetUsersIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetUsersIdResponse, error)
+	// GetUsersIDWithResponse request
+	GetUsersIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetUsersIDResponse, error)
 }
 
 type PostUsersResponse struct {
@@ -286,7 +286,7 @@ func (r PostUsersResponse) StatusCode() int {
 	return 0
 }
 
-type GetUsersIdResponse struct {
+type GetUsersIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *GetUserResponse
@@ -296,7 +296,7 @@ type GetUsersIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetUsersIdResponse) Status() string {
+func (r GetUsersIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -304,7 +304,7 @@ func (r GetUsersIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetUsersIdResponse) StatusCode() int {
+func (r GetUsersIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -328,13 +328,13 @@ func (c *ClientWithResponses) PostUsersWithResponse(ctx context.Context, body Po
 	return ParsePostUsersResponse(rsp)
 }
 
-// GetUsersIdWithResponse request returning *GetUsersIdResponse
-func (c *ClientWithResponses) GetUsersIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetUsersIdResponse, error) {
-	rsp, err := c.GetUsersId(ctx, id, reqEditors...)
+// GetUsersIDWithResponse request returning *GetUsersIDResponse
+func (c *ClientWithResponses) GetUsersIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetUsersIDResponse, error) {
+	rsp, err := c.GetUsersID(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetUsersIdResponse(rsp)
+	return ParseGetUsersIDResponse(rsp)
 }
 
 // ParsePostUsersResponse parses an HTTP response from a PostUsersWithResponse call
@@ -384,15 +384,15 @@ func ParsePostUsersResponse(rsp *http.Response) (*PostUsersResponse, error) {
 	return response, nil
 }
 
-// ParseGetUsersIdResponse parses an HTTP response from a GetUsersIdWithResponse call
-func ParseGetUsersIdResponse(rsp *http.Response) (*GetUsersIdResponse, error) {
+// ParseGetUsersIDResponse parses an HTTP response from a GetUsersIDWithResponse call
+func ParseGetUsersIDResponse(rsp *http.Response) (*GetUsersIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetUsersIdResponse{
+	response := &GetUsersIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

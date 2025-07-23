@@ -1,8 +1,9 @@
-package users
+package users_test
 
 import (
 	"context"
 	"fmt"
+	"net"
 	"testing"
 	"time"
 
@@ -14,13 +15,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	domain "simpleservicedesk/internal/domain/users"
+	infra "simpleservicedesk/internal/infrastructure/users"
 )
 
 type MongoRepoSuite struct {
 	suite.Suite
+
 	container testcontainers.Container
 	db        *mongo.Database
-	repo      *MongoRepo
+	repo      *infra.MongoRepo
 }
 
 func (s *MongoRepoSuite) SetupSuite() {
@@ -42,12 +45,12 @@ func (s *MongoRepoSuite) SetupSuite() {
 	port, err := mongoContainer.MappedPort(ctx, "27017")
 	s.Require().NoError(err)
 
-	uri := fmt.Sprintf("mongodb://%s:%s", host, port.Port())
+	uri := fmt.Sprintf("mongodb://%s", net.JoinHostPort(host, port.Port()))
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	s.Require().NoError(err)
 
 	s.db = client.Database("testdb")
-	s.repo = NewMongoRepo(s.db)
+	s.repo = infra.NewMongoRepo(s.db)
 }
 
 func (s *MongoRepoSuite) TearDownSuite() {
@@ -102,7 +105,7 @@ func (s *MongoRepoSuite) TestUpdateUser() {
 	newEmail := "updated.email@example.com"
 
 	updatedUser, err := s.repo.UpdateUser(ctx, user.ID(), func(u *domain.User) (bool, error) {
-		err := u.ChangeEmail(newEmail)
+		err = u.ChangeEmail(newEmail)
 		if err != nil {
 			return false, err
 		}

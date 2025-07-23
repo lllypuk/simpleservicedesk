@@ -3,11 +3,13 @@ package users
 import (
 	"context"
 	"errors"
+
+	domain "simpleservicedesk/internal/domain/users"
+
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	domain "simpleservicedesk/internal/domain/users"
 )
 
 type mongoUser struct {
@@ -81,7 +83,6 @@ func (r *MongoRepo) GetUser(ctx context.Context, userID uuid.UUID) (*domain.User
 func (r *MongoRepo) UpdateUser(ctx context.Context,
 	userID uuid.UUID,
 	updateFn func(*domain.User) (bool, error)) (*domain.User, error) {
-
 	var mu mongoUser
 	err := r.collection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&mu)
 	if errors.Is(err, mongo.ErrNoDocuments) {

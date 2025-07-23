@@ -42,6 +42,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
   /users/{id}:
     get:
+      operationId: GetUsersID
       summary: Get a user by ID
       description: Retrieves user details using the user ID provided in the path
       tags:
