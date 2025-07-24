@@ -158,18 +158,12 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-
-    - name: Install Gosec
-      run: |
-        curl -sfL https://raw.githubusercontent.com/securecodewarrior/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.18.2
-        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-    - name: Run Gosec Security Scanner
-      run: gosec ./...
+      - name: Checkout Source
+        uses: actions/checkout@v3
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...
