@@ -19,6 +19,23 @@ const (
 	PriorityCritical Priority = "critical" // Критический приоритет
 )
 
+// Константы для весов приоритетов
+const (
+	WeightLow      = 1
+	WeightNormal   = 2
+	WeightHigh     = 3
+	WeightCritical = 4
+)
+
+// Константы для SLA времен (в часах)
+const (
+	SLALowHours      = 72 // 3 дня
+	SLANormalHours   = 24 // 1 день
+	SLAHighHours     = 8  // 8 часов
+	SLACriticalHours = 2  // 2 часа
+	SLADefaultHours  = 24 // по умолчанию 24 часа
+)
+
 // AllPriorities возвращает все возможные приоритеты
 func AllPriorities() []Priority {
 	return []Priority{
@@ -57,10 +74,10 @@ func ParsePriority(s string) (Priority, error) {
 // Чем больше число, тем выше приоритет
 func (p Priority) Weight() int {
 	weights := map[Priority]int{
-		PriorityLow:      1,
-		PriorityNormal:   2,
-		PriorityHigh:     3,
-		PriorityCritical: 4,
+		PriorityLow:      WeightLow,
+		PriorityNormal:   WeightNormal,
+		PriorityHigh:     WeightHigh,
+		PriorityCritical: WeightCritical,
 	}
 
 	if weight, exists := weights[p]; exists {
@@ -102,14 +119,14 @@ func (p Priority) Color() string {
 // SLA возвращает целевое время решения в часах для данного приоритета
 func (p Priority) SLA() int {
 	sla := map[Priority]int{
-		PriorityLow:      72, // 3 дня
-		PriorityNormal:   24, // 1 день
-		PriorityHigh:     8,  // 8 часов
-		PriorityCritical: 2,  // 2 часа
+		PriorityLow:      SLALowHours,
+		PriorityNormal:   SLANormalHours,
+		PriorityHigh:     SLAHighHours,
+		PriorityCritical: SLACriticalHours,
 	}
 
 	if hours, exists := sla[p]; exists {
 		return hours
 	}
-	return 24 // по умолчанию 24 часа
+	return SLADefaultHours
 }

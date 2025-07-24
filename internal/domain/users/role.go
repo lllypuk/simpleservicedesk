@@ -18,6 +18,13 @@ const (
 	RoleAdmin    Role = "admin"    // Администратор - полный доступ
 )
 
+// Константы для уровней доступа ролей
+const (
+	LevelCustomer = 1
+	LevelAgent    = 2
+	LevelAdmin    = 3
+)
+
 // AllRoles возвращает все возможные роли
 func AllRoles() []Role {
 	return []Role{
@@ -103,9 +110,9 @@ func (r Role) CanCreateInternalComments() bool {
 // Level возвращает уровень доступа роли (для сравнения)
 func (r Role) Level() int {
 	levels := map[Role]int{
-		RoleCustomer: 1,
-		RoleAgent:    2,
-		RoleAdmin:    3,
+		RoleCustomer: LevelCustomer,
+		RoleAgent:    LevelAgent,
+		RoleAdmin:    LevelAdmin,
 	}
 
 	if level, exists := levels[r]; exists {

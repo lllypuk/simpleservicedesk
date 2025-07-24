@@ -17,8 +17,11 @@ var (
 )
 
 const (
-	MinNameLength = 2
-	MaxNameLength = 100
+	MinNameLength        = 2
+	MaxNameLength        = 100
+	BytesInKB            = 1024
+	DefaultMaxFileSizeMB = 10
+	EmailPartsCount      = 2
 )
 
 // OrganizationSettings представляет настройки организации
@@ -35,7 +38,7 @@ func DefaultSettings() OrganizationSettings {
 		AllowPublicTickets:    false,
 		DefaultTicketPriority: "normal",
 		EmailNotifications:    true,
-		MaxFileSize:           10 * 1024 * 1024, // 10MB
+		MaxFileSize:           DefaultMaxFileSizeMB * BytesInKB * BytesInKB, // 10MB
 	}
 }
 
@@ -155,7 +158,7 @@ func (o *Organization) CanUserJoinByEmail(email string) bool {
 	}
 
 	emailParts := strings.Split(email, "@")
-	if len(emailParts) != 2 {
+	if len(emailParts) != EmailPartsCount {
 		return false
 	}
 
