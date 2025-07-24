@@ -13,6 +13,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Create .env file
+      run: |
+        cat > .env << EOF
+        MONGO_URI=mongodb://localhost:27017/simpleservicedesk
+        ENVIRONMENT=test
+        EOF
+
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
@@ -73,6 +80,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - name: Create .env file
+      run: |
+        cat > .env << EOF
+        MONGO_URI=mongodb://localhost:27017/simpleservicedesk
+        ENVIRONMENT=test
+        EOF
 
     - name: Set up Go
       uses: actions/setup-go@v5
