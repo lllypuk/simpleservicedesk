@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	_ "net/http/pprof" //nolint:gosec // pprof port is not exposed to the internet
 	"os"
 	"os/signal"
 	"time"
