@@ -93,7 +93,8 @@ func (s Status) CanTransitionTo(newStatus Status) bool {
 
 // ParseStatus преобразует строку в статус
 func ParseStatus(s string) (Status, error) {
-	status := Status(strings.ToLower(strings.TrimSpace(s)))
+	normalized := strings.ReplaceAll(strings.TrimSpace(s), " ", "_")
+	status := Status(strings.ToLower(normalized))
 	if !status.IsValid() {
 		return "", ErrInvalidStatus
 	}
