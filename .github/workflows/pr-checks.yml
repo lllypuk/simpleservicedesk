@@ -29,7 +29,7 @@ jobs:
       run: |
         go mod download
         go install golang.org/x/tools/cmd/goimports@latest
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.3.0
+        go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.3.0
 
     - name: Run linting
       run: make lint
