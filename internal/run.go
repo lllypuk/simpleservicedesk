@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	_ "net/http/pprof" //nolint:gosec // pprof port is not exposed to the internet
 	"os"
 	"os/signal"
 	"time"
@@ -35,11 +34,11 @@ func Run(cfg Config) error {
 	}
 	g.Go(func() error {
 		<-ctx.Done()
-		slog.Info("shutting down mongo client")
+		slog.InfoContext(ctx, "shutting down mongo client")
 		disconnectCtx, cancel := context.WithTimeout(context.Background(), disconnectTimeout)
 		defer cancel()
 		if err = mongoClient.Disconnect(disconnectCtx); err != nil {
-			slog.Error("failed to disconnect mongo client", "error", err)
+			slog.ErrorContext(disconnectCtx, "failed to disconnect mongo client", "error", err)
 		}
 		return nil
 	})
@@ -69,11 +68,11 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 	}
 
 	g.Go(func() error {
-		slog.Info("Starting server http server at " + address)
+		slog.InfoContext(ctx, "Starting server http server at "+address)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			return err
 		}
-		slog.Info("Http server shut down gracefully")
+		slog.InfoContext(ctx, "Http server shut down gracefully")
 		return nil
 	})
 	g.Go(func() error {

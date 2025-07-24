@@ -1,0 +1,27 @@
+# Code Owners для автоматического назначения ревьюеров
+
+# Все изменения требуют ревью от владельца проекта
+* @lllypuk
+
+# API и OpenAPI спецификации
+/api/ @lllypuk
+/generated/openapi/ @lllypuk
+
+# Основной код приложения
+/internal/ @lllypuk
+/cmd/ @lllypuk
+
+# Инфраструктура и DevOps
+/.github/ @lllypuk
+/build/ @lllypuk
+/docker-compose.yml @lllypuk
+/Makefile @lllypuk
+
+# Тесты
+/integration_test/ @lllypuk
+*_test.go @lllypuk
+
+# Конфигурация и зависимости
+/go.mod @lllypuk
+/go.sum @lllypuk
+/.golangci.yml @lllypuk

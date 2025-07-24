@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 
@@ -12,13 +13,13 @@ func main() {
 
 	cfg, err := internal.LoadConfig()
 	if err != nil {
-		logger.Error("Could not load config", "err", err)
+		logger.ErrorContext(context.Background(), "Could not load config", "err", err)
 		os.Exit(1)
 	}
 
 	err = internal.Run(cfg)
 	if err != nil {
-		logger.Error("Failed to run server", "err", err)
+		logger.ErrorContext(context.Background(), "Failed to run server", "err", err)
 		os.Exit(1)
 	}
 }
