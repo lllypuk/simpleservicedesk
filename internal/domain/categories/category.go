@@ -39,13 +39,15 @@ func NewCategory(id uuid.UUID,
 	name, description string,
 	organizationID uuid.UUID,
 	parentID *uuid.UUID) (*Category, error) {
-	if err := validateName(name); err != nil {
+	name, err := validateName(name)
+	if err != nil {
 		return nil, err
 	}
-	if err := validateDescription(description); err != nil {
+	description, err = validateDescription(description)
+	if err != nil {
 		return nil, err
 	}
-	if err := validateOrganizationID(organizationID); err != nil {
+	if err = validateOrganizationID(organizationID); err != nil {
 		return nil, err
 	}
 
@@ -129,7 +131,8 @@ func (c *Category) HasParent() bool {
 
 // ChangeName изменяет название категории
 func (c *Category) ChangeName(newName string) error {
-	if err := validateName(newName); err != nil {
+	newName, err := validateName(newName)
+	if err != nil {
 		return err
 	}
 	c.name = newName
@@ -139,7 +142,8 @@ func (c *Category) ChangeName(newName string) error {
 
 // ChangeDescription изменяет описание категории
 func (c *Category) ChangeDescription(newDescription string) error {
-	if err := validateDescription(newDescription); err != nil {
+	newDescription, err := validateDescription(newDescription)
+	if err != nil {
 		return err
 	}
 	c.description = newDescription
