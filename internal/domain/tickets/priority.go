@@ -133,18 +133,7 @@ func (p Priority) SLA() int {
 
 // GetSLAHours возвращает количество часов SLA для приоритета
 func (p Priority) GetSLAHours() int {
-	switch p {
-	case PriorityLow:
-		return SLALowHours
-	case PriorityNormal:
-		return SLANormalHours
-	case PriorityHigh:
-		return SLAHighHours
-	case PriorityCritical:
-		return SLACriticalHours
-	default:
-		return SLADefaultHours
-	}
+	return p.SLA()
 }
 
 // GetWeight возвращает вес приоритета для сортировки
