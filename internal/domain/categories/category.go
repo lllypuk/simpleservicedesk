@@ -198,19 +198,19 @@ func (c *Category) FullPath(getParentName func(uuid.UUID) (string, error)) (stri
 	return parentName + " / " + c.name, nil
 }
 
-// validateName проверяет валидность названия категории
-func validateName(name string) error {
-	name = strings.TrimSpace(name)
-	if name == "" {
-		return fmt.Errorf("%w: name is required", ErrCategoryValidation)
+// validateName проверяет валидность названия категории и возвращает очищенное имя
+func validateName(name string) (string, error) {
+	trimmedName := strings.TrimSpace(name)
+	if trimmedName == "" {
+		return "", fmt.Errorf("%w: name is required", ErrCategoryValidation)
 	}
-	if len(name) < MinNameLength {
-		return fmt.Errorf("%w: name must be at least %d characters long", ErrCategoryValidation, MinNameLength)
+	if len(trimmedName) < MinNameLength {
+		return "", fmt.Errorf("%w: name must be at least %d characters long", ErrCategoryValidation, MinNameLength)
 	}
-	if len(name) > MaxNameLength {
-		return fmt.Errorf("%w: name must be no more than %d characters long", ErrCategoryValidation, MaxNameLength)
+	if len(trimmedName) > MaxNameLength {
+		return "", fmt.Errorf("%w: name must be no more than %d characters long", ErrCategoryValidation, MaxNameLength)
 	}
-	return nil
+	return trimmedName, nil
 }
 
 // validateDescription проверяет валидность описания категории
