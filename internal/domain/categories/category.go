@@ -214,16 +214,16 @@ func validateName(name string) (string, error) {
 }
 
 // validateDescription проверяет валидность описания категории
-func validateDescription(description string) error {
-	description = strings.TrimSpace(description)
-	if len(description) > MaxDescriptionLength {
-		return fmt.Errorf(
+func validateDescription(description string) (string, error) {
+	trimmedDescription := strings.TrimSpace(description)
+	if len(trimmedDescription) > MaxDescriptionLength {
+		return trimmedDescription, fmt.Errorf(
 			"%w: description must be no more than %d characters long",
 			ErrCategoryValidation,
 			MaxDescriptionLength,
 		)
 	}
-	return nil
+	return trimmedDescription, nil
 }
 
 // validateOrganizationID проверяет валидность ID организации
