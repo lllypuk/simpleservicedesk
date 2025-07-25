@@ -363,7 +363,7 @@ func TestTicket_GetPublicComments(t *testing.T) {
 	assert.Equal(t, "Public comment", publicComments[0].Content)
 }
 
-// Вспомогательные функции для тестов
+// Helper functions for tests
 func createTestTicket(t *testing.T) *domain.Ticket {
 	return createTestTicketWithPriority(t, domain.PriorityNormal)
 }
