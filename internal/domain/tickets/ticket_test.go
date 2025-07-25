@@ -57,7 +57,7 @@ func validateTicketSuccess(t *testing.T,
 	assert.Empty(t, ticket.Attachments())
 }
 
-// getNewTicketTestCases возвращает тестовые случаи для создания заявки
+// getNewTicketTestCases returns test cases for ticket creation
 func getNewTicketTestCases(organizationID, authorID, categoryID uuid.UUID) []struct {
 	name           string
 	title          string
