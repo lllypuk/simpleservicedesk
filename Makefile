@@ -1,10 +1,13 @@
 include .env
 export
 
-.PHONY: help unit_test integration_test test generate lint coverage_report cpu_profile mem_profile
+.PHONY: help unit_test integration_test test generate lint coverage_report cpu_profile mem_profile run
 
 help:
 	cat Makefile
+
+run:
+	go run cmd/server/main.go
 
 unit_test:
 	go test -v ./internal/...
