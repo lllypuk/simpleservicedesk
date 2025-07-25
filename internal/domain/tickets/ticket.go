@@ -118,11 +118,6 @@ func NewTicket(
 	return ticket, nil
 }
 
-// CreateTicket создает новую заявку с автогенерацией ID
-func CreateTicket(params ...interface{}) (*Ticket, error) {
-	return NewTicket(uuid.New(), params...)
-}
-
 func (t *Ticket) ID() uuid.UUID             { return t.id }
 func (t *Ticket) Title() string             { return t.title }
 func (t *Ticket) Description() string       { return t.description }
