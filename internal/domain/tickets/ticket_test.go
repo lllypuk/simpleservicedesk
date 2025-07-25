@@ -162,7 +162,7 @@ func TestTicket_ChangeStatus(t *testing.T) {
 	}
 }
 
-// validateStatusChange проверяет успешное изменение статуса
+// validateStatusChange validates a successful status change
 func validateStatusChange(t *testing.T, ticket *domain.Ticket, expectedStatus domain.Status) {
 	assert.Equal(t, expectedStatus, ticket.Status())
 
