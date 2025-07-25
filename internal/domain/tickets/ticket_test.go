@@ -42,7 +42,7 @@ func TestNewTicket(t *testing.T) {
 	}
 }
 
-// validateTicketSuccess проверяет успешно созданную заявку
+// validateTicketSuccess checks a successfully created ticket
 func validateTicketSuccess(t *testing.T,
 	ticket *domain.Ticket,
 	expectedTitle string,
