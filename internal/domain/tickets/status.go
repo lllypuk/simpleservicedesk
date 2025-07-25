@@ -52,12 +52,12 @@ func (s Status) CanTransitionTo(newStatus Status) bool {
 		return false
 	}
 
-	// Матрица разрешенных переходов
-	transitions := map[Status][]Status{
+	// Определяем допустимые переходы статусов согласно бизнес-логике
+	allowedTransitions := map[Status][]Status{
 		StatusNew: {
 			StatusInProgress,
 			StatusWaiting,
-			StatusClosed,
+			StatusClosed, // Можно сразу закрыть без решения
 		},
 		StatusInProgress: {
 			StatusWaiting,
@@ -71,30 +71,30 @@ func (s Status) CanTransitionTo(newStatus Status) bool {
 		},
 		StatusResolved: {
 			StatusClosed,
-			StatusInProgress, // Переоткрытие
+			StatusInProgress, // Переоткрытие заявки
 		},
 		StatusClosed: {
-			StatusInProgress, // Переоткрытие
+			StatusInProgress, // Переоткрытие закрытой заявки
 		},
 	}
 
-	allowedTransitions, exists := transitions[s]
+	allowedStatuses, exists := allowedTransitions[s]
 	if !exists {
 		return false
 	}
 
-	for _, allowed := range allowedTransitions {
+	for _, allowed := range allowedStatuses {
 		if allowed == newStatus {
 			return true
 		}
 	}
+
 	return false
 }
 
 // ParseStatus преобразует строку в статус
 func ParseStatus(s string) (Status, error) {
-	normalized := strings.ReplaceAll(strings.TrimSpace(s), " ", "_")
-	status := Status(strings.ToLower(normalized))
+	status := Status(strings.ToLower(strings.TrimSpace(s)))
 	if !status.IsValid() {
 		return "", ErrInvalidStatus
 	}
@@ -125,4 +125,30 @@ func (s Status) DisplayName() string {
 		return name
 	}
 	return string(s)
+}
+
+// Color возвращает цвет для отображения статуса в UI
+func (s Status) Color() string {
+	colors := map[Status]string{
+		StatusNew:        "blue",
+		StatusInProgress: "orange",
+		StatusWaiting:    "yellow",
+		StatusResolved:   "green",
+		StatusClosed:     "gray",
+	}
+
+	if color, exists := colors[s]; exists {
+		return color
+	}
+	return "gray"
+}
+
+// IsTerminal проверяет, является ли статус финальным
+func (s Status) IsTerminal() bool {
+	return s == StatusClosed
+}
+
+// IsActive проверяет, является ли статус активным (требует работы)
+func (s Status) IsActive() bool {
+	return s == StatusNew || s == StatusInProgress || s == StatusWaiting
 }
