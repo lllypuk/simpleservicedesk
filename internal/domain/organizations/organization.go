@@ -45,7 +45,7 @@ func DefaultSettings() OrganizationSettings {
 type Organization struct {
 	id        uuid.UUID
 	name      string
-	domain    string // домен организации для автоматического определения пользователей
+	domain    string // Домен организации для автоматического определения пользователей
 	isActive  bool
 	settings  OrganizationSettings
 	createdAt time.Time
