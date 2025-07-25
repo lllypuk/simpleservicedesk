@@ -119,21 +119,8 @@ func NewTicket(
 }
 
 // CreateTicket создает новую заявку с автогенерацией ID
-func CreateTicket(
-	title, description string,
-	priority Priority,
-	organizationID, authorID uuid.UUID,
-	categoryID *uuid.UUID,
-) (*Ticket, error) {
-	return NewTicket(
-		uuid.New(),
-		title,
-		description,
-		priority,
-		organizationID,
-		authorID,
-		categoryID,
-	)
+func CreateTicket(params ...interface{}) (*Ticket, error) {
+	return NewTicket(uuid.New(), params...)
 }
 
 func (t *Ticket) ID() uuid.UUID             { return t.id }
