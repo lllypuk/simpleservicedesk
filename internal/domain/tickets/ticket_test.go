@@ -176,7 +176,7 @@ func validateStatusChange(t *testing.T, ticket *domain.Ticket, expectedStatus do
 	}
 }
 
-// getChangeStatusTestCases возвращает тестовые случаи для изменения статуса
+// getChangeStatusTestCases returns test cases for status changes
 func getChangeStatusTestCases() []struct {
 	name        string
 	fromStatus  domain.Status
