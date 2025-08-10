@@ -134,9 +134,7 @@ func (t *Ticket) UpdatedAt() time.Time      { return t.updatedAt }
 func (t *Ticket) ResolvedAt() *time.Time    { return t.resolvedAt }
 func (t *Ticket) ClosedAt() *time.Time      { return t.closedAt }
 
-func (t *Ticket) SetCreatedAt(newCreatedAt time.Time) {
-	t.createdAt = newCreatedAt
-}
+func (t *Ticket) SetCreatedAt(createdAt time.Time) { t.createdAt = createdAt }
 
 // UpdateTitle обновляет заголовок заявки
 func (t *Ticket) UpdateTitle(title string) error {
