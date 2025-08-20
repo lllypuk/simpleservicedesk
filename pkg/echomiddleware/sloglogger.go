@@ -45,9 +45,9 @@ func SlogLoggerMiddleware(logger logger) echo.MiddlewareFunc {
 			msg := "REQUEST"
 
 			// Adding request_id and trace_id
-			reqID := getRequestID(v.Headers)
+			reqID := GetRequestID(v.Headers)
 			attrs = append(attrs, slog.String(string(contextkeys.RequestIDCtxKey), reqID))
-			traceID := getTraceID(v.Headers)
+			traceID := GetTraceID(v.Headers)
 			attrs = append(attrs, slog.String(string(contextkeys.TraceIDCtxKey), traceID))
 
 			// Adding container_id attribute

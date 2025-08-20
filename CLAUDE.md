@@ -64,6 +64,54 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 5. Run `make lint` before committing
 6. Ensure all tests pass with `make test`
 
+## Code Quality Requirements
+
+**IMPORTANT**: After completing each task, you must run:
+
+1. **`make lint`** - Code formatting, import organization, and linter checks
+   - Automatically fixes formatting using `go fmt`
+   - Organizes imports using `goimports`
+   - Runs `golangci-lint` for code quality checks
+   - Verifies generated code is up-to-date
+
+2. **`make test`** - Run all tests to ensure functionality
+   - Unit tests (`./internal/...`)
+   - Integration tests (`./integration_test/...`) 
+   - All tests must pass before committing
+
+**Post-development workflow:**
+```bash
+make lint    # Fix all linter issues
+make test    # Ensure all tests pass
+git add .    # Only after successful lint + test
+git commit
+```
+
+Code should NOT be committed if:
+- `make lint` shows errors
+- `make test` shows failing tests
+- Generated code is not up-to-date
+
+## Code Style Guidelines
+
+**Language Requirements:**
+- All code comments must be written in **English only**
+- Variable names, function names, and identifiers should use English
+- Documentation and README files can be in multiple languages
+- Test descriptions and error messages should be in English
+
+**Example of correct commenting:**
+```go
+// CreateUser creates a new user with the provided email and password
+func CreateUser(email string, password string) (*User, error) {
+    // Validate email format before processing
+    if !isValidEmail(email) {
+        return nil, ErrInvalidEmail
+    }
+    // ... rest of implementation
+}
+```
+
 ## Configuration
 
 Uses environment variables (see `.env` file):

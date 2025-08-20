@@ -10,7 +10,7 @@ const (
 	TraceParentHeader = "Traceparent"
 )
 
-func getRequestID(headers map[string][]string) string {
+func GetRequestID(headers map[string][]string) string {
 	var reqID string
 	if val, ok := headers[http.CanonicalHeaderKey(RequestIDHeader)]; ok && len(val) > 0 {
 		reqID = val[0]
@@ -18,7 +18,7 @@ func getRequestID(headers map[string][]string) string {
 	return reqID
 }
 
-func getTraceID(headers map[string][]string) string {
+func GetTraceID(headers map[string][]string) string {
 	traceID := "0"
 	if val, ok := headers[http.CanonicalHeaderKey(TraceParentHeader)]; ok && len(val) > 0 {
 		parentVal := val[0]
