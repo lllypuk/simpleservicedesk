@@ -12,8 +12,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Testing
 - `make test` - Run all tests (unit + integration)
-- `make unit_test` - Run unit tests only (`./internal/...`)
-- `make integration_test` - Run integration tests only (`./integration_test/...`)
 - `make coverage_report` - Generate HTML coverage report
 
 ### Performance

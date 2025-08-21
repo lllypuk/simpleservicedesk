@@ -135,12 +135,6 @@ func (h *Handler) handleUserCreation(c echo.Context) error {
 
 #### Запуск тестов
 ```bash
-# Unit tests
-make unit_test
-
-# Integration tests
-make integration_test
-
 # Полный test suite
 make test
 

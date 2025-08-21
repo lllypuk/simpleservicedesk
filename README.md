@@ -186,18 +186,6 @@ You can view the interactive API documentation by:
 make test
 ```
 
-### Unit Tests Only
-
-```bash
-make unit_test
-```
-
-### Integration Tests Only
-
-```bash
-make integration_test
-```
-
 ### Coverage Report
 
 ```bash
