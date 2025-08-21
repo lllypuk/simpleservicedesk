@@ -433,16 +433,8 @@ func (m *MockUserRepository) ExpectCreateUser(user *users.User, err error) *mock
 ### Test Commands
 ```makefile
 # Makefile targets
-unit_test:
+test:
 	go test -v ./internal/...
-
-integration_test:
-	go test -v ./integration_test/...
-
-test: unit_test integration_test
-
-test_fast:
-	go test -short ./...
 
 benchmark:
 	go test -bench=. ./internal/...
