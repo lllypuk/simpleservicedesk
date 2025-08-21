@@ -17,7 +17,7 @@ import (
 func (s *UsersSuite) TestCreateUserIntegration() {
 	tests := []struct {
 		name           string
-		request        interface{}
+		request        any
 		expectedStatus int
 		expectedError  *string
 		validateID     bool
@@ -43,7 +43,7 @@ func (s *UsersSuite) TestCreateUserIntegration() {
 		},
 		{
 			name: "invalid email format",
-			request: map[string]interface{}{
+			request: map[string]any{
 				"name":     "Invalid User",
 				"email":    "invalid-email",
 				"password": "password123",
@@ -61,7 +61,7 @@ func (s *UsersSuite) TestCreateUserIntegration() {
 		},
 		{
 			name: "empty email",
-			request: map[string]interface{}{
+			request: map[string]any{
 				"name":     "Empty Email",
 				"email":    "",
 				"password": "password123",
