@@ -24,12 +24,12 @@ func LoadConfig() (Config, error) {
 		err    error
 	)
 
-	config.Server, err = loadServer()
+	config.Server, err = LoadServer()
 	if err != nil {
 		return config, fmt.Errorf("could not load server config: %w", err)
 	}
 
-	config.Mongo = loadMongo()
+	config.Mongo = LoadMongo()
 	return config, nil
 }
 
@@ -41,17 +41,17 @@ type Server struct {
 	PprofPort         string
 }
 
-func loadServer() (Server, error) {
+func LoadServer() (Server, error) {
 	var server Server
 
-	server.Environment = environment.Type(getEnv("ENV_TYPE", string(environment.Testing)))
-	server.Port = getEnv("SERVER_PORT", "8080")
-	interruptTimeout, err := time.ParseDuration(getEnv("INTERRUPT_TIMEOUT", "2s"))
+	server.Environment = environment.Type(GetEnv("ENV_TYPE", string(environment.Testing)))
+	server.Port = GetEnv("SERVER_PORT", "8080")
+	interruptTimeout, err := time.ParseDuration(GetEnv("INTERRUPT_TIMEOUT", "2s"))
 	if err != nil {
 		return server, fmt.Errorf("could not parse interrupt timeout: %w", err)
 	}
 	server.InterruptTimeout = interruptTimeout
-	readHeaderTimeout, err := time.ParseDuration(getEnv("READ_HEADER_TIMEOUT", "5s"))
+	readHeaderTimeout, err := time.ParseDuration(GetEnv("READ_HEADER_TIMEOUT", "5s"))
 	if err != nil {
 		return server, fmt.Errorf("could not parse read header timeout: %w", err)
 	}
@@ -60,14 +60,14 @@ func loadServer() (Server, error) {
 	return server, nil
 }
 
-func loadMongo() Mongo {
+func LoadMongo() Mongo {
 	var mongo Mongo
-	mongo.URI = getEnv("MONGO_URI", "mongodb://localhost:27017")
-	mongo.Database = getEnv("MONGO_DATABASE", "servicedesk")
+	mongo.URI = GetEnv("MONGO_URI", "mongodb://localhost:27017")
+	mongo.Database = GetEnv("MONGO_DATABASE", "servicedesk")
 	return mongo
 }
 
-func getEnv(key, fallback string) string {
+func GetEnv(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
 	}

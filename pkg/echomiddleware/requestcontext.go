@@ -10,8 +10,8 @@ import (
 
 func PutRequestIDContext(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		reqID := getRequestID(c.Request().Header)
-		traceID := getTraceID(c.Request().Header)
+		reqID := GetRequestID(c.Request().Header)
+		traceID := GetTraceID(c.Request().Header)
 		ctx := c.Request().Context()
 		ctx = context.WithValue(ctx, contextkeys.RequestIDCtxKey, reqID)
 		ctx = context.WithValue(ctx, contextkeys.TraceIDCtxKey, traceID)

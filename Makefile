@@ -1,7 +1,7 @@
 include .env
 export
 
-.PHONY: help unit_test integration_test test generate lint coverage_report cpu_profile mem_profile run
+.PHONY: help unit_test integration_test test pre-commit generate lint coverage_report cpu_profile mem_profile run
 
 help:
 	cat Makefile
