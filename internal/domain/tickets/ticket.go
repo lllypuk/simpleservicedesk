@@ -134,7 +134,10 @@ func (t *Ticket) UpdatedAt() time.Time      { return t.updatedAt }
 func (t *Ticket) ResolvedAt() *time.Time    { return t.resolvedAt }
 func (t *Ticket) ClosedAt() *time.Time      { return t.closedAt }
 
-func (t *Ticket) SetCreatedAt(createdAt time.Time) { t.createdAt = createdAt }
+func (t *Ticket) SetCreatedAt(createdAt time.Time)    { t.createdAt = createdAt }
+func (t *Ticket) SetResolvedAt(resolvedAt *time.Time) { t.resolvedAt = resolvedAt }
+func (t *Ticket) SetClosedAt(closedAt *time.Time)     { t.closedAt = closedAt }
+func (t *Ticket) SetUpdatedAt(updatedAt time.Time)    { t.updatedAt = updatedAt }
 
 // UpdateTitle обновляет заголовок заявки
 func (t *Ticket) UpdateTitle(title string) error {
@@ -201,6 +204,11 @@ func (t *Ticket) ResetToInitialStatus(status Status) {
 	t.resolvedAt = nil
 	t.closedAt = nil
 	t.updatedAt = time.Now()
+}
+
+// SetStatus sets the status without resetting resolved/closed timestamps (for data restoration)
+func (t *Ticket) SetStatus(status Status) {
+	t.status = status
 }
 
 // AssignTo назначает заявку исполнителю

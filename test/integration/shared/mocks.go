@@ -1,4 +1,7 @@
-package application
+//go:build integration
+// +build integration
+
+package shared
 
 import (
 	"context"
@@ -6,18 +9,9 @@ import (
 	"simpleservicedesk/internal/domain/users"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/suite"
 )
 
-type ServerSuite struct {
-	suite.Suite
-
-	HTTPServer *echo.Echo
-	UsersRepo  UserRepository // Interface for repository
-}
-
-// mockUserRepository is a simple mock for testing
+// mockUserRepository is a simple mock for integration testing
 type mockUserRepository struct {
 	createdEmails map[string]bool
 	users         map[uuid.UUID]*users.User
@@ -77,13 +71,4 @@ func (m *mockUserRepository) GetUser(_ context.Context, id uuid.UUID) (*users.Us
 		return nil, users.ErrUserNotFound
 	}
 	return user, nil
-}
-
-// SetupTest for integration tests
-func (s *ServerSuite) SetupTest() {
-	// Initialize mock repository with fresh state
-	s.UsersRepo = newMockUserRepository()
-
-	// Initialize HTTP server with mock repository
-	s.HTTPServer = SetupHTTPServer(s.UsersRepo)
 }

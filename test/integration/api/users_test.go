@@ -1,4 +1,7 @@
-package users_test
+//go:build integration
+// +build integration
+
+package api_test
 
 import (
 	"bytes"
@@ -7,14 +10,26 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"testing"
 
 	"simpleservicedesk/generated/openapi"
+	"simpleservicedesk/test/integration/shared"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	openapi_types "github.com/oapi-codegen/runtime/types"
+	"github.com/stretchr/testify/suite"
 )
 
-func (s *UsersSuite) TestCreateUserIntegration() {
+type UserAPITestSuite struct {
+	shared.IntegrationSuite
+}
+
+func TestUserAPI(t *testing.T) {
+	suite.Run(t, new(UserAPITestSuite))
+}
+
+func (s *UserAPITestSuite) TestCreateUserIntegration() {
 	tests := []struct {
 		name           string
 		request        any
@@ -23,12 +38,8 @@ func (s *UsersSuite) TestCreateUserIntegration() {
 		validateID     bool
 	}{
 		{
-			name: "valid user creation",
-			request: openapi.CreateUserRequest{
-				Name:     "John Doe",
-				Email:    "john.doe@example.com",
-				Password: "password123",
-			},
+			name:           "valid user creation",
+			request:        shared.TestUser1.CreateUserRequest(),
 			expectedStatus: http.StatusCreated,
 			validateID:     true,
 		},
@@ -36,7 +47,7 @@ func (s *UsersSuite) TestCreateUserIntegration() {
 			name: "duplicate email",
 			request: openapi.CreateUserRequest{
 				Name:     "Jane Doe",
-				Email:    "john.doe@example.com", // Same email as above
+				Email:    openapi_types.Email(shared.TestUser1.Email), // Same email as above
 				Password: "password123",
 			},
 			expectedStatus: http.StatusConflict,
@@ -54,7 +65,7 @@ func (s *UsersSuite) TestCreateUserIntegration() {
 			name: "empty name",
 			request: openapi.CreateUserRequest{
 				Name:     "",
-				Email:    "empty.name@example.com",
+				Email:    openapi_types.Email("empty.name@example.com"),
 				Password: "password123",
 			},
 			expectedStatus: http.StatusBadRequest,
@@ -72,7 +83,7 @@ func (s *UsersSuite) TestCreateUserIntegration() {
 			name: "empty password",
 			request: openapi.CreateUserRequest{
 				Name:     "Empty Password",
-				Email:    "empty.password@example.com",
+				Email:    openapi_types.Email("empty.password@example.com"),
 				Password: "",
 			},
 			expectedStatus: http.StatusBadRequest,
@@ -81,7 +92,7 @@ func (s *UsersSuite) TestCreateUserIntegration() {
 			name: "short password",
 			request: openapi.CreateUserRequest{
 				Name:     "Short Password",
-				Email:    "short.password@example.com",
+				Email:    openapi_types.Email("short.password@example.com"),
 				Password: "12345", // Less than 6 characters
 			},
 			expectedStatus: http.StatusBadRequest,
@@ -137,13 +148,9 @@ func (s *UsersSuite) TestCreateUserIntegration() {
 	}
 }
 
-func (s *UsersSuite) TestGetUserIntegration() {
+func (s *UserAPITestSuite) TestGetUserIntegration() {
 	// First create a user to test getting
-	createReq := openapi.CreateUserRequest{
-		Name:     "Test User",
-		Email:    "test.user@example.com",
-		Password: "password123",
-	}
+	createReq := shared.TestUser2.CreateUserRequest()
 	reqBody, _ := json.Marshal(createReq)
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -197,9 +204,9 @@ func (s *UsersSuite) TestGetUserIntegration() {
 				s.Assert().NotNil(resp.Id)
 				s.Assert().Equal(createdUserID, *resp.Id)
 				s.Assert().NotNil(resp.Name)
-				s.Assert().Equal("Test User", *resp.Name)
+				s.Assert().Equal(shared.TestUser2.Name, *resp.Name)
 				s.Assert().NotNil(resp.Email)
-				s.Assert().Equal("test.user@example.com", string(*resp.Email))
+				s.Assert().Equal(shared.TestUser2.Email, string(*resp.Email))
 			} else if tt.expectedStatus != http.StatusOK {
 				var errorResp openapi.ErrorResponse
 				unmarshalErr := json.Unmarshal(testRec.Body.Bytes(), &errorResp)
@@ -211,7 +218,7 @@ func (s *UsersSuite) TestGetUserIntegration() {
 	}
 }
 
-func (s *UsersSuite) TestPingEndpoint() {
+func (s *UserAPITestSuite) TestPingEndpoint() {
 	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
 	rec := httptest.NewRecorder()
 	s.HTTPServer.ServeHTTP(rec, req)
@@ -220,12 +227,8 @@ func (s *UsersSuite) TestPingEndpoint() {
 	s.Assert().Equal("pong", rec.Body.String())
 }
 
-func (s *UsersSuite) TestContentTypeValidation() {
-	userReq := openapi.CreateUserRequest{
-		Name:     "Test User",
-		Email:    "test@example.com",
-		Password: "password123",
-	}
+func (s *UserAPITestSuite) TestContentTypeValidation() {
+	userReq := shared.TestUser3.CreateUserRequest()
 	reqBody, _ := json.Marshal(userReq)
 
 	tests := []struct {
@@ -264,7 +267,7 @@ func (s *UsersSuite) TestContentTypeValidation() {
 	}
 }
 
-func (s *UsersSuite) TestHTTPMethodValidation() {
+func (s *UserAPITestSuite) TestHTTPMethodValidation() {
 	tests := []struct {
 		name           string
 		method         string
@@ -324,13 +327,13 @@ func (s *UsersSuite) TestHTTPMethodValidation() {
 	}
 }
 
-func (s *UsersSuite) TestLargePayloadHandling() {
+func (s *UserAPITestSuite) TestLargePayloadHandling() {
 	// Test with a large name (should be accepted since there's no length validation in domain)
 	largeString := strings.Repeat("A", 1000) // 1KB string - reasonable size
 
 	userReq := openapi.CreateUserRequest{
 		Name:     largeString,
-		Email:    "large.payload@example.com",
+		Email:    openapi_types.Email("large.payload@example.com"),
 		Password: "password123",
 	}
 	reqBody, _ := json.Marshal(userReq)
@@ -349,7 +352,7 @@ func (s *UsersSuite) TestLargePayloadHandling() {
 	s.Assert().NotNil(resp.Id)
 }
 
-func (s *UsersSuite) TestSpecialCharactersInInput() {
+func (s *UserAPITestSuite) TestSpecialCharactersInInput() {
 	tests := []struct {
 		name     string
 		request  openapi.CreateUserRequest
@@ -359,7 +362,7 @@ func (s *UsersSuite) TestSpecialCharactersInInput() {
 			name: "special characters in name",
 			request: openapi.CreateUserRequest{
 				Name:     "John O'Connor-Smith",
-				Email:    "john.oconnor@example.com",
+				Email:    openapi_types.Email("john.oconnor@example.com"),
 				Password: "password123",
 			},
 			expected: http.StatusCreated,
@@ -368,7 +371,7 @@ func (s *UsersSuite) TestSpecialCharactersInInput() {
 			name: "unicode characters in name",
 			request: openapi.CreateUserRequest{
 				Name:     "José María García",
-				Email:    "jose@example.com",
+				Email:    openapi_types.Email("jose@example.com"),
 				Password: "password123",
 			},
 			expected: http.StatusCreated,
@@ -377,7 +380,7 @@ func (s *UsersSuite) TestSpecialCharactersInInput() {
 			name: "emoji in name",
 			request: openapi.CreateUserRequest{
 				Name:     "John 😀 Doe",
-				Email:    "john.emoji@example.com",
+				Email:    openapi_types.Email("john.emoji@example.com"),
 				Password: "password123",
 			},
 			expected: http.StatusCreated,
@@ -386,7 +389,7 @@ func (s *UsersSuite) TestSpecialCharactersInInput() {
 			name: "SQL injection attempt in name",
 			request: openapi.CreateUserRequest{
 				Name:     "'; DROP TABLE users; --",
-				Email:    "injection@example.com",
+				Email:    openapi_types.Email("injection@example.com"),
 				Password: "password123",
 			},
 			expected: http.StatusCreated, // Should be treated as regular text

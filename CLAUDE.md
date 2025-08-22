@@ -8,11 +8,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make run` - Start the server locally on port 8080
 - `make generate` - Generate server/client code from OpenAPI specs (required after API changes)
 - `make lint` - Format code, organize imports, run golangci-lint, and verify generated code is up-to-date
-- `docker-compose up -d` - Start full stack with MongoDB
+- `make docker-up` - Start full stack with MongoDB using Docker Compose
+- `make docker-down` - Stop and remove Docker containers
+- `make docker-logs` - View logs from Docker containers
+- `make docker-clean` - Clean up containers, volumes, and system cache
+- `make docker-rebuild` - Full rebuild and restart with clean state
 
 ### Testing
-- `make test` - Run all tests (unit + integration)
-- `make coverage_report` - Generate HTML coverage report
+- `make test` - Run unit tests only (excludes integration tests)
+- `make test-unit` - Run unit tests explicitly
+- `make test-integration` - Run all integration tests
+- `make test-api` - Run HTTP API integration tests only
+- `make test-repositories` - Run repository integration tests only
+- `make test-e2e` - Run end-to-end tests only
+- `make test-all` - Run both unit and integration tests
+- `make coverage_report` - Generate HTML coverage report for unit tests
+- `make coverage_integration` - Generate HTML coverage report for integration tests
 
 ### Performance
 - `make cpu_profile` - CPU profiling with web interface on :6061
@@ -62,6 +73,58 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 5. Run `make lint` before committing
 6. Ensure all tests pass with `make test`
 
+## Test Organization
+
+The project uses a centralized integration test structure for better organization and maintenance:
+
+### Test Directory Structure
+
+```
+test/
+├── integration/
+│   ├── api/           # HTTP API integration tests
+│   ├── repositories/  # Database repository tests with testcontainers
+│   ├── e2e/          # End-to-end workflow tests
+│   └── shared/       # Common test utilities and setup
+internal/
+├── domain/           # Domain unit tests (co-located)
+├── application/      # Application unit tests (co-located)
+└── infrastructure/   # Infrastructure unit tests (co-located)
+```
+
+### Test Categories
+
+**Unit Tests** (`internal/` packages):
+- Domain logic validation
+- Business rule verification
+- Individual component testing
+- Fast execution, no external dependencies
+- Use mocks for dependencies
+
+**Integration Tests** (`test/integration/`):
+- API endpoint testing (`api/`)
+- Database operations (`repositories/`)
+- Component interaction verification
+- Use testcontainers for real databases
+- Tagged with `//go:build integration`
+
+**End-to-End Tests** (`test/integration/e2e/`):
+- Full workflow testing
+- User journey simulation
+- Multiple service interaction
+- Tagged with `//go:build integration,e2e`
+
+### Test Build Tags
+
+All integration tests use build tags to separate them from unit tests:
+
+```go
+//go:build integration
+// +build integration
+```
+
+This allows running different test types independently using Make commands.
+
 ## Code Quality Requirements
 
 **IMPORTANT**: After completing each task, you must run:
@@ -97,6 +160,25 @@ Code should NOT be committed if:
 - Variable names, function names, and identifiers should use English
 - Documentation and README files can be in multiple languages
 - Test descriptions and error messages should be in English
+
+**Test Package Naming Convention:**
+- **CRITICAL**: All test files must use `package packagename_test` instead of `package packagename`
+- This enforces black-box testing and prevents import cycles
+- Tests should only use public APIs, not internal implementation details
+
+**Example of correct test package naming:**
+```go
+// ❌ INCORRECT - Don't do this
+package tickets
+func TestInternalFunction(t *testing.T) { ... }
+
+// ✅ CORRECT - Always use this
+package tickets_test
+import "myproject/internal/infrastructure/tickets"
+func TestPublicAPI(t *testing.T) { 
+    repo := tickets.NewMongoRepo(db) // Only test public API
+}
+```
 
 **Example of correct commenting:**
 ```go
