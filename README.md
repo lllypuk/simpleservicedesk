@@ -38,7 +38,7 @@ and categorization systems through a clean RESTful API.
 - **Category System**: Organize tickets and resources with hierarchical categories
 - **RESTful API**: Clean, well-documented APIs following OpenAPI 3.0 specification
 - **Code Generation**: Automatic server and client code generation from OpenAPI specs
-- **Multiple Storage Backends**: Support for both in-memory and MongoDB repositories
+- **Multiple Storage Backends**: Support MongoDB repository
 - **Structured Logging**: Comprehensive logging using Go's structured logging (slog)
 - **Graceful Shutdown**: Proper signal handling and graceful application termination
 - **Containerization**: Full Docker and Docker Compose support

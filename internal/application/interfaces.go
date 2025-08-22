@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
 
@@ -48,4 +49,36 @@ type TicketRepository interface {
 	GetTicket(ctx context.Context, id uuid.UUID) (*tickets.Ticket, error)
 	ListTickets(ctx context.Context, filter TicketFilter) ([]*tickets.Ticket, error)
 	DeleteTicket(ctx context.Context, id uuid.UUID) error
+}
+
+// CategoryFilter defines filtering options for category queries
+type CategoryFilter struct {
+	OrganizationID *uuid.UUID `json:"organization_id,omitempty"`
+	ParentID       *uuid.UUID `json:"parent_id,omitempty"`
+	IsActive       *bool      `json:"is_active,omitempty"`
+	Name           *string    `json:"name,omitempty"`
+	IsRootOnly     bool       `json:"is_root_only,omitempty"`
+	Limit          int        `json:"limit,omitempty"`
+	Offset         int        `json:"offset,omitempty"`
+	SortBy         string     `json:"sort_by,omitempty"`    // "name", "created_at", "updated_at"
+	SortOrder      string     `json:"sort_order,omitempty"` // "asc", "desc"
+}
+
+// CategoryTree represents a hierarchical category structure
+type CategoryTree struct {
+	Category *categories.Category `json:"category"`
+	Children []*CategoryTree      `json:"children,omitempty"`
+}
+
+type CategoryRepository interface {
+	CreateCategory(ctx context.Context, createFn func() (*categories.Category, error)) (*categories.Category, error)
+	UpdateCategory(
+		ctx context.Context,
+		id uuid.UUID,
+		updateFn func(*categories.Category) (bool, error),
+	) (*categories.Category, error)
+	GetCategory(ctx context.Context, id uuid.UUID) (*categories.Category, error)
+	ListCategories(ctx context.Context, filter CategoryFilter) ([]*categories.Category, error)
+	GetCategoryHierarchy(ctx context.Context, rootID uuid.UUID) (*CategoryTree, error)
+	DeleteCategory(ctx context.Context, id uuid.UUID) error
 }

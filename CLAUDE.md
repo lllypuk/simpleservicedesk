@@ -46,7 +46,7 @@ Core business entities with their own validation and business logic:
 - HTTP handlers and middleware
 
 ### Infrastructure Layer (`internal/infrastructure/`)
-- Repository implementations (in-memory and MongoDB)
+- Repository implementations (MongoDB)
 - External service integrations
 
 ### Generated Code (`generated/`)
@@ -59,7 +59,7 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 ## Key Technologies
 
 - **Web Framework**: Echo v4 for HTTP routing and middleware
-- **Storage**: MongoDB (primary) with in-memory fallback for testing
+- **Storage**: MongoDB (primary)
 - **Code Generation**: oapi-codegen from OpenAPI 3.0 specs
 - **Testing**: testcontainers-go for integration tests with real MongoDB
 - **Logging**: Structured logging using Go's slog package
