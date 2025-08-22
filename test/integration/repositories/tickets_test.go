@@ -1,4 +1,7 @@
-package integration_test
+//go:build integration
+// +build integration
+
+package repositories_test
 
 import (
 	"context"
@@ -9,58 +12,25 @@ import (
 	"simpleservicedesk/internal/application"
 	domain "simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/infrastructure/tickets"
+	"simpleservicedesk/test/integration/shared"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/testcontainers/testcontainers-go/modules/mongodb"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // TicketRepositoryIntegrationSuite tests MongoDB repository
 type TicketRepositoryIntegrationSuite struct {
-	suite.Suite
-
+	shared.MongoIntegrationSuite
 	mongoRepo *tickets.MongoRepo
-	cleanup   func()
 }
 
 func (s *TicketRepositoryIntegrationSuite) SetupSuite() {
-	ctx := context.Background()
-
-	// Start MongoDB container
-	mongoContainer, err := mongodb.Run(ctx, "mongodb/mongodb-community-server:8.0-ubi8")
-	s.Require().NoError(err)
-
-	// Get connection string
-	endpoint, err := mongoContainer.ConnectionString(ctx)
-	s.Require().NoError(err)
-
-	// Connect to MongoDB
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(endpoint))
-	s.Require().NoError(err)
-
-	// Test connection
-	err = client.Ping(ctx, nil)
-	s.Require().NoError(err)
-
-	// Create test database and repository
-	db := client.Database("test_tickets_integration")
-	s.mongoRepo = tickets.NewMongoRepo(db)
-
-	s.cleanup = func() {
-		_ = client.Disconnect(ctx)
-		_ = mongoContainer.Terminate(ctx)
-	}
-}
-
-func (s *TicketRepositoryIntegrationSuite) TearDownSuite() {
-	if s.cleanup != nil {
-		s.cleanup()
-	}
+	s.MongoIntegrationSuite.SetupSuite()
+	s.mongoRepo = tickets.NewMongoRepo(s.MongoDB)
 }
 
 func (s *TicketRepositoryIntegrationSuite) SetupTest() {
+	s.MongoIntegrationSuite.SetupTest()
 	// Clear MongoDB collections before each test
 	ctx := context.Background()
 	err := s.mongoRepo.Clear(ctx)
@@ -90,22 +60,16 @@ func (s *TicketRepositoryIntegrationSuite) testBasicCRUD(repo application.Ticket
 	assigneeID := uuid.New()
 
 	s.Run("Create ticket", func() {
+		testTicket := shared.NewTestTicket1(orgID, authorID)
+
 		ticket, err := repo.CreateTicket(ctx, func() (*domain.Ticket, error) {
-			return domain.NewTicket(
-				uuid.New(),
-				"Test Ticket",
-				"Test Description",
-				domain.PriorityNormal,
-				orgID,
-				authorID,
-				nil,
-			)
+			return testTicket.CreateDomainTicket()
 		})
 
 		s.Require().NoError(err)
-		s.Equal("Test Ticket", ticket.Title())
-		s.Equal("Test Description", ticket.Description())
-		s.Equal(domain.PriorityNormal, ticket.Priority())
+		s.Equal(testTicket.Title, ticket.Title())
+		s.Equal(testTicket.Description, ticket.Description())
+		s.Equal(testTicket.Priority, ticket.Priority())
 		s.Equal(domain.StatusNew, ticket.Status())
 
 		// Test Get
@@ -154,17 +118,11 @@ func (s *TicketRepositoryIntegrationSuite) testComplexTicketOperations(repo appl
 		authorID := uuid.New()
 		commenterID := uuid.New()
 
+		testTicket := shared.NewTestTicket2(orgID, authorID)
+
 		// Create ticket
 		ticket, err := repo.CreateTicket(ctx, func() (*domain.Ticket, error) {
-			return domain.NewTicket(
-				uuid.New(),
-				"Complex Ticket",
-				"Ticket with comments and attachments",
-				domain.PriorityHigh,
-				orgID,
-				authorID,
-				nil,
-			)
+			return testTicket.CreateDomainTicket()
 		})
 		s.Require().NoError(err)
 
@@ -211,17 +169,11 @@ func (s *TicketRepositoryIntegrationSuite) testComplexTicketOperations(repo appl
 		orgID := uuid.New()
 		authorID := uuid.New()
 
+		testTicket := shared.NewTestTicket3(orgID, authorID)
+
 		// Create ticket
 		ticket, err := repo.CreateTicket(ctx, func() (*domain.Ticket, error) {
-			return domain.NewTicket(
-				uuid.New(),
-				"Status Test",
-				"Testing status transitions",
-				domain.PriorityCritical,
-				orgID,
-				authorID,
-				nil,
-			)
+			return testTicket.CreateDomainTicket()
 		})
 		s.Require().NoError(err)
 		s.Equal(domain.StatusNew, ticket.Status())
@@ -255,6 +207,7 @@ func (s *TicketRepositoryIntegrationSuite) testFilteringAndSorting(repo applicat
 			err := mongoRepo.Clear(ctx)
 			s.Require().NoError(err)
 		}
+
 		// Create test data
 		orgID1 := uuid.New()
 		orgID2 := uuid.New()
@@ -394,16 +347,9 @@ func (s *TicketRepositoryIntegrationSuite) testErrorHandling(repo application.Ti
 		s.Equal(expectedErr, err)
 
 		// Test updateFn returning error
+		testTicket := shared.NewTestTicket1(uuid.New(), uuid.New())
 		ticket, err := repo.CreateTicket(ctx, func() (*domain.Ticket, error) {
-			return domain.NewTicket(
-				uuid.New(),
-				"Error Test",
-				"Testing error handling",
-				domain.PriorityNormal,
-				uuid.New(),
-				uuid.New(),
-				nil,
-			)
+			return testTicket.CreateDomainTicket()
 		})
 		s.Require().NoError(err)
 
@@ -420,17 +366,11 @@ func (s *TicketRepositoryIntegrationSuite) TestConcurrentOperations() {
 	ctx := context.Background()
 
 	s.Run("Concurrent access", func() {
+		testTicket := shared.NewTestTicket1(uuid.New(), uuid.New())
+
 		// Create a ticket
 		ticket, err := repo.CreateTicket(ctx, func() (*domain.Ticket, error) {
-			return domain.NewTicket(
-				uuid.New(),
-				"Concurrent Test",
-				"Testing concurrent access",
-				domain.PriorityNormal,
-				uuid.New(),
-				uuid.New(),
-				nil,
-			)
+			return testTicket.CreateDomainTicket()
 		})
 		s.Require().NoError(err)
 
@@ -480,16 +420,10 @@ func (s *TicketRepositoryIntegrationSuite) TestDataConsistency() {
 		orgID := uuid.New()
 		authorID := uuid.New()
 
+		testTicket := shared.NewTestTicket2(orgID, authorID)
+
 		originalTicket, err := repo.CreateTicket(ctx, func() (*domain.Ticket, error) {
-			return domain.NewTicket(
-				uuid.New(),
-				"Consistency Test",
-				"Testing data consistency",
-				domain.PriorityHigh,
-				orgID,
-				authorID,
-				nil,
-			)
+			return testTicket.CreateDomainTicket()
 		})
 		s.Require().NoError(err)
 
