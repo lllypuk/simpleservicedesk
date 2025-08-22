@@ -244,92 +244,116 @@ func TestMongoRepo_ListTickets(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Create test tickets with different properties
+	// Create test sliceTickets with different properties
 	orgID1 := uuid.New()
 	orgID2 := uuid.New()
 	authorID1 := uuid.New()
 	authorID2 := uuid.New()
 
-	tickets := []*domain.Ticket{}
+	var sliceTickets []*domain.Ticket
 
 	// Ticket 1: High priority, orgID1, authorID1
-	ticket1, err := domain.NewTicket(uuid.New(), "Ticket 1", "Description 1", domain.PriorityHigh, orgID1, authorID1, nil)
+	ticket1, err := domain.NewTicket(
+		uuid.New(),
+		"Ticket 1",
+		"Description 1",
+		domain.PriorityHigh,
+		orgID1,
+		authorID1,
+		nil,
+	)
 	require.NoError(t, err)
-	tickets = append(tickets, ticket1)
+	sliceTickets = append(sliceTickets, ticket1)
 
 	// Ticket 2: Normal priority, orgID2, authorID2
-	ticket2, err := domain.NewTicket(uuid.New(), "Ticket 2", "Description 2", domain.PriorityNormal, orgID2, authorID2, nil)
+	ticket2, err := domain.NewTicket(
+		uuid.New(),
+		"Ticket 2",
+		"Description 2",
+		domain.PriorityNormal,
+		orgID2,
+		authorID2,
+		nil,
+	)
 	require.NoError(t, err)
-	tickets = append(tickets, ticket2)
+	sliceTickets = append(sliceTickets, ticket2)
 
 	// Ticket 3: Critical priority, orgID1, authorID1
-	ticket3, err := domain.NewTicket(uuid.New(), "Ticket 3", "Description 3", domain.PriorityCritical, orgID1, authorID1, nil)
+	ticket3, err := domain.NewTicket(
+		uuid.New(),
+		"Ticket 3",
+		"Description 3",
+		domain.PriorityCritical,
+		orgID1,
+		authorID1,
+		nil,
+	)
 	require.NoError(t, err)
-	tickets = append(tickets, ticket3)
+	sliceTickets = append(sliceTickets, ticket3)
 
-	// Insert all tickets
-	for _, ticket := range tickets {
-		_, err := repo.CreateTicket(ctx, func() (*domain.Ticket, error) {
+	// Insert all sliceTickets
+	for _, ticket := range sliceTickets {
+		_, createErr := repo.CreateTicket(ctx, func() (*domain.Ticket, error) {
 			return ticket, nil
 		})
-		require.NoError(t, err)
+		require.NoError(t, createErr)
 	}
 
 	t.Run("no filter", func(t *testing.T) {
-		result, err := repo.ListTickets(ctx, application.TicketFilter{})
-		require.NoError(t, err)
+		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{})
+		require.NoError(t, ticketErr)
 		assert.Len(t, result, 3)
 	})
 
 	t.Run("filter by priority", func(t *testing.T) {
 		priority := domain.PriorityHigh
-		result, err := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
 			Priority: &priority,
 		})
-		require.NoError(t, err)
+		require.NoError(t, ticketErr)
 		assert.Len(t, result, 1)
 		assert.Equal(t, domain.PriorityHigh, result[0].Priority())
 	})
 
 	t.Run("filter by organization", func(t *testing.T) {
-		result, err := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
 			OrganizationID: &orgID1,
 		})
-		require.NoError(t, err)
+		require.NoError(t, ticketErr)
 		assert.Len(t, result, 2) // ticket1 and ticket3
 	})
 
 	t.Run("filter by author", func(t *testing.T) {
-		result, err := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
 			AuthorID: &authorID2,
 		})
-		require.NoError(t, err)
+		require.NoError(t, ticketErr)
 		assert.Len(t, result, 1) // ticket2
 		assert.Equal(t, "Ticket 2", result[0].Title())
 	})
 
 	t.Run("with limit", func(t *testing.T) {
-		result, err := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
 			Limit: 2,
 		})
-		require.NoError(t, err)
+		require.NoError(t, ticketErr)
 		assert.Len(t, result, 2)
 	})
 
 	t.Run("with offset", func(t *testing.T) {
-		result, err := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
 			Offset: 1,
 		})
-		require.NoError(t, err)
+		require.NoError(t, ticketErr)
 		assert.Len(t, result, 2)
 	})
 
 	t.Run("sort by priority descending", func(t *testing.T) {
-		result, err := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
 			SortBy:    "priority",
 			SortOrder: "desc",
 		})
-		require.NoError(t, err)
+		require.NoError(t, ticketErr)
 		assert.Len(t, result, 3)
 		// Should be ordered: Critical, High, Normal
 		assert.Equal(t, domain.PriorityCritical, result[0].Priority())
@@ -342,11 +366,11 @@ func TestMongoRepo_ListTickets(t *testing.T) {
 		before := now.Add(-1 * time.Hour)
 		after := now.Add(1 * time.Hour)
 
-		result, err := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
 			CreatedAfter:  &before,
 			CreatedBefore: &after,
 		})
-		require.NoError(t, err)
-		assert.Len(t, result, 3) // All tickets should be within this range
+		require.NoError(t, ticketErr)
+		assert.Len(t, result, 3) // All sliceTickets should be within this range
 	})
 }

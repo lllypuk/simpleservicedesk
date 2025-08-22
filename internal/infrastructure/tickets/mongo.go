@@ -118,7 +118,11 @@ func (r *MongoRepo) GetTicket(ctx context.Context, ticketID uuid.UUID) (*domain.
 }
 
 // UpdateTicket updates an existing ticket in MongoDB
-func (r *MongoRepo) UpdateTicket(ctx context.Context, ticketID uuid.UUID, updateFn func(*domain.Ticket) (bool, error)) (*domain.Ticket, error) {
+func (r *MongoRepo) UpdateTicket(
+	ctx context.Context,
+	ticketID uuid.UUID,
+	updateFn func(*domain.Ticket) (bool, error),
+) (*domain.Ticket, error) {
 	var mongoDoc mongoTicket
 	err := r.collection.FindOne(ctx, bson.M{"ticket_id": ticketID}).Decode(&mongoDoc)
 	if errors.Is(err, mongo.ErrNoDocuments) {
@@ -193,13 +197,13 @@ func (r *MongoRepo) ListTickets(ctx context.Context, filter application.TicketFi
 	var tickets []*domain.Ticket
 	for cursor.Next(ctx) {
 		var mongoDoc mongoTicket
-		if err := cursor.Decode(&mongoDoc); err != nil {
+		if err = cursor.Decode(&mongoDoc); err != nil {
 			return nil, err
 		}
 
-		ticket, err := r.mongoToDomain(&mongoDoc)
-		if err != nil {
-			return nil, err
+		ticket, domainErr := r.mongoToDomain(&mongoDoc)
+		if domainErr != nil {
+			return nil, domainErr
 		}
 
 		// Apply overdue filter if specified (complex logic requiring business rules)
@@ -212,7 +216,7 @@ func (r *MongoRepo) ListTickets(ctx context.Context, filter application.TicketFi
 		tickets = append(tickets, ticket)
 	}
 
-	if err := cursor.Err(); err != nil {
+	if err = cursor.Err(); err != nil {
 		return nil, err
 	}
 
@@ -336,21 +340,21 @@ func (r *MongoRepo) mongoToDomain(mongoDoc *mongoTicket) (*domain.Ticket, error)
 
 	// Restore assignee if exists
 	if mongoDoc.AssigneeID != nil {
-		if err := ticket.AssignTo(*mongoDoc.AssigneeID); err != nil {
+		if err = ticket.AssignTo(*mongoDoc.AssigneeID); err != nil {
 			return nil, err
 		}
 	}
 
 	// Restore comments
 	for _, mongoComment := range mongoDoc.Comments {
-		if err := ticket.AddComment(mongoComment.AuthorID, mongoComment.Content, mongoComment.IsInternal); err != nil {
+		if err = ticket.AddComment(mongoComment.AuthorID, mongoComment.Content, mongoComment.IsInternal); err != nil {
 			return nil, err
 		}
 	}
 
 	// Restore attachments
 	for _, mongoAttachment := range mongoDoc.Attachments {
-		if err := ticket.AddAttachment(
+		if err = ticket.AddAttachment(
 			mongoAttachment.FileName,
 			mongoAttachment.FileSize,
 			mongoAttachment.MimeType,
