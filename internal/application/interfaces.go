@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"simpleservicedesk/internal/domain/categories"
+	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
 
@@ -70,6 +71,7 @@ type CategoryTree struct {
 	Children []*CategoryTree      `json:"children,omitempty"`
 }
 
+//nolint:dupl // CategoryRepository and OrganizationRepository have similar patterns by design
 type CategoryRepository interface {
 	CreateCategory(ctx context.Context, createFn func() (*categories.Category, error)) (*categories.Category, error)
 	UpdateCategory(
@@ -81,4 +83,40 @@ type CategoryRepository interface {
 	ListCategories(ctx context.Context, filter CategoryFilter) ([]*categories.Category, error)
 	GetCategoryHierarchy(ctx context.Context, rootID uuid.UUID) (*CategoryTree, error)
 	DeleteCategory(ctx context.Context, id uuid.UUID) error
+}
+
+// OrganizationFilter defines filtering options for organization queries
+type OrganizationFilter struct {
+	ParentID   *uuid.UUID `json:"parent_id,omitempty"`
+	IsActive   *bool      `json:"is_active,omitempty"`
+	Name       *string    `json:"name,omitempty"`
+	Domain     *string    `json:"domain,omitempty"`
+	IsRootOnly bool       `json:"is_root_only,omitempty"`
+	Limit      int        `json:"limit,omitempty"`
+	Offset     int        `json:"offset,omitempty"`
+	SortBy     string     `json:"sort_by,omitempty"`    // "name", "created_at", "updated_at", "domain"
+	SortOrder  string     `json:"sort_order,omitempty"` // "asc", "desc"
+}
+
+// OrganizationTree represents a hierarchical organization structure
+type OrganizationTree struct {
+	Organization *organizations.Organization `json:"organization"`
+	Children     []*OrganizationTree         `json:"children,omitempty"`
+}
+
+//nolint:dupl // CategoryRepository and OrganizationRepository have similar patterns by design
+type OrganizationRepository interface {
+	CreateOrganization(
+		ctx context.Context,
+		createFn func() (*organizations.Organization, error),
+	) (*organizations.Organization, error)
+	UpdateOrganization(
+		ctx context.Context,
+		id uuid.UUID,
+		updateFn func(*organizations.Organization) (bool, error),
+	) (*organizations.Organization, error)
+	GetOrganization(ctx context.Context, id uuid.UUID) (*organizations.Organization, error)
+	ListOrganizations(ctx context.Context, filter OrganizationFilter) ([]*organizations.Organization, error)
+	GetOrganizationHierarchy(ctx context.Context, rootID uuid.UUID) (*OrganizationTree, error)
+	DeleteOrganization(ctx context.Context, id uuid.UUID) error
 }

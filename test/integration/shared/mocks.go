@@ -8,6 +8,7 @@ import (
 
 	"simpleservicedesk/internal/application"
 	"simpleservicedesk/internal/domain/categories"
+	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/users"
 
 	"github.com/google/uuid"
@@ -308,6 +309,264 @@ func (m *mockCategoryRepository) wouldCreateCircle(categoryID, newParentID uuid.
 			break
 		}
 		currentID = *category.ParentID()
+	}
+
+	return false
+}
+
+// mockOrganizationRepository is a simple mock for integration testing
+type mockOrganizationRepository struct {
+	organizations map[uuid.UUID]*organizations.Organization
+	nameIndex     map[string]uuid.UUID      // name -> organization_id
+	parentIndex   map[uuid.UUID][]uuid.UUID // parent_id -> []child_ids
+}
+
+func newMockOrganizationRepository() *mockOrganizationRepository {
+	return &mockOrganizationRepository{
+		organizations: make(map[uuid.UUID]*organizations.Organization),
+		nameIndex:     make(map[string]uuid.UUID),
+		parentIndex:   make(map[uuid.UUID][]uuid.UUID),
+	}
+}
+
+func (m *mockOrganizationRepository) CreateOrganization(
+	_ context.Context,
+	createFn func() (*organizations.Organization, error),
+) (*organizations.Organization, error) {
+	organization, err := createFn()
+	if err != nil {
+		return nil, err
+	}
+
+	// Check for duplicate name
+	if _, exists := m.nameIndex[organization.Name()]; exists {
+		return nil, organizations.ErrOrganizationAlreadyExist
+	}
+
+	// Check parent exists if provided
+	if organization.HasParent() {
+		if _, exists := m.organizations[*organization.ParentID()]; !exists {
+			return nil, organizations.ErrOrganizationNotFound
+		}
+	}
+
+	// Store organization
+	m.organizations[organization.ID()] = organization
+	m.nameIndex[organization.Name()] = organization.ID()
+
+	// Update parent index
+	if organization.HasParent() {
+		parentID := *organization.ParentID()
+		m.parentIndex[parentID] = append(m.parentIndex[parentID], organization.ID())
+	}
+
+	return organization, nil
+}
+
+func (m *mockOrganizationRepository) UpdateOrganization(
+	_ context.Context,
+	id uuid.UUID,
+	updateFn func(*organizations.Organization) (bool, error),
+) (*organizations.Organization, error) {
+	organization, exists := m.organizations[id]
+	if !exists {
+		return nil, organizations.ErrOrganizationNotFound
+	}
+
+	// Create a copy to avoid modifying original during validation
+	orgClone, err := organizations.NewOrganization(
+		organization.ID(),
+		organization.Name(),
+		organization.Domain(),
+		organization.ParentID(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Restore settings and activation state
+	orgClone.UpdateSettings(organization.Settings())
+	if !organization.IsActive() {
+		orgClone.Deactivate()
+	}
+
+	updated, err := updateFn(orgClone)
+	if err != nil {
+		return nil, err
+	}
+	if !updated {
+		return orgClone, nil
+	}
+
+	// Check for circular reference if parent changed
+	if orgClone.HasParent() {
+		if m.wouldCreateCircleOrg(id, *orgClone.ParentID()) {
+			return nil, organizations.ErrCircularReference
+		}
+	}
+
+	// Update name index if name changed
+	if orgClone.Name() != organization.Name() {
+		delete(m.nameIndex, organization.Name())
+		m.nameIndex[orgClone.Name()] = id
+	}
+
+	// Update parent index if parent changed
+	if organization.HasParent() && (!orgClone.HasParent() || *organization.ParentID() != *orgClone.ParentID()) {
+		// Remove from old parent
+		oldParentID := *organization.ParentID()
+		children := m.parentIndex[oldParentID]
+		for i, childID := range children {
+			if childID == id {
+				m.parentIndex[oldParentID] = append(children[:i], children[i+1:]...)
+				break
+			}
+		}
+	}
+
+	if orgClone.HasParent() && (!organization.HasParent() || *organization.ParentID() != *orgClone.ParentID()) {
+		// Add to new parent
+		newParentID := *orgClone.ParentID()
+		m.parentIndex[newParentID] = append(m.parentIndex[newParentID], id)
+	}
+
+	// Update storage
+	m.organizations[id] = orgClone
+
+	return orgClone, nil
+}
+
+func (m *mockOrganizationRepository) GetOrganization(_ context.Context, id uuid.UUID) (*organizations.Organization, error) {
+	organization, exists := m.organizations[id]
+	if !exists {
+		return nil, organizations.ErrOrganizationNotFound
+	}
+	return organization, nil
+}
+
+func (m *mockOrganizationRepository) ListOrganizations(
+	_ context.Context,
+	filter application.OrganizationFilter,
+) ([]*organizations.Organization, error) {
+	var result []*organizations.Organization
+
+	for _, organization := range m.organizations {
+		// Apply filters
+		if filter.ParentID != nil {
+			if organization.ParentID() == nil || *organization.ParentID() != *filter.ParentID {
+				continue
+			}
+		}
+		if filter.IsActive != nil && organization.IsActive() != *filter.IsActive {
+			continue
+		}
+		if filter.IsRootOnly && organization.HasParent() {
+			continue
+		}
+		if filter.Name != nil && organization.Name() != *filter.Name {
+			continue
+		}
+		if filter.Domain != nil && organization.Domain() != *filter.Domain {
+			continue
+		}
+
+		result = append(result, organization)
+	}
+
+	// Apply pagination
+	if filter.Offset > 0 && filter.Offset < len(result) {
+		result = result[filter.Offset:]
+	} else if filter.Offset >= len(result) {
+		result = []*organizations.Organization{}
+	}
+
+	if filter.Limit > 0 && filter.Limit < len(result) {
+		result = result[:filter.Limit]
+	}
+
+	return result, nil
+}
+
+func (m *mockOrganizationRepository) GetOrganizationHierarchy(
+	ctx context.Context,
+	rootID uuid.UUID,
+) (*application.OrganizationTree, error) {
+	root, err := m.GetOrganization(ctx, rootID)
+	if err != nil {
+		return nil, err
+	}
+
+	tree := &application.OrganizationTree{
+		Organization: root,
+		Children:     []*application.OrganizationTree{},
+	}
+
+	// Get children and build their hierarchies
+	childIDs := m.parentIndex[rootID]
+	for _, childID := range childIDs {
+		childTree, err := m.GetOrganizationHierarchy(ctx, childID)
+		if err != nil {
+			return nil, err
+		}
+		tree.Children = append(tree.Children, childTree)
+	}
+
+	return tree, nil
+}
+
+func (m *mockOrganizationRepository) DeleteOrganization(_ context.Context, id uuid.UUID) error {
+	organization, exists := m.organizations[id]
+	if !exists {
+		return organizations.ErrOrganizationNotFound
+	}
+
+	// Check for children
+	if children := m.parentIndex[id]; len(children) > 0 {
+		return organizations.ErrInvalidOrganization // Cannot delete organization with children
+	}
+
+	// Remove from storage
+	delete(m.organizations, id)
+
+	// Remove from name index
+	delete(m.nameIndex, organization.Name())
+
+	// Remove from parent index
+	if organization.HasParent() {
+		parentID := *organization.ParentID()
+		children := m.parentIndex[parentID]
+		for i, childID := range children {
+			if childID == id {
+				m.parentIndex[parentID] = append(children[:i], children[i+1:]...)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// wouldCreateCircleOrg checks if setting newParentID as parent would create circular reference
+func (m *mockOrganizationRepository) wouldCreateCircleOrg(orgID, newParentID uuid.UUID) bool {
+	if orgID == newParentID {
+		return true
+	}
+
+	visited := make(map[uuid.UUID]bool)
+	currentID := newParentID
+
+	for !visited[currentID] {
+		visited[currentID] = true
+
+		if currentID == orgID {
+			return true // Found circle
+		}
+
+		organization, exists := m.organizations[currentID]
+		if !exists || !organization.HasParent() {
+			break
+		}
+		currentID = *organization.ParentID()
 	}
 
 	return false

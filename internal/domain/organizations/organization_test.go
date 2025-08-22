@@ -18,7 +18,7 @@ func TestNewOrganization_Valid(t *testing.T) {
 	name := "Test Organization"
 	domain := "test.com"
 
-	org, err := domainOrg.NewOrganization(id, name, domain)
+	org, err := domainOrg.NewOrganization(id, name, domain, nil)
 
 	require.NoError(t, err)
 	require.Equal(t, id, org.ID())
@@ -45,7 +45,7 @@ func TestNewOrganization_InvalidName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := domainOrg.NewOrganization(uuid.New(), tt.orgName, "test.com")
+			_, err := domainOrg.NewOrganization(uuid.New(), tt.orgName, "test.com", nil)
 			if tt.hasError {
 				require.Error(t, err)
 				require.ErrorIs(t, err, domainOrg.ErrOrganizationValidation)
@@ -72,7 +72,7 @@ func TestNewOrganization_InvalidDomain(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := domainOrg.NewOrganization(uuid.New(), "Test Org", tt.domain)
+			_, err := domainOrg.NewOrganization(uuid.New(), "Test Org", tt.domain, nil)
 			if tt.hasError {
 				require.Error(t, err)
 				require.ErrorIs(t, err, domainOrg.ErrOrganizationValidation)
