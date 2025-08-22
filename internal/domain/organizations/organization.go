@@ -14,6 +14,7 @@ var (
 	ErrInvalidOrganization      = errors.New("invalid organization")
 	ErrOrganizationValidation   = errors.New("organization validation error")
 	ErrOrganizationAlreadyExist = errors.New("organization already exist")
+	ErrCircularReference        = errors.New("circular reference detected")
 )
 
 const (
@@ -45,7 +46,8 @@ func DefaultSettings() OrganizationSettings {
 type Organization struct {
 	id        uuid.UUID
 	name      string
-	domain    string // Домен организации для автоматического определения пользователей
+	domain    string     // Домен организации для автоматического определения пользователей
+	parentID  *uuid.UUID // Указатель, так как может быть nil для корневых организаций
 	isActive  bool
 	settings  OrganizationSettings
 	createdAt time.Time
@@ -53,7 +55,7 @@ type Organization struct {
 }
 
 // NewOrganization создает новую организацию с указанным ID
-func NewOrganization(id uuid.UUID, name, domain string) (*Organization, error) {
+func NewOrganization(id uuid.UUID, name, domain string, parentID *uuid.UUID) (*Organization, error) {
 	if err := validateName(name); err != nil {
 		return nil, err
 	}
@@ -66,6 +68,7 @@ func NewOrganization(id uuid.UUID, name, domain string) (*Organization, error) {
 		id:        id,
 		name:      name,
 		domain:    domain,
+		parentID:  parentID,
 		isActive:  true,
 		settings:  DefaultSettings(),
 		createdAt: now,
@@ -75,7 +78,17 @@ func NewOrganization(id uuid.UUID, name, domain string) (*Organization, error) {
 
 // CreateOrganization создает новую организацию с автоматически сгенерированным ID
 func CreateOrganization(name, domain string) (*Organization, error) {
-	return NewOrganization(uuid.New(), name, domain)
+	return NewOrganization(uuid.New(), name, domain, nil)
+}
+
+// CreateRootOrganization создает корневую организацию (без родителя)
+func CreateRootOrganization(name, domain string) (*Organization, error) {
+	return CreateOrganization(name, domain)
+}
+
+// CreateSubOrganization создает дочернюю организацию
+func CreateSubOrganization(name, domain string, parentID uuid.UUID) (*Organization, error) {
+	return NewOrganization(uuid.New(), name, domain, &parentID)
 }
 
 // ID возвращает идентификатор организации
@@ -113,6 +126,21 @@ func (o *Organization) UpdatedAt() time.Time {
 	return o.updatedAt
 }
 
+// ParentID возвращает ID родительской организации (может быть nil)
+func (o *Organization) ParentID() *uuid.UUID {
+	return o.parentID
+}
+
+// IsRootOrganization проверяет, является ли организация корневой
+func (o *Organization) IsRootOrganization() bool {
+	return o.parentID == nil
+}
+
+// HasParent проверяет, есть ли у организации родитель
+func (o *Organization) HasParent() bool {
+	return o.parentID != nil
+}
+
 // ChangeName изменяет название организации
 func (o *Organization) ChangeName(newName string) error {
 	if err := validateName(newName); err != nil {
@@ -148,6 +176,25 @@ func (o *Organization) Activate() {
 // Deactivate деактивирует организацию
 func (o *Organization) Deactivate() {
 	o.isActive = false
+	o.updatedAt = time.Now()
+}
+
+// ChangeParent изменяет родительскую организацию
+// Валидация на циклические ссылки должна происходить на уровне сервиса
+func (o *Organization) ChangeParent(newParentID *uuid.UUID) error {
+	// Нельзя сделать себя своим родителем
+	if newParentID != nil && *newParentID == o.id {
+		return fmt.Errorf("%w: organization cannot be parent of itself", ErrCircularReference)
+	}
+
+	o.parentID = newParentID
+	o.updatedAt = time.Now()
+	return nil
+}
+
+// MoveToRoot делает организацию корневой (убирает родителя)
+func (o *Organization) MoveToRoot() {
+	o.parentID = nil
 	o.updatedAt = time.Now()
 }
 

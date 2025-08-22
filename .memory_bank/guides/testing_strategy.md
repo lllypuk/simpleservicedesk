@@ -392,7 +392,7 @@ func AssertUsersEqual(t *testing.T, expected, actual *users.User) {
 func GetTestConfig() *Config {
     return &Config{
         Database: DatabaseConfig{
-            Driver: "memory", // Use in-memory for fast unit tests
+            Driver: "memory",
         },
         Logger: LoggerConfig{
             Level: "debug",
