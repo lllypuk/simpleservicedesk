@@ -98,6 +98,25 @@ Code should NOT be committed if:
 - Documentation and README files can be in multiple languages
 - Test descriptions and error messages should be in English
 
+**Test Package Naming Convention:**
+- **CRITICAL**: All test files must use `package packagename_test` instead of `package packagename`
+- This enforces black-box testing and prevents import cycles
+- Tests should only use public APIs, not internal implementation details
+
+**Example of correct test package naming:**
+```go
+// ❌ INCORRECT - Don't do this
+package tickets
+func TestInternalFunction(t *testing.T) { ... }
+
+// ✅ CORRECT - Always use this
+package tickets_test
+import "myproject/internal/infrastructure/tickets"
+func TestPublicAPI(t *testing.T) { 
+    repo := tickets.NewMongoRepo(db) // Only test public API
+}
+```
+
 **Example of correct commenting:**
 ```go
 // CreateUser creates a new user with the provided email and password
