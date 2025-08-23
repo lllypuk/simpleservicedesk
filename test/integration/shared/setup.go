@@ -20,8 +20,9 @@ import (
 // IntegrationSuite provides common setup for all integration tests
 type IntegrationSuite struct {
 	suite.Suite
-	HTTPServer *echo.Echo
-	UsersRepo  application.UserRepository
+	HTTPServer  *echo.Echo
+	UsersRepo   application.UserRepository
+	TicketsRepo application.TicketRepository
 }
 
 // MongoIntegrationSuite extends IntegrationSuite with MongoDB setup
@@ -65,18 +66,20 @@ func SetupMongoTest(t *testing.T) (*mongo.Database, *mongo.Client, func()) {
 
 // SetupSuite initializes the integration test suite with mock repository
 func (s *IntegrationSuite) SetupSuite() {
-	// Initialize mock repository with fresh state
+	// Initialize mock repositories with fresh state
 	s.UsersRepo = newMockUserRepository()
+	s.TicketsRepo = newMockTicketRepository()
 
-	// Initialize HTTP server with mock repository
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo)
+	// Initialize HTTP server with mock repositories
+	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo)
 }
 
 // SetupTest runs before each test to ensure clean state
 func (s *IntegrationSuite) SetupTest() {
 	// Reset mock repository state for each test
 	s.UsersRepo = newMockUserRepository()
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo)
+	s.TicketsRepo = newMockTicketRepository()
+	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo)
 }
 
 // SetupSuite initializes the MongoDB integration test suite

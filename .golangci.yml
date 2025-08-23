@@ -440,6 +440,11 @@ linters:
       - text: 'comment on exported \S+ \S+ should be of the form ".+"'
         source: '// ?(nolint|TODO)'
         linters: [ revive, staticcheck ]
+      - text: 'method \S+Id(\S+)? should be \S+ID(\S+)?'
+        linters: [ revive, staticcheck ]
+      - text: 'File is not properly formatted'
+        source: 'func.*Id.*\('
+        linters: [ golines ]
       - path: '_test\.go'
         linters:
           - bodyclose

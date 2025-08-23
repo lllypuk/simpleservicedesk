@@ -9,6 +9,7 @@ import (
 	"simpleservicedesk/internal/application"
 	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/organizations"
+	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
 
 	"github.com/google/uuid"
@@ -570,4 +571,74 @@ func (m *mockOrganizationRepository) wouldCreateCircleOrg(orgID, newParentID uui
 	}
 
 	return false
+}
+
+// mockTicketRepository is a simple mock for integration testing
+type mockTicketRepository struct {
+	tickets map[uuid.UUID]*tickets.Ticket
+}
+
+func newMockTicketRepository() *mockTicketRepository {
+	return &mockTicketRepository{
+		tickets: make(map[uuid.UUID]*tickets.Ticket),
+	}
+}
+
+func (m *mockTicketRepository) CreateTicket(
+	_ context.Context,
+	createFn func() (*tickets.Ticket, error),
+) (*tickets.Ticket, error) {
+	ticket, err := createFn()
+	if err != nil {
+		return nil, err
+	}
+	m.tickets[ticket.ID()] = ticket
+	return ticket, nil
+}
+
+func (m *mockTicketRepository) UpdateTicket(
+	_ context.Context,
+	id uuid.UUID,
+	updateFn func(*tickets.Ticket) (bool, error),
+) (*tickets.Ticket, error) {
+	ticket, exists := m.tickets[id]
+	if !exists {
+		return nil, tickets.ErrTicketNotFound
+	}
+	updated, err := updateFn(ticket)
+	if err != nil {
+		return nil, err
+	}
+	if updated {
+		m.tickets[id] = ticket
+	}
+	return ticket, nil
+}
+
+func (m *mockTicketRepository) GetTicket(_ context.Context, id uuid.UUID) (*tickets.Ticket, error) {
+	ticket, exists := m.tickets[id]
+	if !exists {
+		return nil, tickets.ErrTicketNotFound
+	}
+	return ticket, nil
+}
+
+func (m *mockTicketRepository) ListTickets(
+	_ context.Context,
+	_ application.TicketFilter,
+) ([]*tickets.Ticket, error) {
+	result := make([]*tickets.Ticket, 0, len(m.tickets))
+	for _, ticket := range m.tickets {
+		result = append(result, ticket)
+	}
+	return result, nil
+}
+
+func (m *mockTicketRepository) DeleteTicket(_ context.Context, id uuid.UUID) error {
+	_, exists := m.tickets[id]
+	if !exists {
+		return tickets.ErrTicketNotFound
+	}
+	delete(m.tickets, id)
+	return nil
 }
