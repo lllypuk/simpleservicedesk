@@ -5,6 +5,7 @@ package shared
 
 import (
 	"simpleservicedesk/generated/openapi"
+	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
 
@@ -109,4 +110,58 @@ func (td TestTicketData) CreateDomainTicket() (*tickets.Ticket, error) {
 		td.AuthorID,
 		td.CategoryID,
 	)
+}
+
+// TestOrganizationData provides common test organization data
+type TestOrganizationData struct {
+	Name     string
+	Domain   string
+	ParentID *uuid.UUID
+}
+
+// Common test organizations
+var (
+	TestOrg1 = TestOrganizationData{
+		Name:     "Example Corp",
+		Domain:   "example.com",
+		ParentID: nil,
+	}
+
+	TestOrg2 = TestOrganizationData{
+		Name:     "Tech Solutions Inc",
+		Domain:   "techsolutions.net",
+		ParentID: nil,
+	}
+
+	TestOrg3 = TestOrganizationData{
+		Name:     "Innovation Labs",
+		Domain:   "innovationlabs.org",
+		ParentID: nil,
+	}
+)
+
+// NewSubOrganization creates test data for a sub-organization
+func NewSubOrganization(name, domain string, parentID uuid.UUID) TestOrganizationData {
+	return TestOrganizationData{
+		Name:     name,
+		Domain:   domain,
+		ParentID: &parentID,
+	}
+}
+
+// CreateOrganizationRequest creates an OpenAPI organization request
+func (td TestOrganizationData) CreateOrganizationRequest() openapi.CreateOrganizationRequest {
+	return openapi.CreateOrganizationRequest{
+		Name:     td.Name,
+		Domain:   &td.Domain,
+		ParentId: td.ParentID,
+	}
+}
+
+// CreateDomainOrganization creates a domain organization entity
+func (td TestOrganizationData) CreateDomainOrganization() (*organizations.Organization, error) {
+	if td.ParentID == nil {
+		return organizations.CreateRootOrganization(td.Name, td.Domain)
+	}
+	return organizations.CreateSubOrganization(td.Name, td.Domain, *td.ParentID)
 }

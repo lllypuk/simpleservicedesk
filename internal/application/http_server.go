@@ -10,6 +10,7 @@ import (
 	"simpleservicedesk/internal/application/organizations"
 	"simpleservicedesk/internal/application/tickets"
 	"simpleservicedesk/internal/application/users"
+	domainOrganizations "simpleservicedesk/internal/domain/organizations"
 	domainTickets "simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/pkg/echomiddleware"
 
@@ -64,6 +65,56 @@ func (a *ticketRepoAdapter) DeleteTicket(ctx context.Context, id uuid.UUID) erro
 	return a.appRepo.DeleteTicket(ctx, id)
 }
 
+// organizationRepoAdapter adapts application.OrganizationRepository to organizations.Repository
+type organizationRepoAdapter struct {
+	appRepo OrganizationRepository
+}
+
+func (a *organizationRepoAdapter) CreateOrganization(
+	ctx context.Context,
+	createFn func() (*domainOrganizations.Organization, error),
+) (*domainOrganizations.Organization, error) {
+	return a.appRepo.CreateOrganization(ctx, createFn)
+}
+
+func (a *organizationRepoAdapter) UpdateOrganization(
+	ctx context.Context,
+	id uuid.UUID,
+	updateFn func(*domainOrganizations.Organization) (bool, error),
+) (*domainOrganizations.Organization, error) {
+	return a.appRepo.UpdateOrganization(ctx, id, updateFn)
+}
+
+func (a *organizationRepoAdapter) GetOrganization(
+	ctx context.Context,
+	id uuid.UUID,
+) (*domainOrganizations.Organization, error) {
+	return a.appRepo.GetOrganization(ctx, id)
+}
+
+func (a *organizationRepoAdapter) ListOrganizations(
+	ctx context.Context,
+	filter organizations.OrganizationFilter,
+) ([]*domainOrganizations.Organization, error) {
+	// Convert organizations.OrganizationFilter to application.OrganizationFilter
+	appFilter := OrganizationFilter{
+		ParentID:   filter.ParentID,
+		IsActive:   filter.IsActive,
+		Name:       filter.Name,
+		Domain:     filter.Domain,
+		IsRootOnly: filter.IsRootOnly,
+		Limit:      filter.Limit,
+		Offset:     filter.Offset,
+		SortBy:     filter.SortBy,
+		SortOrder:  filter.SortOrder,
+	}
+	return a.appRepo.ListOrganizations(ctx, appFilter)
+}
+
+func (a *organizationRepoAdapter) DeleteOrganization(ctx context.Context, id uuid.UUID) error {
+	return a.appRepo.DeleteOrganization(ctx, id)
+}
+
 type httpServer struct {
 	users.UserHandlers
 	tickets.TicketHandlers
@@ -71,7 +122,11 @@ type httpServer struct {
 	organizations.OrganizationHandlers
 }
 
-func SetupHTTPServer(userRepo UserRepository, ticketRepo TicketRepository) *echo.Echo {
+func SetupHTTPServer(
+	userRepo UserRepository,
+	ticketRepo TicketRepository,
+	organizationRepo OrganizationRepository,
+) *echo.Echo {
 	e := echo.New()
 
 	e.Pre(middleware.RemoveTrailingSlash())
@@ -87,7 +142,7 @@ func SetupHTTPServer(userRepo UserRepository, ticketRepo TicketRepository) *echo
 	server.UserHandlers = users.SetupHandlers(userRepo)
 	server.TicketHandlers = tickets.SetupHandlers(&ticketRepoAdapter{appRepo: ticketRepo})
 	server.CategoryHandlers = categories.SetupHandlers()
-	server.OrganizationHandlers = organizations.SetupHandlers()
+	server.OrganizationHandlers = organizations.SetupHandlers(&organizationRepoAdapter{appRepo: organizationRepo})
 
 	// Register routes generated from OpenAPI
 	openapi.RegisterHandlers(e, server)

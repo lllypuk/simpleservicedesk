@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"simpleservicedesk/internal/application"
+	organizationsInfra "simpleservicedesk/internal/infrastructure/organizations"
 	ticketsInfra "simpleservicedesk/internal/infrastructure/tickets"
 	usersInfra "simpleservicedesk/internal/infrastructure/users"
 
@@ -57,8 +58,9 @@ func Run(cfg Config) error {
 func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.Database) {
 	userRepo := usersInfra.NewMongoRepo(db)
 	ticketRepo := ticketsInfra.NewMongoRepo(db)
+	organizationRepo := organizationsInfra.NewMongoRepo(db)
 
-	httpServer := application.SetupHTTPServer(userRepo, ticketRepo)
+	httpServer := application.SetupHTTPServer(userRepo, ticketRepo, organizationRepo)
 
 	address := "0.0.0.0:" + cfg.Server.Port
 	server := &http.Server{

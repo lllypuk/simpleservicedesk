@@ -1,58 +1,48 @@
 package organizations
 
 import (
-	"net/http"
+	"context"
 
-	"simpleservicedesk/generated/openapi"
+	"simpleservicedesk/internal/domain/organizations"
 
-	"github.com/labstack/echo/v4"
-	openapi_types "github.com/oapi-codegen/runtime/types"
+	"github.com/google/uuid"
 )
 
-const notImplementedMsg = "organizations functionality not implemented yet"
+const DefaultPageLimit = 20
 
-type OrganizationHandlers struct{}
-
-func SetupHandlers() OrganizationHandlers {
-	return OrganizationHandlers{}
+type Repository interface {
+	CreateOrganization(
+		ctx context.Context,
+		createFn func() (*organizations.Organization, error),
+	) (*organizations.Organization, error)
+	UpdateOrganization(
+		ctx context.Context,
+		id uuid.UUID,
+		updateFn func(*organizations.Organization) (bool, error),
+	) (*organizations.Organization, error)
+	GetOrganization(ctx context.Context, id uuid.UUID) (*organizations.Organization, error)
+	ListOrganizations(ctx context.Context, filter OrganizationFilter) ([]*organizations.Organization, error)
+	DeleteOrganization(ctx context.Context, id uuid.UUID) error
 }
 
-func (h OrganizationHandlers) GetOrganizations(c echo.Context, _ openapi.GetOrganizationsParams) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
+type OrganizationFilter struct {
+	ParentID   *uuid.UUID `json:"parent_id,omitempty"`
+	IsActive   *bool      `json:"is_active,omitempty"`
+	Name       *string    `json:"name,omitempty"`
+	Domain     *string    `json:"domain,omitempty"`
+	IsRootOnly bool       `json:"is_root_only,omitempty"`
+	Limit      int        `json:"limit,omitempty"`
+	Offset     int        `json:"offset,omitempty"`
+	SortBy     string     `json:"sort_by,omitempty"`
+	SortOrder  string     `json:"sort_order,omitempty"`
 }
 
-func (h OrganizationHandlers) PostOrganizations(c echo.Context) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
+type OrganizationHandlers struct {
+	repo Repository
 }
 
-func (h OrganizationHandlers) GetOrganizationsID(c echo.Context, _ openapi_types.UUID) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h OrganizationHandlers) GetOrganizationsIdTickets(c echo.Context, _ openapi_types.UUID, _ openapi.GetOrganizationsIdTicketsParams) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h OrganizationHandlers) GetOrganizationsIdUsers(c echo.Context, _ openapi_types.UUID, _ openapi.GetOrganizationsIdUsersParams) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h OrganizationHandlers) PutOrganizationsId(c echo.Context, _ openapi_types.UUID) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h OrganizationHandlers) DeleteOrganizationsId(c echo.Context, _ openapi_types.UUID) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h OrganizationHandlers) GetOrganizationsIdHierarchy(c echo.Context, _ openapi_types.UUID) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
+func SetupHandlers(repo Repository) OrganizationHandlers {
+	return OrganizationHandlers{
+		repo: repo,
+	}
 }

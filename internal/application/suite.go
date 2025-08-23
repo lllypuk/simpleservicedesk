@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 
+	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
 
@@ -14,9 +15,10 @@ import (
 type ServerSuite struct {
 	suite.Suite
 
-	HTTPServer  *echo.Echo
-	UsersRepo   UserRepository   // Interface for repository
-	TicketsRepo TicketRepository // Interface for ticket repository
+	HTTPServer        *echo.Echo
+	UsersRepo         UserRepository         // Interface for repository
+	TicketsRepo       TicketRepository       // Interface for ticket repository
+	OrganizationsRepo OrganizationRepository // Interface for organization repository
 }
 
 // mockUserRepository is a simple mock for testing
@@ -151,12 +153,110 @@ func (m *mockTicketRepository) DeleteTicket(_ context.Context, id uuid.UUID) err
 	return nil
 }
 
+// mockOrganizationRepository is a simple mock for testing
+type mockOrganizationRepository struct {
+	orgs map[uuid.UUID]*organizations.Organization
+}
+
+func newMockOrganizationRepository() *mockOrganizationRepository {
+	return &mockOrganizationRepository{
+		orgs: make(map[uuid.UUID]*organizations.Organization),
+	}
+}
+
+func (m *mockOrganizationRepository) CreateOrganization(
+	_ context.Context,
+	createFn func() (*organizations.Organization, error),
+) (*organizations.Organization, error) {
+	org, err := createFn()
+	if err != nil {
+		return nil, err
+	}
+
+	m.orgs[org.ID()] = org
+	return org, nil
+}
+
+func (m *mockOrganizationRepository) UpdateOrganization(
+	_ context.Context,
+	id uuid.UUID,
+	updateFn func(*organizations.Organization) (bool, error),
+) (*organizations.Organization, error) {
+	org, exists := m.orgs[id]
+	if !exists {
+		return nil, organizations.ErrOrganizationNotFound
+	}
+
+	_, err := updateFn(org)
+	if err != nil {
+		return nil, err
+	}
+
+	return org, nil
+}
+
+func (m *mockOrganizationRepository) GetOrganization(
+	_ context.Context,
+	id uuid.UUID,
+) (*organizations.Organization, error) {
+	org, exists := m.orgs[id]
+	if !exists {
+		return nil, organizations.ErrOrganizationNotFound
+	}
+	return org, nil
+}
+
+func (m *mockOrganizationRepository) ListOrganizations(
+	_ context.Context,
+	filter OrganizationFilter,
+) ([]*organizations.Organization, error) {
+	var result []*organizations.Organization
+	count := 0
+
+	for _, org := range m.orgs {
+		if filter.Limit > 0 && count >= filter.Offset+filter.Limit {
+			break
+		}
+		if count >= filter.Offset {
+			result = append(result, org)
+		}
+		count++
+	}
+
+	return result, nil
+}
+
+func (m *mockOrganizationRepository) DeleteOrganization(_ context.Context, id uuid.UUID) error {
+	_, exists := m.orgs[id]
+	if !exists {
+		return organizations.ErrOrganizationNotFound
+	}
+	delete(m.orgs, id)
+	return nil
+}
+
+func (m *mockOrganizationRepository) GetOrganizationHierarchy(
+	_ context.Context,
+	rootID uuid.UUID,
+) (*OrganizationTree, error) {
+	root, exists := m.orgs[rootID]
+	if !exists {
+		return nil, organizations.ErrOrganizationNotFound
+	}
+
+	return &OrganizationTree{
+		Organization: root,
+		Children:     []*OrganizationTree{}, // Simplified implementation for tests
+	}, nil
+}
+
 // SetupTest for integration tests
 func (s *ServerSuite) SetupTest() {
 	// Initialize mock repositories with fresh state
 	s.UsersRepo = newMockUserRepository()
 	s.TicketsRepo = newMockTicketRepository()
+	s.OrganizationsRepo = newMockOrganizationRepository()
 
 	// Initialize HTTP server with mock repositories
-	s.HTTPServer = SetupHTTPServer(s.UsersRepo, s.TicketsRepo)
+	s.HTTPServer = SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo)
 }
