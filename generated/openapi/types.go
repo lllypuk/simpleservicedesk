@@ -121,12 +121,6 @@ type CreateTicketRequest struct {
 	Title string `json:"title"`
 }
 
-// CreateTicketResponse defines model for CreateTicketResponse.
-type CreateTicketResponse struct {
-	// Id Created ticket ID
-	Id *openapi_types.UUID `json:"id,omitempty"`
-}
-
 // CreateUserRequest defines model for CreateUserRequest.
 type CreateUserRequest struct {
 	Email    openapi_types.Email `json:"email"`

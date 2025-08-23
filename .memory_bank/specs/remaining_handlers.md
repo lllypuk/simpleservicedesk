@@ -88,7 +88,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateTicketResponse'
+                $ref: '#/components/schemas/GetTicketResponse'
     get:
       summary: List tickets with filtering
       parameters:

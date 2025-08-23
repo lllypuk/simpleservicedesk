@@ -32,7 +32,7 @@ func (s *TicketsSuite) TestCreateTicket() {
 		s.HTTPServer.ServeHTTP(rec, req)
 
 		s.Require().Equal(http.StatusCreated, rec.Code)
-		var resp openapi.CreateTicketResponse
+		var resp openapi.GetTicketResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &resp)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp.Id)
@@ -60,7 +60,7 @@ func (s *TicketsSuite) TestCreateTicket() {
 		s.HTTPServer.ServeHTTP(rec, req)
 
 		s.Require().Equal(http.StatusCreated, rec.Code)
-		var resp openapi.CreateTicketResponse
+		var resp openapi.GetTicketResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &resp)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp.Id)
@@ -128,7 +128,7 @@ func (s *TicketsSuite) TestCreateTicket() {
 		s.HTTPServer.ServeHTTP(rec, req)
 
 		s.Require().Equal(http.StatusCreated, rec.Code)
-		var resp openapi.CreateTicketResponse
+		var resp openapi.GetTicketResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &resp)
 		s.Require().NoError(err)
 		s.Require().NotNil(resp.Id)

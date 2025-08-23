@@ -115,7 +115,7 @@ func (s *TicketAPITestSuite) TestCreateTicketIntegration() {
 			s.Equal(tt.expectedStatus, rec.Code)
 
 			if tt.expectedStatus == http.StatusCreated && tt.validateID {
-				var resp openapi.CreateTicketResponse
+				var resp openapi.GetTicketResponse
 				err := json.Unmarshal(rec.Body.Bytes(), &resp)
 				s.Require().NoError(err)
 				s.NotNil(resp.Id)
@@ -156,7 +156,7 @@ func (s *TicketAPITestSuite) TestGetTicketIntegration() {
 	s.HTTPServer.ServeHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
-	var createResp openapi.CreateTicketResponse
+	var createResp openapi.GetTicketResponse
 	err = json.Unmarshal(rec.Body.Bytes(), &createResp)
 	s.Require().NoError(err)
 	s.Require().NotNil(createResp.Id)
@@ -409,7 +409,7 @@ func (s *TicketAPITestSuite) TestTicketPriorityLevels() {
 
 			s.Equal(http.StatusCreated, rec.Code)
 
-			var createResp openapi.CreateTicketResponse
+			var createResp openapi.GetTicketResponse
 			err = json.Unmarshal(rec.Body.Bytes(), &createResp)
 			s.Require().NoError(err)
 			s.NotNil(createResp.Id)

@@ -55,6 +55,6 @@ func (h TicketHandlers) PostTickets(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
 	}
 
-	id := ticket.ID()
-	return c.JSON(http.StatusCreated, openapi.CreateTicketResponse{Id: &id})
+	response := convertTicketToResponse(ticket)
+	return c.JSON(http.StatusCreated, response)
 }

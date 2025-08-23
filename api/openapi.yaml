@@ -359,7 +359,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateTicketResponse"
+                $ref: "#/components/schemas/GetTicketResponse"
         "400":
           description: Invalid input data
           content:
@@ -1473,14 +1473,6 @@ components:
           type: string
           format: uuid
           description: Assignee ID (optional)
-
-    CreateTicketResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Created ticket ID
 
     UpdateTicketRequest:
       type: object

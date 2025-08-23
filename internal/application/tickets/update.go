@@ -80,7 +80,9 @@ func (h TicketHandlers) handleUpdateError(c echo.Context, err error) error {
 	if errors.Is(err, tickets.ErrTicketNotFound) {
 		return c.JSON(http.StatusNotFound, openapi.ErrorResponse{Message: &msg})
 	}
-	if errors.Is(err, tickets.ErrTicketValidation) || errors.Is(err, tickets.ErrInvalidTicket) {
+	if errors.Is(err, tickets.ErrTicketValidation) ||
+		errors.Is(err, tickets.ErrInvalidTicket) ||
+		errors.Is(err, tickets.ErrInvalidPriority) {
 		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
 	return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})

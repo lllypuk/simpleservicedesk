@@ -2996,7 +2996,7 @@ func (r GetTicketsResponse) StatusCode() int {
 type PostTicketsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON201      *CreateTicketResponse
+	JSON201      *GetTicketResponse
 	JSON400      *ErrorResponse
 	JSON404      *ErrorResponse
 	JSON500      *ErrorResponse
@@ -4382,7 +4382,7 @@ func ParsePostTicketsResponse(rsp *http.Response) (*PostTicketsResponse, error) 
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest CreateTicketResponse
+		var dest GetTicketResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
