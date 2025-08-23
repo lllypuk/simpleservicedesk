@@ -625,12 +625,49 @@ func (m *mockTicketRepository) GetTicket(_ context.Context, id uuid.UUID) (*tick
 
 func (m *mockTicketRepository) ListTickets(
 	_ context.Context,
-	_ application.TicketFilter,
+	filter application.TicketFilter,
 ) ([]*tickets.Ticket, error) {
-	result := make([]*tickets.Ticket, 0, len(m.tickets))
+	var result []*tickets.Ticket
+
 	for _, ticket := range m.tickets {
+		// Apply filters
+		if filter.Status != nil && ticket.Status() != *filter.Status {
+			continue
+		}
+		if filter.Priority != nil && ticket.Priority() != *filter.Priority {
+			continue
+		}
+		if filter.AssigneeID != nil {
+			if ticket.AssigneeID() == nil || *ticket.AssigneeID() != *filter.AssigneeID {
+				continue
+			}
+		}
+		if filter.AuthorID != nil && ticket.AuthorID() != *filter.AuthorID {
+			continue
+		}
+		if filter.OrganizationID != nil && ticket.OrganizationID() != *filter.OrganizationID {
+			continue
+		}
+		if filter.CategoryID != nil {
+			if ticket.CategoryID() == nil || *ticket.CategoryID() != *filter.CategoryID {
+				continue
+			}
+		}
+
 		result = append(result, ticket)
 	}
+
+	// Apply pagination
+	if filter.Offset > 0 && filter.Offset < len(result) {
+		result = result[filter.Offset:]
+	} else if filter.Offset >= len(result) {
+		result = []*tickets.Ticket{}
+	}
+
+	if filter.Limit > 0 && filter.Limit < len(result) {
+		result = result[:filter.Limit]
+	}
+
 	return result, nil
 }
 

@@ -278,11 +278,11 @@ components:
     TicketStatus:
       type: string
       enum: [Open, InProgress, Resolved, Closed]
-    
+
     TicketPriority:
       type: string
       enum: [Low, Medium, High, Critical]
-    
+
     CreateTicketRequest:
       type: object
       required:
@@ -488,7 +488,7 @@ components:
 - [ ] Unit tests покрывают 85%+ нового кода
 - [ ] Integration tests проходят для всех endpoints
 - [ ] `make lint` проходит без ошибок
-- [ ] `make test` проходит без ошибок
+- [ ] `make test-all` проходит без ошибок
 - [ ] API документация обновлена
 - [ ] Manual testing completed successfully
 
