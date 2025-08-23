@@ -8,6 +8,10 @@ import (
 	"testing"
 
 	"simpleservicedesk/internal/application"
+	"simpleservicedesk/internal/infrastructure/categories"
+	"simpleservicedesk/internal/infrastructure/organizations"
+	"simpleservicedesk/internal/infrastructure/tickets"
+	"simpleservicedesk/internal/infrastructure/users"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -17,21 +21,22 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// IntegrationSuite provides common setup for all integration tests
+// IntegrationSuite provides common setup for all integration tests with real MongoDB repositories
 type IntegrationSuite struct {
 	suite.Suite
 	HTTPServer        *echo.Echo
 	UsersRepo         application.UserRepository
 	TicketsRepo       application.TicketRepository
 	OrganizationsRepo application.OrganizationRepository
+	CategoriesRepo    application.CategoryRepository
+	MongoContainer    *mongodb.MongoDBContainer
+	MongoDB           *mongo.Database
+	MongoClient       *mongo.Client
 }
 
 // MongoIntegrationSuite extends IntegrationSuite with MongoDB setup
 type MongoIntegrationSuite struct {
 	IntegrationSuite
-	MongoContainer *mongodb.MongoDBContainer
-	MongoDB        *mongo.Database
-	MongoClient    *mongo.Client
 }
 
 // SetupMongoTest sets up MongoDB testcontainer for integration tests
@@ -65,37 +70,26 @@ func SetupMongoTest(t *testing.T) (*mongo.Database, *mongo.Client, func()) {
 	return db, client, cleanup
 }
 
-// SetupSuite initializes the integration test suite with mock repository
+// SetupSuite initializes the integration test suite with real MongoDB repositories
 func (s *IntegrationSuite) SetupSuite() {
-	// Initialize mock repositories with fresh state
-	s.UsersRepo = newMockUserRepository()
-	s.TicketsRepo = newMockTicketRepository()
-	s.OrganizationsRepo = newMockOrganizationRepository()
-
-	// Initialize HTTP server with mock repositories
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo)
-}
-
-// SetupTest runs before each test to ensure clean state
-func (s *IntegrationSuite) SetupTest() {
-	// Reset mock repository state for each test
-	s.UsersRepo = newMockUserRepository()
-	s.TicketsRepo = newMockTicketRepository()
-	s.OrganizationsRepo = newMockOrganizationRepository()
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo)
-}
-
-// SetupSuite initializes the MongoDB integration test suite
-func (s *MongoIntegrationSuite) SetupSuite() {
 	var cleanup func()
 	s.MongoDB, s.MongoClient, cleanup = SetupMongoTest(s.T())
 
 	// Store cleanup function for TearDownSuite
 	s.T().Cleanup(cleanup)
+
+	// Initialize real repositories
+	s.UsersRepo = users.NewMongoRepo(s.MongoDB)
+	s.TicketsRepo = tickets.NewMongoRepo(s.MongoDB)
+	s.OrganizationsRepo = organizations.NewMongoRepo(s.MongoDB)
+	s.CategoriesRepo = categories.NewMongoRepo(s.MongoDB)
+
+	// Initialize HTTP server with real repositories
+	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo)
 }
 
 // SetupTest runs before each test to ensure clean database state
-func (s *MongoIntegrationSuite) SetupTest() {
+func (s *IntegrationSuite) SetupTest() {
 	// Clear all collections for clean test state
 	ctx := context.Background()
 	collections, err := s.MongoDB.ListCollectionNames(ctx, map[string]interface{}{})
@@ -105,4 +99,19 @@ func (s *MongoIntegrationSuite) SetupTest() {
 		err = s.MongoDB.Collection(collection).Drop(ctx)
 		s.Require().NoError(err)
 	}
+
+	// Re-initialize HTTP server to ensure clean state
+	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo)
+}
+
+// SetupSuite initializes the MongoDB integration test suite
+func (s *MongoIntegrationSuite) SetupSuite() {
+	// Call parent SetupSuite which handles MongoDB setup
+	s.IntegrationSuite.SetupSuite()
+}
+
+// SetupTest runs before each test to ensure clean database state
+func (s *MongoIntegrationSuite) SetupTest() {
+	// Call parent SetupTest which handles database cleanup
+	s.IntegrationSuite.SetupTest()
 }
