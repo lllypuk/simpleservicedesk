@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 
+	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
@@ -19,6 +20,7 @@ type ServerSuite struct {
 	UsersRepo         UserRepository         // Interface for repository
 	TicketsRepo       TicketRepository       // Interface for ticket repository
 	OrganizationsRepo OrganizationRepository // Interface for organization repository
+	CategoriesRepo    CategoryRepository     // Interface for category repository
 }
 
 // mockUserRepository is a simple mock for testing
@@ -250,13 +252,146 @@ func (m *mockOrganizationRepository) GetOrganizationHierarchy(
 	}, nil
 }
 
+// mockCategoryRepository is a simple mock for testing
+type mockCategoryRepository struct {
+	categories map[uuid.UUID]*categories.Category
+}
+
+func newMockCategoryRepository() *mockCategoryRepository {
+	return &mockCategoryRepository{
+		categories: make(map[uuid.UUID]*categories.Category),
+	}
+}
+
+func (m *mockCategoryRepository) CreateCategory(
+	_ context.Context,
+	createFn func() (*categories.Category, error),
+) (*categories.Category, error) {
+	category, err := createFn()
+	if err != nil {
+		return nil, err
+	}
+
+	m.categories[category.ID()] = category
+	return category, nil
+}
+
+func (m *mockCategoryRepository) UpdateCategory(
+	_ context.Context,
+	id uuid.UUID,
+	updateFn func(*categories.Category) (bool, error),
+) (*categories.Category, error) {
+	category, exists := m.categories[id]
+	if !exists {
+		return nil, categories.ErrCategoryNotFound
+	}
+
+	_, err := updateFn(category)
+	if err != nil {
+		return nil, err
+	}
+
+	return category, nil
+}
+
+func (m *mockCategoryRepository) GetCategory(
+	_ context.Context,
+	id uuid.UUID,
+) (*categories.Category, error) {
+	category, exists := m.categories[id]
+	if !exists {
+		return nil, categories.ErrCategoryNotFound
+	}
+	return category, nil
+}
+
+func (m *mockCategoryRepository) ListCategories(
+	_ context.Context,
+	filter CategoryFilter,
+) ([]*categories.Category, error) {
+	var result []*categories.Category
+	count := 0
+
+	for _, category := range m.categories {
+		if !m.matchesFilter(category, filter) {
+			continue
+		}
+
+		if m.shouldBreakOnLimit(filter, count) {
+			break
+		}
+		if m.shouldIncludeInResult(filter, count) {
+			result = append(result, category)
+		}
+		count++
+	}
+
+	return result, nil
+}
+
+func (m *mockCategoryRepository) matchesFilter(category *categories.Category, filter CategoryFilter) bool {
+	if filter.OrganizationID != nil && category.OrganizationID() != *filter.OrganizationID {
+		return false
+	}
+	if filter.IsActive != nil && category.IsActive() != *filter.IsActive {
+		return false
+	}
+	return m.matchesParentFilter(category, filter)
+}
+
+func (m *mockCategoryRepository) matchesParentFilter(category *categories.Category, filter CategoryFilter) bool {
+	if filter.ParentID == nil {
+		return true
+	}
+	if category.ParentID() == nil && *filter.ParentID != uuid.Nil {
+		return false
+	}
+	if category.ParentID() != nil && *category.ParentID() != *filter.ParentID {
+		return false
+	}
+	return true
+}
+
+func (m *mockCategoryRepository) shouldBreakOnLimit(filter CategoryFilter, count int) bool {
+	return filter.Limit > 0 && count >= filter.Offset+filter.Limit
+}
+
+func (m *mockCategoryRepository) shouldIncludeInResult(filter CategoryFilter, count int) bool {
+	return count >= filter.Offset
+}
+
+func (m *mockCategoryRepository) DeleteCategory(_ context.Context, id uuid.UUID) error {
+	_, exists := m.categories[id]
+	if !exists {
+		return categories.ErrCategoryNotFound
+	}
+	delete(m.categories, id)
+	return nil
+}
+
+func (m *mockCategoryRepository) GetCategoryHierarchy(
+	_ context.Context,
+	rootID uuid.UUID,
+) (*CategoryTree, error) {
+	root, exists := m.categories[rootID]
+	if !exists {
+		return nil, categories.ErrCategoryNotFound
+	}
+
+	return &CategoryTree{
+		Category: root,
+		Children: []*CategoryTree{}, // Simplified implementation for tests
+	}, nil
+}
+
 // SetupTest for integration tests
 func (s *ServerSuite) SetupTest() {
 	// Initialize mock repositories with fresh state
 	s.UsersRepo = newMockUserRepository()
 	s.TicketsRepo = newMockTicketRepository()
 	s.OrganizationsRepo = newMockOrganizationRepository()
+	s.CategoriesRepo = newMockCategoryRepository()
 
 	// Initialize HTTP server with mock repositories
-	s.HTTPServer = SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo)
+	s.HTTPServer = SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
 }

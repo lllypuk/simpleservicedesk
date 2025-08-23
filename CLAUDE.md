@@ -73,6 +73,30 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 5. Run `make lint` before committing
 6. Ensure all tests pass with `make test`
 
+## Current Development Status
+
+The project is currently implementing REST API endpoints for all core entities:
+
+### Completed Phases
+- ✅ **Phase 1**: OpenAPI specification extended with all endpoints
+- ✅ **Phase 2**: Tickets API - Full CRUD operations with status transitions
+- ✅ **Phase 3**: Organizations API - Hierarchical organization management
+
+### Current Phase
+- 🚧 **Phase 4**: Categories API - Implementing category management with tree structure
+  - Current focus: Category CRUD operations with parent-child relationships
+  - See `.memory_bank/current_task.md` for detailed requirements
+
+### Upcoming Phases
+- 📋 **Phase 5**: Extended Users API - Additional user management operations
+
+### API Status Summary
+- **Users API**: ✅ Basic operations (create, get by ID) + 🚧 Extended operations pending
+- **Tickets API**: ✅ Complete CRUD with status management
+- **Organizations API**: ✅ Complete CRUD with hierarchical support  
+- **Categories API**: 🚧 In progress - CRUD with tree structure
+- **Generated Code**: ✅ Up-to-date with current OpenAPI spec
+
 ## Test Organization
 
 The project uses a centralized integration test structure for better organization and maintenance:

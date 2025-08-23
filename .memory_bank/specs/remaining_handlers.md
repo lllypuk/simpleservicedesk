@@ -471,10 +471,7 @@ components:
    - Unit и integration tests
    - Тестирование через API
 
-4. **Phase 4**: Categories API
-   - Реализовать хэндлеры для categories
-   - Unit и integration tests
-   - Тестирование через API
+4. **Phase 4**: ✅ Completed - Categories API moved to current_task.md
 
 5. **Phase 5**: Extended Users API
    - Добавить недостающие операции для users

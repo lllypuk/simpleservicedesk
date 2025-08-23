@@ -10,6 +10,7 @@ import (
 	"simpleservicedesk/internal/application/organizations"
 	"simpleservicedesk/internal/application/tickets"
 	"simpleservicedesk/internal/application/users"
+	domainCategories "simpleservicedesk/internal/domain/categories"
 	domainOrganizations "simpleservicedesk/internal/domain/organizations"
 	domainTickets "simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/pkg/echomiddleware"
@@ -115,6 +116,53 @@ func (a *organizationRepoAdapter) DeleteOrganization(ctx context.Context, id uui
 	return a.appRepo.DeleteOrganization(ctx, id)
 }
 
+// categoryRepoAdapter adapts application.CategoryRepository to categories.CategoryRepository
+type categoryRepoAdapter struct {
+	appRepo CategoryRepository
+}
+
+func (a *categoryRepoAdapter) CreateCategory(
+	ctx context.Context,
+	createFn func() (*domainCategories.Category, error),
+) (*domainCategories.Category, error) {
+	return a.appRepo.CreateCategory(ctx, createFn)
+}
+
+func (a *categoryRepoAdapter) UpdateCategory(
+	ctx context.Context,
+	id uuid.UUID,
+	updateFn func(*domainCategories.Category) (bool, error),
+) (*domainCategories.Category, error) {
+	return a.appRepo.UpdateCategory(ctx, id, updateFn)
+}
+
+func (a *categoryRepoAdapter) GetCategory(ctx context.Context, id uuid.UUID) (*domainCategories.Category, error) {
+	return a.appRepo.GetCategory(ctx, id)
+}
+
+func (a *categoryRepoAdapter) ListCategories(
+	ctx context.Context,
+	filter categories.CategoryFilter,
+) ([]*domainCategories.Category, error) {
+	// Convert categories.CategoryFilter to application.CategoryFilter
+	appFilter := CategoryFilter{
+		OrganizationID: filter.OrganizationID,
+		ParentID:       filter.ParentID,
+		IsActive:       filter.IsActive,
+		Name:           filter.Name,
+		IsRootOnly:     filter.IsRootOnly,
+		Limit:          filter.Limit,
+		Offset:         filter.Offset,
+		SortBy:         filter.SortBy,
+		SortOrder:      filter.SortOrder,
+	}
+	return a.appRepo.ListCategories(ctx, appFilter)
+}
+
+func (a *categoryRepoAdapter) DeleteCategory(ctx context.Context, id uuid.UUID) error {
+	return a.appRepo.DeleteCategory(ctx, id)
+}
+
 type httpServer struct {
 	users.UserHandlers
 	tickets.TicketHandlers
@@ -126,6 +174,7 @@ func SetupHTTPServer(
 	userRepo UserRepository,
 	ticketRepo TicketRepository,
 	organizationRepo OrganizationRepository,
+	categoryRepo CategoryRepository,
 ) *echo.Echo {
 	e := echo.New()
 
@@ -141,7 +190,7 @@ func SetupHTTPServer(
 	server := httpServer{}
 	server.UserHandlers = users.SetupHandlers(userRepo)
 	server.TicketHandlers = tickets.SetupHandlers(&ticketRepoAdapter{appRepo: ticketRepo})
-	server.CategoryHandlers = categories.SetupHandlers()
+	server.CategoryHandlers = categories.SetupHandlers(&categoryRepoAdapter{appRepo: categoryRepo})
 	server.OrganizationHandlers = organizations.SetupHandlers(&organizationRepoAdapter{appRepo: organizationRepo})
 
 	// Register routes generated from OpenAPI

@@ -85,7 +85,7 @@ func (s *IntegrationSuite) SetupSuite() {
 	s.CategoriesRepo = categories.NewMongoRepo(s.MongoDB)
 
 	// Initialize HTTP server with real repositories
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo)
+	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
 }
 
 // SetupTest runs before each test to ensure clean database state
@@ -101,7 +101,7 @@ func (s *IntegrationSuite) SetupTest() {
 	}
 
 	// Re-initialize HTTP server to ensure clean state
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo)
+	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
 }
 
 // SetupSuite initializes the MongoDB integration test suite

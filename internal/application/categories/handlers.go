@@ -1,53 +1,43 @@
 package categories
 
 import (
-	"net/http"
+	"context"
 
-	"simpleservicedesk/generated/openapi"
+	"simpleservicedesk/internal/domain/categories"
 
-	"github.com/labstack/echo/v4"
-	openapi_types "github.com/oapi-codegen/runtime/types"
+	"github.com/google/uuid"
 )
 
-const notImplementedMsg = "categories functionality not implemented yet"
-
-type CategoryHandlers struct{}
-
-func SetupHandlers() CategoryHandlers {
-	return CategoryHandlers{}
+type CategoryRepository interface {
+	CreateCategory(ctx context.Context, createFn func() (*categories.Category, error)) (*categories.Category, error)
+	UpdateCategory(
+		ctx context.Context,
+		id uuid.UUID,
+		updateFn func(*categories.Category) (bool, error),
+	) (*categories.Category, error)
+	GetCategory(ctx context.Context, id uuid.UUID) (*categories.Category, error)
+	ListCategories(ctx context.Context, filter CategoryFilter) ([]*categories.Category, error)
+	DeleteCategory(ctx context.Context, id uuid.UUID) error
 }
 
-func (h CategoryHandlers) GetCategories(c echo.Context, _ openapi.GetCategoriesParams) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
+type CategoryFilter struct {
+	OrganizationID *uuid.UUID `json:"organization_id,omitempty"`
+	ParentID       *uuid.UUID `json:"parent_id,omitempty"`
+	IsActive       *bool      `json:"is_active,omitempty"`
+	Name           *string    `json:"name,omitempty"`
+	IsRootOnly     bool       `json:"is_root_only,omitempty"`
+	Limit          int        `json:"limit,omitempty"`
+	Offset         int        `json:"offset,omitempty"`
+	SortBy         string     `json:"sort_by,omitempty"`
+	SortOrder      string     `json:"sort_order,omitempty"`
 }
 
-func (h CategoryHandlers) PostCategories(c echo.Context) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
+type CategoryHandlers struct {
+	repo CategoryRepository
 }
 
-func (h CategoryHandlers) GetCategoriesID(c echo.Context, _ openapi_types.UUID) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h CategoryHandlers) GetCategoriesIdTickets(c echo.Context, _ openapi_types.UUID, _ openapi.GetCategoriesIdTicketsParams) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h CategoryHandlers) PutCategoriesId(c echo.Context, _ openapi_types.UUID) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h CategoryHandlers) DeleteCategoriesId(c echo.Context, _ openapi_types.UUID) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
-}
-
-func (h CategoryHandlers) GetCategoriesIdHierarchy(c echo.Context, _ openapi_types.UUID) error {
-	msg := notImplementedMsg
-	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
+func SetupHandlers(repo CategoryRepository) CategoryHandlers {
+	return CategoryHandlers{
+		repo: repo,
+	}
 }
