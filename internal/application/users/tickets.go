@@ -9,7 +9,9 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func (h UserHandlers) GetUsersIdTickets(c echo.Context, _ openapi_types.UUID, _ openapi.GetUsersIdTicketsParams) error {
+func (h UserHandlers) GetUsersIDTickets(
+	c echo.Context, _ openapi_types.UUID, _ openapi.GetUsersIDTicketsParams,
+) error {
 	msg := "user tickets functionality not implemented yet"
 	return c.JSON(http.StatusNotImplemented, openapi.ErrorResponse{Message: &msg})
 }

@@ -9,7 +9,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func (h UserHandlers) DeleteUsersId(c echo.Context, id openapi_types.UUID) error {
+func (h UserHandlers) DeleteUsersID(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
 
 	// Сначала проверим, существует ли пользователь

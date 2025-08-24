@@ -12,7 +12,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func (h OrganizationHandlers) PutOrganizationsId(c echo.Context, id openapi_types.UUID) error {
+func (h OrganizationHandlers) PutOrganizationsID(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
 	var req openapi.UpdateOrganizationRequest
 	if err := c.Bind(&req); err != nil {
