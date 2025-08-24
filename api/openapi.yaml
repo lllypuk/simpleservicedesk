@@ -147,6 +147,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     put:
+      operationId: PutUsersID
       summary: Update a user
       description: Updates the user with the provided details
       tags:
@@ -197,6 +198,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
+      operationId: DeleteUsersID
       summary: Delete a user
       description: Deletes the user with the specified ID
       tags:
@@ -232,6 +234,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /users/{id}/role:
     patch:
+      operationId: PatchUsersIDRole
       summary: Update user role
       description: Updates the role of the specified user
       tags:
@@ -277,6 +280,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /users/{id}/tickets:
     get:
+      operationId: GetUsersIDTickets
       summary: Get user tickets
       description: Retrieves tickets associated with the specified user (created by or assigned to)
       tags:
@@ -498,6 +502,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     put:
+      operationId: PutTicketsID
       summary: Update a ticket
       description: Updates the ticket with the provided details
       tags:
@@ -542,6 +547,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
+      operationId: DeleteTicketsID
       summary: Delete a ticket
       description: Deletes the ticket with the specified ID
       tags:
@@ -577,6 +583,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /tickets/{id}/status:
     patch:
+      operationId: PatchTicketsIDStatus
       summary: Update ticket status
       description: Updates the status of the ticket with proper transition validation
       tags:
@@ -622,6 +629,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /tickets/{id}/assign:
     patch:
+      operationId: PatchTicketsIDAssign
       summary: Assign or unassign ticket
       description: Assigns a ticket to an agent or unassigns it
       tags:
@@ -667,6 +675,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /tickets/{id}/comments:
     post:
+      operationId: PostTicketsIDComments
       summary: Add a comment to a ticket
       description: Adds a new comment to the specified ticket
       tags:
@@ -711,6 +720,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     get:
+      operationId: GetTicketsIDComments
       summary: Get ticket comments
       description: Retrieves all comments for the specified ticket
       tags:
@@ -895,6 +905,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     put:
+      operationId: PutOrganizationsID
       summary: Update an organization
       description: Updates the organization with the provided details
       tags:
@@ -945,6 +956,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
+      operationId: DeleteOrganizationsID
       summary: Delete an organization
       description: Deletes the organization with the specified ID
       tags:
@@ -980,6 +992,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /organizations/{id}/users:
     get:
+      operationId: GetOrganizationsIDUsers
       summary: Get users in an organization
       description: Retrieves all users belonging to the specified organization
       tags:
@@ -1034,6 +1047,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /organizations/{id}/tickets:
     get:
+      operationId: GetOrganizationsIDTickets
       summary: Get tickets in an organization
       description: Retrieves all tickets belonging to the specified organization
       tags:
@@ -1228,6 +1242,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     put:
+      operationId: PutCategoriesID
       summary: Update a category
       description: Updates the category with the provided details
       tags:
@@ -1278,6 +1293,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     delete:
+      operationId: DeleteCategoriesID
       summary: Delete a category
       description: Deletes the category with the specified ID
       tags:
@@ -1313,6 +1329,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /categories/{id}/tickets:
     get:
+      operationId: GetCategoriesIDTickets
       summary: Get tickets in a category
       description: Retrieves all tickets belonging to the specified category
       tags:

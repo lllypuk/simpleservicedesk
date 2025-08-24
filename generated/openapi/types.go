@@ -33,11 +33,11 @@ const (
 	Customer UserRole = "customer"
 )
 
-// Defines values for GetUsersIdTicketsParamsRelationship.
+// Defines values for GetUsersIDTicketsParamsRelationship.
 const (
-	All      GetUsersIdTicketsParamsRelationship = "all"
-	Assignee GetUsersIdTicketsParamsRelationship = "assignee"
-	Author   GetUsersIdTicketsParamsRelationship = "author"
+	All      GetUsersIDTicketsParamsRelationship = "all"
+	Assignee GetUsersIDTicketsParamsRelationship = "assignee"
+	Author   GetUsersIDTicketsParamsRelationship = "author"
 )
 
 // AssignTicketRequest defines model for AssignTicketRequest.
@@ -342,8 +342,8 @@ type GetCategoriesParams struct {
 	IncludeChildren *bool `form:"include_children,omitempty" json:"include_children,omitempty"`
 }
 
-// GetCategoriesIdTicketsParams defines parameters for GetCategoriesIdTickets.
-type GetCategoriesIdTicketsParams struct {
+// GetCategoriesIDTicketsParams defines parameters for GetCategoriesIDTickets.
+type GetCategoriesIDTicketsParams struct {
 	// Status Filter by ticket status
 	Status *TicketStatus `form:"status,omitempty" json:"status,omitempty"`
 
@@ -381,8 +381,8 @@ type GetOrganizationsParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
-// GetOrganizationsIdTicketsParams defines parameters for GetOrganizationsIdTickets.
-type GetOrganizationsIdTicketsParams struct {
+// GetOrganizationsIDTicketsParams defines parameters for GetOrganizationsIDTickets.
+type GetOrganizationsIDTicketsParams struct {
 	// Status Filter by ticket status
 	Status *TicketStatus `form:"status,omitempty" json:"status,omitempty"`
 
@@ -396,8 +396,8 @@ type GetOrganizationsIdTicketsParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
-// GetOrganizationsIdUsersParams defines parameters for GetOrganizationsIdUsers.
-type GetOrganizationsIdUsersParams struct {
+// GetOrganizationsIDUsersParams defines parameters for GetOrganizationsIDUsers.
+type GetOrganizationsIDUsersParams struct {
 	// Page Page number for pagination
 	Page *int `form:"page,omitempty" json:"page,omitempty"`
 
@@ -432,8 +432,8 @@ type GetTicketsParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
-// GetTicketsIdCommentsParams defines parameters for GetTicketsIdComments.
-type GetTicketsIdCommentsParams struct {
+// GetTicketsIDCommentsParams defines parameters for GetTicketsIDComments.
+type GetTicketsIDCommentsParams struct {
 	// IncludeInternal Include internal comments (admin/agent only)
 	IncludeInternal *bool `form:"include_internal,omitempty" json:"include_internal,omitempty"`
 }
@@ -462,8 +462,8 @@ type GetUsersParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
-// GetUsersIdTicketsParams defines parameters for GetUsersIdTickets.
-type GetUsersIdTicketsParams struct {
+// GetUsersIDTicketsParams defines parameters for GetUsersIDTickets.
+type GetUsersIDTicketsParams struct {
 	// Status Filter by ticket status
 	Status *TicketStatus `form:"status,omitempty" json:"status,omitempty"`
 
@@ -471,7 +471,7 @@ type GetUsersIdTicketsParams struct {
 	Priority *TicketPriority `form:"priority,omitempty" json:"priority,omitempty"`
 
 	// Relationship Filter by relationship to user
-	Relationship *GetUsersIdTicketsParamsRelationship `form:"relationship,omitempty" json:"relationship,omitempty"`
+	Relationship *GetUsersIDTicketsParamsRelationship `form:"relationship,omitempty" json:"relationship,omitempty"`
 
 	// Page Page number for pagination
 	Page *int `form:"page,omitempty" json:"page,omitempty"`
@@ -480,41 +480,41 @@ type GetUsersIdTicketsParams struct {
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
-// GetUsersIdTicketsParamsRelationship defines parameters for GetUsersIdTickets.
-type GetUsersIdTicketsParamsRelationship string
+// GetUsersIDTicketsParamsRelationship defines parameters for GetUsersIDTickets.
+type GetUsersIDTicketsParamsRelationship string
 
 // PostCategoriesJSONRequestBody defines body for PostCategories for application/json ContentType.
 type PostCategoriesJSONRequestBody = CreateCategoryRequest
 
-// PutCategoriesIdJSONRequestBody defines body for PutCategoriesId for application/json ContentType.
-type PutCategoriesIdJSONRequestBody = UpdateCategoryRequest
+// PutCategoriesIDJSONRequestBody defines body for PutCategoriesID for application/json ContentType.
+type PutCategoriesIDJSONRequestBody = UpdateCategoryRequest
 
 // PostOrganizationsJSONRequestBody defines body for PostOrganizations for application/json ContentType.
 type PostOrganizationsJSONRequestBody = CreateOrganizationRequest
 
-// PutOrganizationsIdJSONRequestBody defines body for PutOrganizationsId for application/json ContentType.
-type PutOrganizationsIdJSONRequestBody = UpdateOrganizationRequest
+// PutOrganizationsIDJSONRequestBody defines body for PutOrganizationsID for application/json ContentType.
+type PutOrganizationsIDJSONRequestBody = UpdateOrganizationRequest
 
 // PostTicketsJSONRequestBody defines body for PostTickets for application/json ContentType.
 type PostTicketsJSONRequestBody = CreateTicketRequest
 
-// PutTicketsIdJSONRequestBody defines body for PutTicketsId for application/json ContentType.
-type PutTicketsIdJSONRequestBody = UpdateTicketRequest
+// PutTicketsIDJSONRequestBody defines body for PutTicketsID for application/json ContentType.
+type PutTicketsIDJSONRequestBody = UpdateTicketRequest
 
-// PatchTicketsIdAssignJSONRequestBody defines body for PatchTicketsIdAssign for application/json ContentType.
-type PatchTicketsIdAssignJSONRequestBody = AssignTicketRequest
+// PatchTicketsIDAssignJSONRequestBody defines body for PatchTicketsIDAssign for application/json ContentType.
+type PatchTicketsIDAssignJSONRequestBody = AssignTicketRequest
 
-// PostTicketsIdCommentsJSONRequestBody defines body for PostTicketsIdComments for application/json ContentType.
-type PostTicketsIdCommentsJSONRequestBody = CreateCommentRequest
+// PostTicketsIDCommentsJSONRequestBody defines body for PostTicketsIDComments for application/json ContentType.
+type PostTicketsIDCommentsJSONRequestBody = CreateCommentRequest
 
-// PatchTicketsIdStatusJSONRequestBody defines body for PatchTicketsIdStatus for application/json ContentType.
-type PatchTicketsIdStatusJSONRequestBody = UpdateTicketStatusRequest
+// PatchTicketsIDStatusJSONRequestBody defines body for PatchTicketsIDStatus for application/json ContentType.
+type PatchTicketsIDStatusJSONRequestBody = UpdateTicketStatusRequest
 
 // PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody = CreateUserRequest
 
-// PutUsersIdJSONRequestBody defines body for PutUsersId for application/json ContentType.
-type PutUsersIdJSONRequestBody = UpdateUserRequest
+// PutUsersIDJSONRequestBody defines body for PutUsersID for application/json ContentType.
+type PutUsersIDJSONRequestBody = UpdateUserRequest
 
-// PatchUsersIdRoleJSONRequestBody defines body for PatchUsersIdRole for application/json ContentType.
-type PatchUsersIdRoleJSONRequestBody = UpdateUserRoleRequest
+// PatchUsersIDRoleJSONRequestBody defines body for PatchUsersIDRole for application/json ContentType.
+type PatchUsersIDRoleJSONRequestBody = UpdateUserRoleRequest

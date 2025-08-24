@@ -11,7 +11,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func (h TicketHandlers) PostTicketsIdComments(c echo.Context, id openapi_types.UUID) error {
+func (h TicketHandlers) PostTicketsIDComments(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
 	var req openapi.CreateCommentRequest
 	if err := c.Bind(&req); err != nil {
@@ -58,7 +58,9 @@ func (h TicketHandlers) PostTicketsIdComments(c echo.Context, id openapi_types.U
 	return c.JSON(http.StatusCreated, response)
 }
 
-func (h TicketHandlers) GetTicketsIdComments(c echo.Context, id openapi_types.UUID, params openapi.GetTicketsIdCommentsParams) error {
+func (h TicketHandlers) GetTicketsIDComments(
+	c echo.Context, id openapi_types.UUID, params openapi.GetTicketsIDCommentsParams,
+) error {
 	ctx := c.Request().Context()
 
 	ticket, err := h.repo.GetTicket(ctx, id)

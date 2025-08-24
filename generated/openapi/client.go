@@ -98,19 +98,19 @@ type ClientInterface interface {
 
 	PostCategories(ctx context.Context, body PostCategoriesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteCategoriesId request
-	DeleteCategoriesId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// DeleteCategoriesID request
+	DeleteCategoriesID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetCategoriesID request
 	GetCategoriesID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutCategoriesIdWithBody request with any body
-	PutCategoriesIdWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PutCategoriesIDWithBody request with any body
+	PutCategoriesIDWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PutCategoriesId(ctx context.Context, id openapi_types.UUID, body PutCategoriesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PutCategoriesID(ctx context.Context, id openapi_types.UUID, body PutCategoriesIDJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetCategoriesIdTickets request
-	GetCategoriesIdTickets(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIdTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetCategoriesIDTickets request
+	GetCategoriesIDTickets(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIDTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetOrganizations request
 	GetOrganizations(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -120,22 +120,22 @@ type ClientInterface interface {
 
 	PostOrganizations(ctx context.Context, body PostOrganizationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteOrganizationsId request
-	DeleteOrganizationsId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// DeleteOrganizationsID request
+	DeleteOrganizationsID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetOrganizationsID request
 	GetOrganizationsID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutOrganizationsIdWithBody request with any body
-	PutOrganizationsIdWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PutOrganizationsIDWithBody request with any body
+	PutOrganizationsIDWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PutOrganizationsId(ctx context.Context, id openapi_types.UUID, body PutOrganizationsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PutOrganizationsID(ctx context.Context, id openapi_types.UUID, body PutOrganizationsIDJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetOrganizationsIdTickets request
-	GetOrganizationsIdTickets(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIdTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetOrganizationsIDTickets request
+	GetOrganizationsIDTickets(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIDTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetOrganizationsIdUsers request
-	GetOrganizationsIdUsers(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIdUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetOrganizationsIDUsers request
+	GetOrganizationsIDUsers(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIDUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetTickets request
 	GetTickets(ctx context.Context, params *GetTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -145,34 +145,34 @@ type ClientInterface interface {
 
 	PostTickets(ctx context.Context, body PostTicketsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteTicketsId request
-	DeleteTicketsId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// DeleteTicketsID request
+	DeleteTicketsID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetTicketsID request
 	GetTicketsID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutTicketsIdWithBody request with any body
-	PutTicketsIdWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PutTicketsIDWithBody request with any body
+	PutTicketsIDWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PutTicketsId(ctx context.Context, id openapi_types.UUID, body PutTicketsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PutTicketsID(ctx context.Context, id openapi_types.UUID, body PutTicketsIDJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchTicketsIdAssignWithBody request with any body
-	PatchTicketsIdAssignWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PatchTicketsIDAssignWithBody request with any body
+	PatchTicketsIDAssignWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PatchTicketsIdAssign(ctx context.Context, id openapi_types.UUID, body PatchTicketsIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PatchTicketsIDAssign(ctx context.Context, id openapi_types.UUID, body PatchTicketsIDAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetTicketsIdComments request
-	GetTicketsIdComments(ctx context.Context, id openapi_types.UUID, params *GetTicketsIdCommentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetTicketsIDComments request
+	GetTicketsIDComments(ctx context.Context, id openapi_types.UUID, params *GetTicketsIDCommentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostTicketsIdCommentsWithBody request with any body
-	PostTicketsIdCommentsWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostTicketsIDCommentsWithBody request with any body
+	PostTicketsIDCommentsWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostTicketsIdComments(ctx context.Context, id openapi_types.UUID, body PostTicketsIdCommentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostTicketsIDComments(ctx context.Context, id openapi_types.UUID, body PostTicketsIDCommentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchTicketsIdStatusWithBody request with any body
-	PatchTicketsIdStatusWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PatchTicketsIDStatusWithBody request with any body
+	PatchTicketsIDStatusWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PatchTicketsIdStatus(ctx context.Context, id openapi_types.UUID, body PatchTicketsIdStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PatchTicketsIDStatus(ctx context.Context, id openapi_types.UUID, body PatchTicketsIDStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetUsers request
 	GetUsers(ctx context.Context, params *GetUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -182,24 +182,24 @@ type ClientInterface interface {
 
 	PostUsers(ctx context.Context, body PostUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteUsersId request
-	DeleteUsersId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// DeleteUsersID request
+	DeleteUsersID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetUsersID request
 	GetUsersID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutUsersIdWithBody request with any body
-	PutUsersIdWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PutUsersIDWithBody request with any body
+	PutUsersIDWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PutUsersId(ctx context.Context, id openapi_types.UUID, body PutUsersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PutUsersID(ctx context.Context, id openapi_types.UUID, body PutUsersIDJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchUsersIdRoleWithBody request with any body
-	PatchUsersIdRoleWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PatchUsersIDRoleWithBody request with any body
+	PatchUsersIDRoleWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PatchUsersIdRole(ctx context.Context, id openapi_types.UUID, body PatchUsersIdRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PatchUsersIDRole(ctx context.Context, id openapi_types.UUID, body PatchUsersIDRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetUsersIdTickets request
-	GetUsersIdTickets(ctx context.Context, id openapi_types.UUID, params *GetUsersIdTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetUsersIDTickets request
+	GetUsersIDTickets(ctx context.Context, id openapi_types.UUID, params *GetUsersIDTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) GetCategories(ctx context.Context, params *GetCategoriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -238,8 +238,8 @@ func (c *Client) PostCategories(ctx context.Context, body PostCategoriesJSONRequ
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteCategoriesId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteCategoriesIdRequest(c.Server, id)
+func (c *Client) DeleteCategoriesID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteCategoriesIDRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -262,8 +262,8 @@ func (c *Client) GetCategoriesID(ctx context.Context, id openapi_types.UUID, req
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutCategoriesIdWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutCategoriesIdRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) PutCategoriesIDWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutCategoriesIDRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -274,8 +274,8 @@ func (c *Client) PutCategoriesIdWithBody(ctx context.Context, id openapi_types.U
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutCategoriesId(ctx context.Context, id openapi_types.UUID, body PutCategoriesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutCategoriesIdRequest(c.Server, id, body)
+func (c *Client) PutCategoriesID(ctx context.Context, id openapi_types.UUID, body PutCategoriesIDJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutCategoriesIDRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -286,8 +286,8 @@ func (c *Client) PutCategoriesId(ctx context.Context, id openapi_types.UUID, bod
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetCategoriesIdTickets(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIdTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetCategoriesIdTicketsRequest(c.Server, id, params)
+func (c *Client) GetCategoriesIDTickets(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIDTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetCategoriesIDTicketsRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -334,8 +334,8 @@ func (c *Client) PostOrganizations(ctx context.Context, body PostOrganizationsJS
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteOrganizationsId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteOrganizationsIdRequest(c.Server, id)
+func (c *Client) DeleteOrganizationsID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteOrganizationsIDRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -358,8 +358,8 @@ func (c *Client) GetOrganizationsID(ctx context.Context, id openapi_types.UUID, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutOrganizationsIdWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutOrganizationsIdRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) PutOrganizationsIDWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutOrganizationsIDRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -370,8 +370,8 @@ func (c *Client) PutOrganizationsIdWithBody(ctx context.Context, id openapi_type
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutOrganizationsId(ctx context.Context, id openapi_types.UUID, body PutOrganizationsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutOrganizationsIdRequest(c.Server, id, body)
+func (c *Client) PutOrganizationsID(ctx context.Context, id openapi_types.UUID, body PutOrganizationsIDJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutOrganizationsIDRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -382,8 +382,8 @@ func (c *Client) PutOrganizationsId(ctx context.Context, id openapi_types.UUID, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrganizationsIdTickets(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIdTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetOrganizationsIdTicketsRequest(c.Server, id, params)
+func (c *Client) GetOrganizationsIDTickets(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIDTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrganizationsIDTicketsRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -394,8 +394,8 @@ func (c *Client) GetOrganizationsIdTickets(ctx context.Context, id openapi_types
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrganizationsIdUsers(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIdUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetOrganizationsIdUsersRequest(c.Server, id, params)
+func (c *Client) GetOrganizationsIDUsers(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIDUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrganizationsIDUsersRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -442,8 +442,8 @@ func (c *Client) PostTickets(ctx context.Context, body PostTicketsJSONRequestBod
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteTicketsId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteTicketsIdRequest(c.Server, id)
+func (c *Client) DeleteTicketsID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteTicketsIDRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -466,8 +466,8 @@ func (c *Client) GetTicketsID(ctx context.Context, id openapi_types.UUID, reqEdi
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutTicketsIdWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutTicketsIdRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) PutTicketsIDWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutTicketsIDRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -478,8 +478,8 @@ func (c *Client) PutTicketsIdWithBody(ctx context.Context, id openapi_types.UUID
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutTicketsId(ctx context.Context, id openapi_types.UUID, body PutTicketsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutTicketsIdRequest(c.Server, id, body)
+func (c *Client) PutTicketsID(ctx context.Context, id openapi_types.UUID, body PutTicketsIDJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutTicketsIDRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -490,8 +490,8 @@ func (c *Client) PutTicketsId(ctx context.Context, id openapi_types.UUID, body P
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchTicketsIdAssignWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchTicketsIdAssignRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) PatchTicketsIDAssignWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchTicketsIDAssignRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -502,8 +502,8 @@ func (c *Client) PatchTicketsIdAssignWithBody(ctx context.Context, id openapi_ty
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchTicketsIdAssign(ctx context.Context, id openapi_types.UUID, body PatchTicketsIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchTicketsIdAssignRequest(c.Server, id, body)
+func (c *Client) PatchTicketsIDAssign(ctx context.Context, id openapi_types.UUID, body PatchTicketsIDAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchTicketsIDAssignRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -514,8 +514,8 @@ func (c *Client) PatchTicketsIdAssign(ctx context.Context, id openapi_types.UUID
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetTicketsIdComments(ctx context.Context, id openapi_types.UUID, params *GetTicketsIdCommentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetTicketsIdCommentsRequest(c.Server, id, params)
+func (c *Client) GetTicketsIDComments(ctx context.Context, id openapi_types.UUID, params *GetTicketsIDCommentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetTicketsIDCommentsRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -526,8 +526,8 @@ func (c *Client) GetTicketsIdComments(ctx context.Context, id openapi_types.UUID
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostTicketsIdCommentsWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostTicketsIdCommentsRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) PostTicketsIDCommentsWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostTicketsIDCommentsRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -538,8 +538,8 @@ func (c *Client) PostTicketsIdCommentsWithBody(ctx context.Context, id openapi_t
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostTicketsIdComments(ctx context.Context, id openapi_types.UUID, body PostTicketsIdCommentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostTicketsIdCommentsRequest(c.Server, id, body)
+func (c *Client) PostTicketsIDComments(ctx context.Context, id openapi_types.UUID, body PostTicketsIDCommentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostTicketsIDCommentsRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -550,8 +550,8 @@ func (c *Client) PostTicketsIdComments(ctx context.Context, id openapi_types.UUI
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchTicketsIdStatusWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchTicketsIdStatusRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) PatchTicketsIDStatusWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchTicketsIDStatusRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -562,8 +562,8 @@ func (c *Client) PatchTicketsIdStatusWithBody(ctx context.Context, id openapi_ty
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchTicketsIdStatus(ctx context.Context, id openapi_types.UUID, body PatchTicketsIdStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchTicketsIdStatusRequest(c.Server, id, body)
+func (c *Client) PatchTicketsIDStatus(ctx context.Context, id openapi_types.UUID, body PatchTicketsIDStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchTicketsIDStatusRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -610,8 +610,8 @@ func (c *Client) PostUsers(ctx context.Context, body PostUsersJSONRequestBody, r
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteUsersId(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteUsersIdRequest(c.Server, id)
+func (c *Client) DeleteUsersID(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteUsersIDRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -634,8 +634,8 @@ func (c *Client) GetUsersID(ctx context.Context, id openapi_types.UUID, reqEdito
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutUsersIdWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutUsersIdRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) PutUsersIDWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutUsersIDRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -646,8 +646,8 @@ func (c *Client) PutUsersIdWithBody(ctx context.Context, id openapi_types.UUID, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutUsersId(ctx context.Context, id openapi_types.UUID, body PutUsersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutUsersIdRequest(c.Server, id, body)
+func (c *Client) PutUsersID(ctx context.Context, id openapi_types.UUID, body PutUsersIDJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutUsersIDRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -658,8 +658,8 @@ func (c *Client) PutUsersId(ctx context.Context, id openapi_types.UUID, body Put
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchUsersIdRoleWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchUsersIdRoleRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) PatchUsersIDRoleWithBody(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchUsersIDRoleRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -670,8 +670,8 @@ func (c *Client) PatchUsersIdRoleWithBody(ctx context.Context, id openapi_types.
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchUsersIdRole(ctx context.Context, id openapi_types.UUID, body PatchUsersIdRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchUsersIdRoleRequest(c.Server, id, body)
+func (c *Client) PatchUsersIDRole(ctx context.Context, id openapi_types.UUID, body PatchUsersIDRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchUsersIDRoleRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -682,8 +682,8 @@ func (c *Client) PatchUsersIdRole(ctx context.Context, id openapi_types.UUID, bo
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetUsersIdTickets(ctx context.Context, id openapi_types.UUID, params *GetUsersIdTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetUsersIdTicketsRequest(c.Server, id, params)
+func (c *Client) GetUsersIDTickets(ctx context.Context, id openapi_types.UUID, params *GetUsersIDTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetUsersIDTicketsRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -831,8 +831,8 @@ func NewPostCategoriesRequestWithBody(server string, contentType string, body io
 	return req, nil
 }
 
-// NewDeleteCategoriesIdRequest generates requests for DeleteCategoriesId
-func NewDeleteCategoriesIdRequest(server string, id openapi_types.UUID) (*http.Request, error) {
+// NewDeleteCategoriesIDRequest generates requests for DeleteCategoriesID
+func NewDeleteCategoriesIDRequest(server string, id openapi_types.UUID) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -899,19 +899,19 @@ func NewGetCategoriesIDRequest(server string, id openapi_types.UUID) (*http.Requ
 	return req, nil
 }
 
-// NewPutCategoriesIdRequest calls the generic PutCategoriesId builder with application/json body
-func NewPutCategoriesIdRequest(server string, id openapi_types.UUID, body PutCategoriesIdJSONRequestBody) (*http.Request, error) {
+// NewPutCategoriesIDRequest calls the generic PutCategoriesID builder with application/json body
+func NewPutCategoriesIDRequest(server string, id openapi_types.UUID, body PutCategoriesIDJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPutCategoriesIdRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPutCategoriesIDRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPutCategoriesIdRequestWithBody generates requests for PutCategoriesId with any type of body
-func NewPutCategoriesIdRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+// NewPutCategoriesIDRequestWithBody generates requests for PutCategoriesID with any type of body
+func NewPutCategoriesIDRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -946,8 +946,8 @@ func NewPutCategoriesIdRequestWithBody(server string, id openapi_types.UUID, con
 	return req, nil
 }
 
-// NewGetCategoriesIdTicketsRequest generates requests for GetCategoriesIdTickets
-func NewGetCategoriesIdTicketsRequest(server string, id openapi_types.UUID, params *GetCategoriesIdTicketsParams) (*http.Request, error) {
+// NewGetCategoriesIDTicketsRequest generates requests for GetCategoriesIDTickets
+func NewGetCategoriesIDTicketsRequest(server string, id openapi_types.UUID, params *GetCategoriesIDTicketsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1235,8 +1235,8 @@ func NewPostOrganizationsRequestWithBody(server string, contentType string, body
 	return req, nil
 }
 
-// NewDeleteOrganizationsIdRequest generates requests for DeleteOrganizationsId
-func NewDeleteOrganizationsIdRequest(server string, id openapi_types.UUID) (*http.Request, error) {
+// NewDeleteOrganizationsIDRequest generates requests for DeleteOrganizationsID
+func NewDeleteOrganizationsIDRequest(server string, id openapi_types.UUID) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1303,19 +1303,19 @@ func NewGetOrganizationsIDRequest(server string, id openapi_types.UUID) (*http.R
 	return req, nil
 }
 
-// NewPutOrganizationsIdRequest calls the generic PutOrganizationsId builder with application/json body
-func NewPutOrganizationsIdRequest(server string, id openapi_types.UUID, body PutOrganizationsIdJSONRequestBody) (*http.Request, error) {
+// NewPutOrganizationsIDRequest calls the generic PutOrganizationsID builder with application/json body
+func NewPutOrganizationsIDRequest(server string, id openapi_types.UUID, body PutOrganizationsIDJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPutOrganizationsIdRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPutOrganizationsIDRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPutOrganizationsIdRequestWithBody generates requests for PutOrganizationsId with any type of body
-func NewPutOrganizationsIdRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+// NewPutOrganizationsIDRequestWithBody generates requests for PutOrganizationsID with any type of body
+func NewPutOrganizationsIDRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1350,8 +1350,8 @@ func NewPutOrganizationsIdRequestWithBody(server string, id openapi_types.UUID, 
 	return req, nil
 }
 
-// NewGetOrganizationsIdTicketsRequest generates requests for GetOrganizationsIdTickets
-func NewGetOrganizationsIdTicketsRequest(server string, id openapi_types.UUID, params *GetOrganizationsIdTicketsParams) (*http.Request, error) {
+// NewGetOrganizationsIDTicketsRequest generates requests for GetOrganizationsIDTickets
+func NewGetOrganizationsIDTicketsRequest(server string, id openapi_types.UUID, params *GetOrganizationsIDTicketsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1454,8 +1454,8 @@ func NewGetOrganizationsIdTicketsRequest(server string, id openapi_types.UUID, p
 	return req, nil
 }
 
-// NewGetOrganizationsIdUsersRequest generates requests for GetOrganizationsIdUsers
-func NewGetOrganizationsIdUsersRequest(server string, id openapi_types.UUID, params *GetOrganizationsIdUsersParams) (*http.Request, error) {
+// NewGetOrganizationsIDUsersRequest generates requests for GetOrganizationsIDUsers
+func NewGetOrganizationsIDUsersRequest(server string, id openapi_types.UUID, params *GetOrganizationsIDUsersParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1727,8 +1727,8 @@ func NewPostTicketsRequestWithBody(server string, contentType string, body io.Re
 	return req, nil
 }
 
-// NewDeleteTicketsIdRequest generates requests for DeleteTicketsId
-func NewDeleteTicketsIdRequest(server string, id openapi_types.UUID) (*http.Request, error) {
+// NewDeleteTicketsIDRequest generates requests for DeleteTicketsID
+func NewDeleteTicketsIDRequest(server string, id openapi_types.UUID) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1795,19 +1795,19 @@ func NewGetTicketsIDRequest(server string, id openapi_types.UUID) (*http.Request
 	return req, nil
 }
 
-// NewPutTicketsIdRequest calls the generic PutTicketsId builder with application/json body
-func NewPutTicketsIdRequest(server string, id openapi_types.UUID, body PutTicketsIdJSONRequestBody) (*http.Request, error) {
+// NewPutTicketsIDRequest calls the generic PutTicketsID builder with application/json body
+func NewPutTicketsIDRequest(server string, id openapi_types.UUID, body PutTicketsIDJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPutTicketsIdRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPutTicketsIDRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPutTicketsIdRequestWithBody generates requests for PutTicketsId with any type of body
-func NewPutTicketsIdRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+// NewPutTicketsIDRequestWithBody generates requests for PutTicketsID with any type of body
+func NewPutTicketsIDRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1842,19 +1842,19 @@ func NewPutTicketsIdRequestWithBody(server string, id openapi_types.UUID, conten
 	return req, nil
 }
 
-// NewPatchTicketsIdAssignRequest calls the generic PatchTicketsIdAssign builder with application/json body
-func NewPatchTicketsIdAssignRequest(server string, id openapi_types.UUID, body PatchTicketsIdAssignJSONRequestBody) (*http.Request, error) {
+// NewPatchTicketsIDAssignRequest calls the generic PatchTicketsIDAssign builder with application/json body
+func NewPatchTicketsIDAssignRequest(server string, id openapi_types.UUID, body PatchTicketsIDAssignJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPatchTicketsIdAssignRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPatchTicketsIDAssignRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPatchTicketsIdAssignRequestWithBody generates requests for PatchTicketsIdAssign with any type of body
-func NewPatchTicketsIdAssignRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+// NewPatchTicketsIDAssignRequestWithBody generates requests for PatchTicketsIDAssign with any type of body
+func NewPatchTicketsIDAssignRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1889,8 +1889,8 @@ func NewPatchTicketsIdAssignRequestWithBody(server string, id openapi_types.UUID
 	return req, nil
 }
 
-// NewGetTicketsIdCommentsRequest generates requests for GetTicketsIdComments
-func NewGetTicketsIdCommentsRequest(server string, id openapi_types.UUID, params *GetTicketsIdCommentsParams) (*http.Request, error) {
+// NewGetTicketsIDCommentsRequest generates requests for GetTicketsIDComments
+func NewGetTicketsIDCommentsRequest(server string, id openapi_types.UUID, params *GetTicketsIDCommentsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1945,19 +1945,19 @@ func NewGetTicketsIdCommentsRequest(server string, id openapi_types.UUID, params
 	return req, nil
 }
 
-// NewPostTicketsIdCommentsRequest calls the generic PostTicketsIdComments builder with application/json body
-func NewPostTicketsIdCommentsRequest(server string, id openapi_types.UUID, body PostTicketsIdCommentsJSONRequestBody) (*http.Request, error) {
+// NewPostTicketsIDCommentsRequest calls the generic PostTicketsIDComments builder with application/json body
+func NewPostTicketsIDCommentsRequest(server string, id openapi_types.UUID, body PostTicketsIDCommentsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostTicketsIdCommentsRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPostTicketsIDCommentsRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPostTicketsIdCommentsRequestWithBody generates requests for PostTicketsIdComments with any type of body
-func NewPostTicketsIdCommentsRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostTicketsIDCommentsRequestWithBody generates requests for PostTicketsIDComments with any type of body
+func NewPostTicketsIDCommentsRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1992,19 +1992,19 @@ func NewPostTicketsIdCommentsRequestWithBody(server string, id openapi_types.UUI
 	return req, nil
 }
 
-// NewPatchTicketsIdStatusRequest calls the generic PatchTicketsIdStatus builder with application/json body
-func NewPatchTicketsIdStatusRequest(server string, id openapi_types.UUID, body PatchTicketsIdStatusJSONRequestBody) (*http.Request, error) {
+// NewPatchTicketsIDStatusRequest calls the generic PatchTicketsIDStatus builder with application/json body
+func NewPatchTicketsIDStatusRequest(server string, id openapi_types.UUID, body PatchTicketsIDStatusJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPatchTicketsIdStatusRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPatchTicketsIDStatusRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPatchTicketsIdStatusRequestWithBody generates requests for PatchTicketsIdStatus with any type of body
-func NewPatchTicketsIdStatusRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+// NewPatchTicketsIDStatusRequestWithBody generates requests for PatchTicketsIDStatus with any type of body
+func NewPatchTicketsIDStatusRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2224,8 +2224,8 @@ func NewPostUsersRequestWithBody(server string, contentType string, body io.Read
 	return req, nil
 }
 
-// NewDeleteUsersIdRequest generates requests for DeleteUsersId
-func NewDeleteUsersIdRequest(server string, id openapi_types.UUID) (*http.Request, error) {
+// NewDeleteUsersIDRequest generates requests for DeleteUsersID
+func NewDeleteUsersIDRequest(server string, id openapi_types.UUID) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2292,19 +2292,19 @@ func NewGetUsersIDRequest(server string, id openapi_types.UUID) (*http.Request, 
 	return req, nil
 }
 
-// NewPutUsersIdRequest calls the generic PutUsersId builder with application/json body
-func NewPutUsersIdRequest(server string, id openapi_types.UUID, body PutUsersIdJSONRequestBody) (*http.Request, error) {
+// NewPutUsersIDRequest calls the generic PutUsersID builder with application/json body
+func NewPutUsersIDRequest(server string, id openapi_types.UUID, body PutUsersIDJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPutUsersIdRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPutUsersIDRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPutUsersIdRequestWithBody generates requests for PutUsersId with any type of body
-func NewPutUsersIdRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+// NewPutUsersIDRequestWithBody generates requests for PutUsersID with any type of body
+func NewPutUsersIDRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2339,19 +2339,19 @@ func NewPutUsersIdRequestWithBody(server string, id openapi_types.UUID, contentT
 	return req, nil
 }
 
-// NewPatchUsersIdRoleRequest calls the generic PatchUsersIdRole builder with application/json body
-func NewPatchUsersIdRoleRequest(server string, id openapi_types.UUID, body PatchUsersIdRoleJSONRequestBody) (*http.Request, error) {
+// NewPatchUsersIDRoleRequest calls the generic PatchUsersIDRole builder with application/json body
+func NewPatchUsersIDRoleRequest(server string, id openapi_types.UUID, body PatchUsersIDRoleJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPatchUsersIdRoleRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPatchUsersIDRoleRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPatchUsersIdRoleRequestWithBody generates requests for PatchUsersIdRole with any type of body
-func NewPatchUsersIdRoleRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+// NewPatchUsersIDRoleRequestWithBody generates requests for PatchUsersIDRole with any type of body
+func NewPatchUsersIDRoleRequestWithBody(server string, id openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2386,8 +2386,8 @@ func NewPatchUsersIdRoleRequestWithBody(server string, id openapi_types.UUID, co
 	return req, nil
 }
 
-// NewGetUsersIdTicketsRequest generates requests for GetUsersIdTickets
-func NewGetUsersIdTicketsRequest(server string, id openapi_types.UUID, params *GetUsersIdTicketsParams) (*http.Request, error) {
+// NewGetUsersIDTicketsRequest generates requests for GetUsersIDTickets
+func NewGetUsersIDTicketsRequest(server string, id openapi_types.UUID, params *GetUsersIDTicketsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2557,19 +2557,19 @@ type ClientWithResponsesInterface interface {
 
 	PostCategoriesWithResponse(ctx context.Context, body PostCategoriesJSONRequestBody, reqEditors ...RequestEditorFn) (*PostCategoriesResponse, error)
 
-	// DeleteCategoriesIdWithResponse request
-	DeleteCategoriesIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteCategoriesIdResponse, error)
+	// DeleteCategoriesIDWithResponse request
+	DeleteCategoriesIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteCategoriesIDResponse, error)
 
 	// GetCategoriesIDWithResponse request
 	GetCategoriesIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetCategoriesIDResponse, error)
 
-	// PutCategoriesIdWithBodyWithResponse request with any body
-	PutCategoriesIdWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutCategoriesIdResponse, error)
+	// PutCategoriesIDWithBodyWithResponse request with any body
+	PutCategoriesIDWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutCategoriesIDResponse, error)
 
-	PutCategoriesIdWithResponse(ctx context.Context, id openapi_types.UUID, body PutCategoriesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutCategoriesIdResponse, error)
+	PutCategoriesIDWithResponse(ctx context.Context, id openapi_types.UUID, body PutCategoriesIDJSONRequestBody, reqEditors ...RequestEditorFn) (*PutCategoriesIDResponse, error)
 
-	// GetCategoriesIdTicketsWithResponse request
-	GetCategoriesIdTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIdTicketsParams, reqEditors ...RequestEditorFn) (*GetCategoriesIdTicketsResponse, error)
+	// GetCategoriesIDTicketsWithResponse request
+	GetCategoriesIDTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIDTicketsParams, reqEditors ...RequestEditorFn) (*GetCategoriesIDTicketsResponse, error)
 
 	// GetOrganizationsWithResponse request
 	GetOrganizationsWithResponse(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsResponse, error)
@@ -2579,22 +2579,22 @@ type ClientWithResponsesInterface interface {
 
 	PostOrganizationsWithResponse(ctx context.Context, body PostOrganizationsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrganizationsResponse, error)
 
-	// DeleteOrganizationsIdWithResponse request
-	DeleteOrganizationsIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIdResponse, error)
+	// DeleteOrganizationsIDWithResponse request
+	DeleteOrganizationsIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIDResponse, error)
 
 	// GetOrganizationsIDWithResponse request
 	GetOrganizationsIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetOrganizationsIDResponse, error)
 
-	// PutOrganizationsIdWithBodyWithResponse request with any body
-	PutOrganizationsIdWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutOrganizationsIdResponse, error)
+	// PutOrganizationsIDWithBodyWithResponse request with any body
+	PutOrganizationsIDWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutOrganizationsIDResponse, error)
 
-	PutOrganizationsIdWithResponse(ctx context.Context, id openapi_types.UUID, body PutOrganizationsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutOrganizationsIdResponse, error)
+	PutOrganizationsIDWithResponse(ctx context.Context, id openapi_types.UUID, body PutOrganizationsIDJSONRequestBody, reqEditors ...RequestEditorFn) (*PutOrganizationsIDResponse, error)
 
-	// GetOrganizationsIdTicketsWithResponse request
-	GetOrganizationsIdTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIdTicketsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsIdTicketsResponse, error)
+	// GetOrganizationsIDTicketsWithResponse request
+	GetOrganizationsIDTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIDTicketsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsIDTicketsResponse, error)
 
-	// GetOrganizationsIdUsersWithResponse request
-	GetOrganizationsIdUsersWithResponse(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIdUsersParams, reqEditors ...RequestEditorFn) (*GetOrganizationsIdUsersResponse, error)
+	// GetOrganizationsIDUsersWithResponse request
+	GetOrganizationsIDUsersWithResponse(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIDUsersParams, reqEditors ...RequestEditorFn) (*GetOrganizationsIDUsersResponse, error)
 
 	// GetTicketsWithResponse request
 	GetTicketsWithResponse(ctx context.Context, params *GetTicketsParams, reqEditors ...RequestEditorFn) (*GetTicketsResponse, error)
@@ -2604,34 +2604,34 @@ type ClientWithResponsesInterface interface {
 
 	PostTicketsWithResponse(ctx context.Context, body PostTicketsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostTicketsResponse, error)
 
-	// DeleteTicketsIdWithResponse request
-	DeleteTicketsIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteTicketsIdResponse, error)
+	// DeleteTicketsIDWithResponse request
+	DeleteTicketsIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteTicketsIDResponse, error)
 
 	// GetTicketsIDWithResponse request
 	GetTicketsIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetTicketsIDResponse, error)
 
-	// PutTicketsIdWithBodyWithResponse request with any body
-	PutTicketsIdWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutTicketsIdResponse, error)
+	// PutTicketsIDWithBodyWithResponse request with any body
+	PutTicketsIDWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutTicketsIDResponse, error)
 
-	PutTicketsIdWithResponse(ctx context.Context, id openapi_types.UUID, body PutTicketsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutTicketsIdResponse, error)
+	PutTicketsIDWithResponse(ctx context.Context, id openapi_types.UUID, body PutTicketsIDJSONRequestBody, reqEditors ...RequestEditorFn) (*PutTicketsIDResponse, error)
 
-	// PatchTicketsIdAssignWithBodyWithResponse request with any body
-	PatchTicketsIdAssignWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchTicketsIdAssignResponse, error)
+	// PatchTicketsIDAssignWithBodyWithResponse request with any body
+	PatchTicketsIDAssignWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchTicketsIDAssignResponse, error)
 
-	PatchTicketsIdAssignWithResponse(ctx context.Context, id openapi_types.UUID, body PatchTicketsIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchTicketsIdAssignResponse, error)
+	PatchTicketsIDAssignWithResponse(ctx context.Context, id openapi_types.UUID, body PatchTicketsIDAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchTicketsIDAssignResponse, error)
 
-	// GetTicketsIdCommentsWithResponse request
-	GetTicketsIdCommentsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetTicketsIdCommentsParams, reqEditors ...RequestEditorFn) (*GetTicketsIdCommentsResponse, error)
+	// GetTicketsIDCommentsWithResponse request
+	GetTicketsIDCommentsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetTicketsIDCommentsParams, reqEditors ...RequestEditorFn) (*GetTicketsIDCommentsResponse, error)
 
-	// PostTicketsIdCommentsWithBodyWithResponse request with any body
-	PostTicketsIdCommentsWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostTicketsIdCommentsResponse, error)
+	// PostTicketsIDCommentsWithBodyWithResponse request with any body
+	PostTicketsIDCommentsWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostTicketsIDCommentsResponse, error)
 
-	PostTicketsIdCommentsWithResponse(ctx context.Context, id openapi_types.UUID, body PostTicketsIdCommentsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostTicketsIdCommentsResponse, error)
+	PostTicketsIDCommentsWithResponse(ctx context.Context, id openapi_types.UUID, body PostTicketsIDCommentsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostTicketsIDCommentsResponse, error)
 
-	// PatchTicketsIdStatusWithBodyWithResponse request with any body
-	PatchTicketsIdStatusWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchTicketsIdStatusResponse, error)
+	// PatchTicketsIDStatusWithBodyWithResponse request with any body
+	PatchTicketsIDStatusWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchTicketsIDStatusResponse, error)
 
-	PatchTicketsIdStatusWithResponse(ctx context.Context, id openapi_types.UUID, body PatchTicketsIdStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchTicketsIdStatusResponse, error)
+	PatchTicketsIDStatusWithResponse(ctx context.Context, id openapi_types.UUID, body PatchTicketsIDStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchTicketsIDStatusResponse, error)
 
 	// GetUsersWithResponse request
 	GetUsersWithResponse(ctx context.Context, params *GetUsersParams, reqEditors ...RequestEditorFn) (*GetUsersResponse, error)
@@ -2641,24 +2641,24 @@ type ClientWithResponsesInterface interface {
 
 	PostUsersWithResponse(ctx context.Context, body PostUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUsersResponse, error)
 
-	// DeleteUsersIdWithResponse request
-	DeleteUsersIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteUsersIdResponse, error)
+	// DeleteUsersIDWithResponse request
+	DeleteUsersIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteUsersIDResponse, error)
 
 	// GetUsersIDWithResponse request
 	GetUsersIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetUsersIDResponse, error)
 
-	// PutUsersIdWithBodyWithResponse request with any body
-	PutUsersIdWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutUsersIdResponse, error)
+	// PutUsersIDWithBodyWithResponse request with any body
+	PutUsersIDWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutUsersIDResponse, error)
 
-	PutUsersIdWithResponse(ctx context.Context, id openapi_types.UUID, body PutUsersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutUsersIdResponse, error)
+	PutUsersIDWithResponse(ctx context.Context, id openapi_types.UUID, body PutUsersIDJSONRequestBody, reqEditors ...RequestEditorFn) (*PutUsersIDResponse, error)
 
-	// PatchUsersIdRoleWithBodyWithResponse request with any body
-	PatchUsersIdRoleWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchUsersIdRoleResponse, error)
+	// PatchUsersIDRoleWithBodyWithResponse request with any body
+	PatchUsersIDRoleWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchUsersIDRoleResponse, error)
 
-	PatchUsersIdRoleWithResponse(ctx context.Context, id openapi_types.UUID, body PatchUsersIdRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchUsersIdRoleResponse, error)
+	PatchUsersIDRoleWithResponse(ctx context.Context, id openapi_types.UUID, body PatchUsersIDRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchUsersIDRoleResponse, error)
 
-	// GetUsersIdTicketsWithResponse request
-	GetUsersIdTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetUsersIdTicketsParams, reqEditors ...RequestEditorFn) (*GetUsersIdTicketsResponse, error)
+	// GetUsersIDTicketsWithResponse request
+	GetUsersIDTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetUsersIDTicketsParams, reqEditors ...RequestEditorFn) (*GetUsersIDTicketsResponse, error)
 }
 
 type GetCategoriesResponse struct {
@@ -2711,7 +2711,7 @@ func (r PostCategoriesResponse) StatusCode() int {
 	return 0
 }
 
-type DeleteCategoriesIdResponse struct {
+type DeleteCategoriesIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *ErrorResponse
@@ -2720,7 +2720,7 @@ type DeleteCategoriesIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteCategoriesIdResponse) Status() string {
+func (r DeleteCategoriesIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2728,7 +2728,7 @@ func (r DeleteCategoriesIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteCategoriesIdResponse) StatusCode() int {
+func (r DeleteCategoriesIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2760,7 +2760,7 @@ func (r GetCategoriesIDResponse) StatusCode() int {
 	return 0
 }
 
-type PutCategoriesIdResponse struct {
+type PutCategoriesIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *GetCategoryResponse
@@ -2771,7 +2771,7 @@ type PutCategoriesIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PutCategoriesIdResponse) Status() string {
+func (r PutCategoriesIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2779,14 +2779,14 @@ func (r PutCategoriesIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PutCategoriesIdResponse) StatusCode() int {
+func (r PutCategoriesIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetCategoriesIdTicketsResponse struct {
+type GetCategoriesIDTicketsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListTicketsResponse
@@ -2796,7 +2796,7 @@ type GetCategoriesIdTicketsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetCategoriesIdTicketsResponse) Status() string {
+func (r GetCategoriesIDTicketsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2804,7 +2804,7 @@ func (r GetCategoriesIdTicketsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetCategoriesIdTicketsResponse) StatusCode() int {
+func (r GetCategoriesIDTicketsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2860,7 +2860,7 @@ func (r PostOrganizationsResponse) StatusCode() int {
 	return 0
 }
 
-type DeleteOrganizationsIdResponse struct {
+type DeleteOrganizationsIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *ErrorResponse
@@ -2869,7 +2869,7 @@ type DeleteOrganizationsIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteOrganizationsIdResponse) Status() string {
+func (r DeleteOrganizationsIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2877,7 +2877,7 @@ func (r DeleteOrganizationsIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteOrganizationsIdResponse) StatusCode() int {
+func (r DeleteOrganizationsIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2909,7 +2909,7 @@ func (r GetOrganizationsIDResponse) StatusCode() int {
 	return 0
 }
 
-type PutOrganizationsIdResponse struct {
+type PutOrganizationsIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *GetOrganizationResponse
@@ -2920,7 +2920,7 @@ type PutOrganizationsIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PutOrganizationsIdResponse) Status() string {
+func (r PutOrganizationsIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2928,14 +2928,14 @@ func (r PutOrganizationsIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PutOrganizationsIdResponse) StatusCode() int {
+func (r PutOrganizationsIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetOrganizationsIdTicketsResponse struct {
+type GetOrganizationsIDTicketsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListTicketsResponse
@@ -2945,7 +2945,7 @@ type GetOrganizationsIdTicketsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetOrganizationsIdTicketsResponse) Status() string {
+func (r GetOrganizationsIDTicketsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2953,14 +2953,14 @@ func (r GetOrganizationsIdTicketsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetOrganizationsIdTicketsResponse) StatusCode() int {
+func (r GetOrganizationsIDTicketsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetOrganizationsIdUsersResponse struct {
+type GetOrganizationsIDUsersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListUsersResponse
@@ -2970,7 +2970,7 @@ type GetOrganizationsIdUsersResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetOrganizationsIdUsersResponse) Status() string {
+func (r GetOrganizationsIDUsersResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2978,7 +2978,7 @@ func (r GetOrganizationsIdUsersResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetOrganizationsIdUsersResponse) StatusCode() int {
+func (r GetOrganizationsIDUsersResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3034,7 +3034,7 @@ func (r PostTicketsResponse) StatusCode() int {
 	return 0
 }
 
-type DeleteTicketsIdResponse struct {
+type DeleteTicketsIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *ErrorResponse
@@ -3043,7 +3043,7 @@ type DeleteTicketsIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteTicketsIdResponse) Status() string {
+func (r DeleteTicketsIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3051,7 +3051,7 @@ func (r DeleteTicketsIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteTicketsIdResponse) StatusCode() int {
+func (r DeleteTicketsIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3083,7 +3083,7 @@ func (r GetTicketsIDResponse) StatusCode() int {
 	return 0
 }
 
-type PutTicketsIdResponse struct {
+type PutTicketsIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *GetTicketResponse
@@ -3093,7 +3093,7 @@ type PutTicketsIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PutTicketsIdResponse) Status() string {
+func (r PutTicketsIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3101,14 +3101,14 @@ func (r PutTicketsIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PutTicketsIdResponse) StatusCode() int {
+func (r PutTicketsIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PatchTicketsIdAssignResponse struct {
+type PatchTicketsIDAssignResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *GetTicketResponse
@@ -3118,7 +3118,7 @@ type PatchTicketsIdAssignResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PatchTicketsIdAssignResponse) Status() string {
+func (r PatchTicketsIDAssignResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3126,14 +3126,14 @@ func (r PatchTicketsIdAssignResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PatchTicketsIdAssignResponse) StatusCode() int {
+func (r PatchTicketsIDAssignResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetTicketsIdCommentsResponse struct {
+type GetTicketsIDCommentsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *[]TicketComment
@@ -3143,7 +3143,7 @@ type GetTicketsIdCommentsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetTicketsIdCommentsResponse) Status() string {
+func (r GetTicketsIDCommentsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3151,14 +3151,14 @@ func (r GetTicketsIdCommentsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetTicketsIdCommentsResponse) StatusCode() int {
+func (r GetTicketsIDCommentsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PostTicketsIdCommentsResponse struct {
+type PostTicketsIDCommentsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON201      *TicketComment
@@ -3168,7 +3168,7 @@ type PostTicketsIdCommentsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostTicketsIdCommentsResponse) Status() string {
+func (r PostTicketsIDCommentsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3176,14 +3176,14 @@ func (r PostTicketsIdCommentsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostTicketsIdCommentsResponse) StatusCode() int {
+func (r PostTicketsIDCommentsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PatchTicketsIdStatusResponse struct {
+type PatchTicketsIDStatusResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *GetTicketResponse
@@ -3193,7 +3193,7 @@ type PatchTicketsIdStatusResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PatchTicketsIdStatusResponse) Status() string {
+func (r PatchTicketsIDStatusResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3201,7 +3201,7 @@ func (r PatchTicketsIdStatusResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PatchTicketsIdStatusResponse) StatusCode() int {
+func (r PatchTicketsIDStatusResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3257,7 +3257,7 @@ func (r PostUsersResponse) StatusCode() int {
 	return 0
 }
 
-type DeleteUsersIdResponse struct {
+type DeleteUsersIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *ErrorResponse
@@ -3266,7 +3266,7 @@ type DeleteUsersIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteUsersIdResponse) Status() string {
+func (r DeleteUsersIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3274,7 +3274,7 @@ func (r DeleteUsersIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteUsersIdResponse) StatusCode() int {
+func (r DeleteUsersIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3306,7 +3306,7 @@ func (r GetUsersIDResponse) StatusCode() int {
 	return 0
 }
 
-type PutUsersIdResponse struct {
+type PutUsersIDResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *GetUserResponse
@@ -3317,7 +3317,7 @@ type PutUsersIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PutUsersIdResponse) Status() string {
+func (r PutUsersIDResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3325,14 +3325,14 @@ func (r PutUsersIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PutUsersIdResponse) StatusCode() int {
+func (r PutUsersIDResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PatchUsersIdRoleResponse struct {
+type PatchUsersIDRoleResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *GetUserResponse
@@ -3342,7 +3342,7 @@ type PatchUsersIdRoleResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PatchUsersIdRoleResponse) Status() string {
+func (r PatchUsersIDRoleResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3350,14 +3350,14 @@ func (r PatchUsersIdRoleResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PatchUsersIdRoleResponse) StatusCode() int {
+func (r PatchUsersIDRoleResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetUsersIdTicketsResponse struct {
+type GetUsersIDTicketsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListTicketsResponse
@@ -3367,7 +3367,7 @@ type GetUsersIdTicketsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetUsersIdTicketsResponse) Status() string {
+func (r GetUsersIDTicketsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3375,7 +3375,7 @@ func (r GetUsersIdTicketsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetUsersIdTicketsResponse) StatusCode() int {
+func (r GetUsersIDTicketsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3408,13 +3408,13 @@ func (c *ClientWithResponses) PostCategoriesWithResponse(ctx context.Context, bo
 	return ParsePostCategoriesResponse(rsp)
 }
 
-// DeleteCategoriesIdWithResponse request returning *DeleteCategoriesIdResponse
-func (c *ClientWithResponses) DeleteCategoriesIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteCategoriesIdResponse, error) {
-	rsp, err := c.DeleteCategoriesId(ctx, id, reqEditors...)
+// DeleteCategoriesIDWithResponse request returning *DeleteCategoriesIDResponse
+func (c *ClientWithResponses) DeleteCategoriesIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteCategoriesIDResponse, error) {
+	rsp, err := c.DeleteCategoriesID(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteCategoriesIdResponse(rsp)
+	return ParseDeleteCategoriesIDResponse(rsp)
 }
 
 // GetCategoriesIDWithResponse request returning *GetCategoriesIDResponse
@@ -3426,30 +3426,30 @@ func (c *ClientWithResponses) GetCategoriesIDWithResponse(ctx context.Context, i
 	return ParseGetCategoriesIDResponse(rsp)
 }
 
-// PutCategoriesIdWithBodyWithResponse request with arbitrary body returning *PutCategoriesIdResponse
-func (c *ClientWithResponses) PutCategoriesIdWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutCategoriesIdResponse, error) {
-	rsp, err := c.PutCategoriesIdWithBody(ctx, id, contentType, body, reqEditors...)
+// PutCategoriesIDWithBodyWithResponse request with arbitrary body returning *PutCategoriesIDResponse
+func (c *ClientWithResponses) PutCategoriesIDWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutCategoriesIDResponse, error) {
+	rsp, err := c.PutCategoriesIDWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePutCategoriesIdResponse(rsp)
+	return ParsePutCategoriesIDResponse(rsp)
 }
 
-func (c *ClientWithResponses) PutCategoriesIdWithResponse(ctx context.Context, id openapi_types.UUID, body PutCategoriesIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutCategoriesIdResponse, error) {
-	rsp, err := c.PutCategoriesId(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) PutCategoriesIDWithResponse(ctx context.Context, id openapi_types.UUID, body PutCategoriesIDJSONRequestBody, reqEditors ...RequestEditorFn) (*PutCategoriesIDResponse, error) {
+	rsp, err := c.PutCategoriesID(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePutCategoriesIdResponse(rsp)
+	return ParsePutCategoriesIDResponse(rsp)
 }
 
-// GetCategoriesIdTicketsWithResponse request returning *GetCategoriesIdTicketsResponse
-func (c *ClientWithResponses) GetCategoriesIdTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIdTicketsParams, reqEditors ...RequestEditorFn) (*GetCategoriesIdTicketsResponse, error) {
-	rsp, err := c.GetCategoriesIdTickets(ctx, id, params, reqEditors...)
+// GetCategoriesIDTicketsWithResponse request returning *GetCategoriesIDTicketsResponse
+func (c *ClientWithResponses) GetCategoriesIDTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIDTicketsParams, reqEditors ...RequestEditorFn) (*GetCategoriesIDTicketsResponse, error) {
+	rsp, err := c.GetCategoriesIDTickets(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetCategoriesIdTicketsResponse(rsp)
+	return ParseGetCategoriesIDTicketsResponse(rsp)
 }
 
 // GetOrganizationsWithResponse request returning *GetOrganizationsResponse
@@ -3478,13 +3478,13 @@ func (c *ClientWithResponses) PostOrganizationsWithResponse(ctx context.Context,
 	return ParsePostOrganizationsResponse(rsp)
 }
 
-// DeleteOrganizationsIdWithResponse request returning *DeleteOrganizationsIdResponse
-func (c *ClientWithResponses) DeleteOrganizationsIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIdResponse, error) {
-	rsp, err := c.DeleteOrganizationsId(ctx, id, reqEditors...)
+// DeleteOrganizationsIDWithResponse request returning *DeleteOrganizationsIDResponse
+func (c *ClientWithResponses) DeleteOrganizationsIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIDResponse, error) {
+	rsp, err := c.DeleteOrganizationsID(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteOrganizationsIdResponse(rsp)
+	return ParseDeleteOrganizationsIDResponse(rsp)
 }
 
 // GetOrganizationsIDWithResponse request returning *GetOrganizationsIDResponse
@@ -3496,39 +3496,39 @@ func (c *ClientWithResponses) GetOrganizationsIDWithResponse(ctx context.Context
 	return ParseGetOrganizationsIDResponse(rsp)
 }
 
-// PutOrganizationsIdWithBodyWithResponse request with arbitrary body returning *PutOrganizationsIdResponse
-func (c *ClientWithResponses) PutOrganizationsIdWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutOrganizationsIdResponse, error) {
-	rsp, err := c.PutOrganizationsIdWithBody(ctx, id, contentType, body, reqEditors...)
+// PutOrganizationsIDWithBodyWithResponse request with arbitrary body returning *PutOrganizationsIDResponse
+func (c *ClientWithResponses) PutOrganizationsIDWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutOrganizationsIDResponse, error) {
+	rsp, err := c.PutOrganizationsIDWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePutOrganizationsIdResponse(rsp)
+	return ParsePutOrganizationsIDResponse(rsp)
 }
 
-func (c *ClientWithResponses) PutOrganizationsIdWithResponse(ctx context.Context, id openapi_types.UUID, body PutOrganizationsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutOrganizationsIdResponse, error) {
-	rsp, err := c.PutOrganizationsId(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) PutOrganizationsIDWithResponse(ctx context.Context, id openapi_types.UUID, body PutOrganizationsIDJSONRequestBody, reqEditors ...RequestEditorFn) (*PutOrganizationsIDResponse, error) {
+	rsp, err := c.PutOrganizationsID(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePutOrganizationsIdResponse(rsp)
+	return ParsePutOrganizationsIDResponse(rsp)
 }
 
-// GetOrganizationsIdTicketsWithResponse request returning *GetOrganizationsIdTicketsResponse
-func (c *ClientWithResponses) GetOrganizationsIdTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIdTicketsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsIdTicketsResponse, error) {
-	rsp, err := c.GetOrganizationsIdTickets(ctx, id, params, reqEditors...)
+// GetOrganizationsIDTicketsWithResponse request returning *GetOrganizationsIDTicketsResponse
+func (c *ClientWithResponses) GetOrganizationsIDTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIDTicketsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsIDTicketsResponse, error) {
+	rsp, err := c.GetOrganizationsIDTickets(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetOrganizationsIdTicketsResponse(rsp)
+	return ParseGetOrganizationsIDTicketsResponse(rsp)
 }
 
-// GetOrganizationsIdUsersWithResponse request returning *GetOrganizationsIdUsersResponse
-func (c *ClientWithResponses) GetOrganizationsIdUsersWithResponse(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIdUsersParams, reqEditors ...RequestEditorFn) (*GetOrganizationsIdUsersResponse, error) {
-	rsp, err := c.GetOrganizationsIdUsers(ctx, id, params, reqEditors...)
+// GetOrganizationsIDUsersWithResponse request returning *GetOrganizationsIDUsersResponse
+func (c *ClientWithResponses) GetOrganizationsIDUsersWithResponse(ctx context.Context, id openapi_types.UUID, params *GetOrganizationsIDUsersParams, reqEditors ...RequestEditorFn) (*GetOrganizationsIDUsersResponse, error) {
+	rsp, err := c.GetOrganizationsIDUsers(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetOrganizationsIdUsersResponse(rsp)
+	return ParseGetOrganizationsIDUsersResponse(rsp)
 }
 
 // GetTicketsWithResponse request returning *GetTicketsResponse
@@ -3557,13 +3557,13 @@ func (c *ClientWithResponses) PostTicketsWithResponse(ctx context.Context, body 
 	return ParsePostTicketsResponse(rsp)
 }
 
-// DeleteTicketsIdWithResponse request returning *DeleteTicketsIdResponse
-func (c *ClientWithResponses) DeleteTicketsIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteTicketsIdResponse, error) {
-	rsp, err := c.DeleteTicketsId(ctx, id, reqEditors...)
+// DeleteTicketsIDWithResponse request returning *DeleteTicketsIDResponse
+func (c *ClientWithResponses) DeleteTicketsIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteTicketsIDResponse, error) {
+	rsp, err := c.DeleteTicketsID(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteTicketsIdResponse(rsp)
+	return ParseDeleteTicketsIDResponse(rsp)
 }
 
 // GetTicketsIDWithResponse request returning *GetTicketsIDResponse
@@ -3575,81 +3575,81 @@ func (c *ClientWithResponses) GetTicketsIDWithResponse(ctx context.Context, id o
 	return ParseGetTicketsIDResponse(rsp)
 }
 
-// PutTicketsIdWithBodyWithResponse request with arbitrary body returning *PutTicketsIdResponse
-func (c *ClientWithResponses) PutTicketsIdWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutTicketsIdResponse, error) {
-	rsp, err := c.PutTicketsIdWithBody(ctx, id, contentType, body, reqEditors...)
+// PutTicketsIDWithBodyWithResponse request with arbitrary body returning *PutTicketsIDResponse
+func (c *ClientWithResponses) PutTicketsIDWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutTicketsIDResponse, error) {
+	rsp, err := c.PutTicketsIDWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePutTicketsIdResponse(rsp)
+	return ParsePutTicketsIDResponse(rsp)
 }
 
-func (c *ClientWithResponses) PutTicketsIdWithResponse(ctx context.Context, id openapi_types.UUID, body PutTicketsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutTicketsIdResponse, error) {
-	rsp, err := c.PutTicketsId(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) PutTicketsIDWithResponse(ctx context.Context, id openapi_types.UUID, body PutTicketsIDJSONRequestBody, reqEditors ...RequestEditorFn) (*PutTicketsIDResponse, error) {
+	rsp, err := c.PutTicketsID(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePutTicketsIdResponse(rsp)
+	return ParsePutTicketsIDResponse(rsp)
 }
 
-// PatchTicketsIdAssignWithBodyWithResponse request with arbitrary body returning *PatchTicketsIdAssignResponse
-func (c *ClientWithResponses) PatchTicketsIdAssignWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchTicketsIdAssignResponse, error) {
-	rsp, err := c.PatchTicketsIdAssignWithBody(ctx, id, contentType, body, reqEditors...)
+// PatchTicketsIDAssignWithBodyWithResponse request with arbitrary body returning *PatchTicketsIDAssignResponse
+func (c *ClientWithResponses) PatchTicketsIDAssignWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchTicketsIDAssignResponse, error) {
+	rsp, err := c.PatchTicketsIDAssignWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchTicketsIdAssignResponse(rsp)
+	return ParsePatchTicketsIDAssignResponse(rsp)
 }
 
-func (c *ClientWithResponses) PatchTicketsIdAssignWithResponse(ctx context.Context, id openapi_types.UUID, body PatchTicketsIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchTicketsIdAssignResponse, error) {
-	rsp, err := c.PatchTicketsIdAssign(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) PatchTicketsIDAssignWithResponse(ctx context.Context, id openapi_types.UUID, body PatchTicketsIDAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchTicketsIDAssignResponse, error) {
+	rsp, err := c.PatchTicketsIDAssign(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchTicketsIdAssignResponse(rsp)
+	return ParsePatchTicketsIDAssignResponse(rsp)
 }
 
-// GetTicketsIdCommentsWithResponse request returning *GetTicketsIdCommentsResponse
-func (c *ClientWithResponses) GetTicketsIdCommentsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetTicketsIdCommentsParams, reqEditors ...RequestEditorFn) (*GetTicketsIdCommentsResponse, error) {
-	rsp, err := c.GetTicketsIdComments(ctx, id, params, reqEditors...)
+// GetTicketsIDCommentsWithResponse request returning *GetTicketsIDCommentsResponse
+func (c *ClientWithResponses) GetTicketsIDCommentsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetTicketsIDCommentsParams, reqEditors ...RequestEditorFn) (*GetTicketsIDCommentsResponse, error) {
+	rsp, err := c.GetTicketsIDComments(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetTicketsIdCommentsResponse(rsp)
+	return ParseGetTicketsIDCommentsResponse(rsp)
 }
 
-// PostTicketsIdCommentsWithBodyWithResponse request with arbitrary body returning *PostTicketsIdCommentsResponse
-func (c *ClientWithResponses) PostTicketsIdCommentsWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostTicketsIdCommentsResponse, error) {
-	rsp, err := c.PostTicketsIdCommentsWithBody(ctx, id, contentType, body, reqEditors...)
+// PostTicketsIDCommentsWithBodyWithResponse request with arbitrary body returning *PostTicketsIDCommentsResponse
+func (c *ClientWithResponses) PostTicketsIDCommentsWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostTicketsIDCommentsResponse, error) {
+	rsp, err := c.PostTicketsIDCommentsWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostTicketsIdCommentsResponse(rsp)
+	return ParsePostTicketsIDCommentsResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostTicketsIdCommentsWithResponse(ctx context.Context, id openapi_types.UUID, body PostTicketsIdCommentsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostTicketsIdCommentsResponse, error) {
-	rsp, err := c.PostTicketsIdComments(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) PostTicketsIDCommentsWithResponse(ctx context.Context, id openapi_types.UUID, body PostTicketsIDCommentsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostTicketsIDCommentsResponse, error) {
+	rsp, err := c.PostTicketsIDComments(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostTicketsIdCommentsResponse(rsp)
+	return ParsePostTicketsIDCommentsResponse(rsp)
 }
 
-// PatchTicketsIdStatusWithBodyWithResponse request with arbitrary body returning *PatchTicketsIdStatusResponse
-func (c *ClientWithResponses) PatchTicketsIdStatusWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchTicketsIdStatusResponse, error) {
-	rsp, err := c.PatchTicketsIdStatusWithBody(ctx, id, contentType, body, reqEditors...)
+// PatchTicketsIDStatusWithBodyWithResponse request with arbitrary body returning *PatchTicketsIDStatusResponse
+func (c *ClientWithResponses) PatchTicketsIDStatusWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchTicketsIDStatusResponse, error) {
+	rsp, err := c.PatchTicketsIDStatusWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchTicketsIdStatusResponse(rsp)
+	return ParsePatchTicketsIDStatusResponse(rsp)
 }
 
-func (c *ClientWithResponses) PatchTicketsIdStatusWithResponse(ctx context.Context, id openapi_types.UUID, body PatchTicketsIdStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchTicketsIdStatusResponse, error) {
-	rsp, err := c.PatchTicketsIdStatus(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) PatchTicketsIDStatusWithResponse(ctx context.Context, id openapi_types.UUID, body PatchTicketsIDStatusJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchTicketsIDStatusResponse, error) {
+	rsp, err := c.PatchTicketsIDStatus(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchTicketsIdStatusResponse(rsp)
+	return ParsePatchTicketsIDStatusResponse(rsp)
 }
 
 // GetUsersWithResponse request returning *GetUsersResponse
@@ -3678,13 +3678,13 @@ func (c *ClientWithResponses) PostUsersWithResponse(ctx context.Context, body Po
 	return ParsePostUsersResponse(rsp)
 }
 
-// DeleteUsersIdWithResponse request returning *DeleteUsersIdResponse
-func (c *ClientWithResponses) DeleteUsersIdWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteUsersIdResponse, error) {
-	rsp, err := c.DeleteUsersId(ctx, id, reqEditors...)
+// DeleteUsersIDWithResponse request returning *DeleteUsersIDResponse
+func (c *ClientWithResponses) DeleteUsersIDWithResponse(ctx context.Context, id openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteUsersIDResponse, error) {
+	rsp, err := c.DeleteUsersID(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteUsersIdResponse(rsp)
+	return ParseDeleteUsersIDResponse(rsp)
 }
 
 // GetUsersIDWithResponse request returning *GetUsersIDResponse
@@ -3696,47 +3696,47 @@ func (c *ClientWithResponses) GetUsersIDWithResponse(ctx context.Context, id ope
 	return ParseGetUsersIDResponse(rsp)
 }
 
-// PutUsersIdWithBodyWithResponse request with arbitrary body returning *PutUsersIdResponse
-func (c *ClientWithResponses) PutUsersIdWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutUsersIdResponse, error) {
-	rsp, err := c.PutUsersIdWithBody(ctx, id, contentType, body, reqEditors...)
+// PutUsersIDWithBodyWithResponse request with arbitrary body returning *PutUsersIDResponse
+func (c *ClientWithResponses) PutUsersIDWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutUsersIDResponse, error) {
+	rsp, err := c.PutUsersIDWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePutUsersIdResponse(rsp)
+	return ParsePutUsersIDResponse(rsp)
 }
 
-func (c *ClientWithResponses) PutUsersIdWithResponse(ctx context.Context, id openapi_types.UUID, body PutUsersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutUsersIdResponse, error) {
-	rsp, err := c.PutUsersId(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) PutUsersIDWithResponse(ctx context.Context, id openapi_types.UUID, body PutUsersIDJSONRequestBody, reqEditors ...RequestEditorFn) (*PutUsersIDResponse, error) {
+	rsp, err := c.PutUsersID(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePutUsersIdResponse(rsp)
+	return ParsePutUsersIDResponse(rsp)
 }
 
-// PatchUsersIdRoleWithBodyWithResponse request with arbitrary body returning *PatchUsersIdRoleResponse
-func (c *ClientWithResponses) PatchUsersIdRoleWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchUsersIdRoleResponse, error) {
-	rsp, err := c.PatchUsersIdRoleWithBody(ctx, id, contentType, body, reqEditors...)
+// PatchUsersIDRoleWithBodyWithResponse request with arbitrary body returning *PatchUsersIDRoleResponse
+func (c *ClientWithResponses) PatchUsersIDRoleWithBodyWithResponse(ctx context.Context, id openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchUsersIDRoleResponse, error) {
+	rsp, err := c.PatchUsersIDRoleWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchUsersIdRoleResponse(rsp)
+	return ParsePatchUsersIDRoleResponse(rsp)
 }
 
-func (c *ClientWithResponses) PatchUsersIdRoleWithResponse(ctx context.Context, id openapi_types.UUID, body PatchUsersIdRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchUsersIdRoleResponse, error) {
-	rsp, err := c.PatchUsersIdRole(ctx, id, body, reqEditors...)
+func (c *ClientWithResponses) PatchUsersIDRoleWithResponse(ctx context.Context, id openapi_types.UUID, body PatchUsersIDRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchUsersIDRoleResponse, error) {
+	rsp, err := c.PatchUsersIDRole(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchUsersIdRoleResponse(rsp)
+	return ParsePatchUsersIDRoleResponse(rsp)
 }
 
-// GetUsersIdTicketsWithResponse request returning *GetUsersIdTicketsResponse
-func (c *ClientWithResponses) GetUsersIdTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetUsersIdTicketsParams, reqEditors ...RequestEditorFn) (*GetUsersIdTicketsResponse, error) {
-	rsp, err := c.GetUsersIdTickets(ctx, id, params, reqEditors...)
+// GetUsersIDTicketsWithResponse request returning *GetUsersIDTicketsResponse
+func (c *ClientWithResponses) GetUsersIDTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetUsersIDTicketsParams, reqEditors ...RequestEditorFn) (*GetUsersIDTicketsResponse, error) {
+	rsp, err := c.GetUsersIDTickets(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetUsersIdTicketsResponse(rsp)
+	return ParseGetUsersIDTicketsResponse(rsp)
 }
 
 // ParseGetCategoriesResponse parses an HTTP response from a GetCategoriesWithResponse call
@@ -3833,15 +3833,15 @@ func ParsePostCategoriesResponse(rsp *http.Response) (*PostCategoriesResponse, e
 	return response, nil
 }
 
-// ParseDeleteCategoriesIdResponse parses an HTTP response from a DeleteCategoriesIdWithResponse call
-func ParseDeleteCategoriesIdResponse(rsp *http.Response) (*DeleteCategoriesIdResponse, error) {
+// ParseDeleteCategoriesIDResponse parses an HTTP response from a DeleteCategoriesIDWithResponse call
+func ParseDeleteCategoriesIDResponse(rsp *http.Response) (*DeleteCategoriesIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteCategoriesIdResponse{
+	response := &DeleteCategoriesIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3920,15 +3920,15 @@ func ParseGetCategoriesIDResponse(rsp *http.Response) (*GetCategoriesIDResponse,
 	return response, nil
 }
 
-// ParsePutCategoriesIdResponse parses an HTTP response from a PutCategoriesIdWithResponse call
-func ParsePutCategoriesIdResponse(rsp *http.Response) (*PutCategoriesIdResponse, error) {
+// ParsePutCategoriesIDResponse parses an HTTP response from a PutCategoriesIDWithResponse call
+func ParsePutCategoriesIDResponse(rsp *http.Response) (*PutCategoriesIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PutCategoriesIdResponse{
+	response := &PutCategoriesIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3974,15 +3974,15 @@ func ParsePutCategoriesIdResponse(rsp *http.Response) (*PutCategoriesIdResponse,
 	return response, nil
 }
 
-// ParseGetCategoriesIdTicketsResponse parses an HTTP response from a GetCategoriesIdTicketsWithResponse call
-func ParseGetCategoriesIdTicketsResponse(rsp *http.Response) (*GetCategoriesIdTicketsResponse, error) {
+// ParseGetCategoriesIDTicketsResponse parses an HTTP response from a GetCategoriesIDTicketsWithResponse call
+func ParseGetCategoriesIDTicketsResponse(rsp *http.Response) (*GetCategoriesIDTicketsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetCategoriesIdTicketsResponse{
+	response := &GetCategoriesIDTicketsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4108,15 +4108,15 @@ func ParsePostOrganizationsResponse(rsp *http.Response) (*PostOrganizationsRespo
 	return response, nil
 }
 
-// ParseDeleteOrganizationsIdResponse parses an HTTP response from a DeleteOrganizationsIdWithResponse call
-func ParseDeleteOrganizationsIdResponse(rsp *http.Response) (*DeleteOrganizationsIdResponse, error) {
+// ParseDeleteOrganizationsIDResponse parses an HTTP response from a DeleteOrganizationsIDWithResponse call
+func ParseDeleteOrganizationsIDResponse(rsp *http.Response) (*DeleteOrganizationsIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteOrganizationsIdResponse{
+	response := &DeleteOrganizationsIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4195,15 +4195,15 @@ func ParseGetOrganizationsIDResponse(rsp *http.Response) (*GetOrganizationsIDRes
 	return response, nil
 }
 
-// ParsePutOrganizationsIdResponse parses an HTTP response from a PutOrganizationsIdWithResponse call
-func ParsePutOrganizationsIdResponse(rsp *http.Response) (*PutOrganizationsIdResponse, error) {
+// ParsePutOrganizationsIDResponse parses an HTTP response from a PutOrganizationsIDWithResponse call
+func ParsePutOrganizationsIDResponse(rsp *http.Response) (*PutOrganizationsIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PutOrganizationsIdResponse{
+	response := &PutOrganizationsIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4249,15 +4249,15 @@ func ParsePutOrganizationsIdResponse(rsp *http.Response) (*PutOrganizationsIdRes
 	return response, nil
 }
 
-// ParseGetOrganizationsIdTicketsResponse parses an HTTP response from a GetOrganizationsIdTicketsWithResponse call
-func ParseGetOrganizationsIdTicketsResponse(rsp *http.Response) (*GetOrganizationsIdTicketsResponse, error) {
+// ParseGetOrganizationsIDTicketsResponse parses an HTTP response from a GetOrganizationsIDTicketsWithResponse call
+func ParseGetOrganizationsIDTicketsResponse(rsp *http.Response) (*GetOrganizationsIDTicketsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetOrganizationsIdTicketsResponse{
+	response := &GetOrganizationsIDTicketsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4296,15 +4296,15 @@ func ParseGetOrganizationsIdTicketsResponse(rsp *http.Response) (*GetOrganizatio
 	return response, nil
 }
 
-// ParseGetOrganizationsIdUsersResponse parses an HTTP response from a GetOrganizationsIdUsersWithResponse call
-func ParseGetOrganizationsIdUsersResponse(rsp *http.Response) (*GetOrganizationsIdUsersResponse, error) {
+// ParseGetOrganizationsIDUsersResponse parses an HTTP response from a GetOrganizationsIDUsersWithResponse call
+func ParseGetOrganizationsIDUsersResponse(rsp *http.Response) (*GetOrganizationsIDUsersResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetOrganizationsIdUsersResponse{
+	response := &GetOrganizationsIDUsersResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4430,15 +4430,15 @@ func ParsePostTicketsResponse(rsp *http.Response) (*PostTicketsResponse, error) 
 	return response, nil
 }
 
-// ParseDeleteTicketsIdResponse parses an HTTP response from a DeleteTicketsIdWithResponse call
-func ParseDeleteTicketsIdResponse(rsp *http.Response) (*DeleteTicketsIdResponse, error) {
+// ParseDeleteTicketsIDResponse parses an HTTP response from a DeleteTicketsIDWithResponse call
+func ParseDeleteTicketsIDResponse(rsp *http.Response) (*DeleteTicketsIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteTicketsIdResponse{
+	response := &DeleteTicketsIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4517,15 +4517,15 @@ func ParseGetTicketsIDResponse(rsp *http.Response) (*GetTicketsIDResponse, error
 	return response, nil
 }
 
-// ParsePutTicketsIdResponse parses an HTTP response from a PutTicketsIdWithResponse call
-func ParsePutTicketsIdResponse(rsp *http.Response) (*PutTicketsIdResponse, error) {
+// ParsePutTicketsIDResponse parses an HTTP response from a PutTicketsIDWithResponse call
+func ParsePutTicketsIDResponse(rsp *http.Response) (*PutTicketsIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PutTicketsIdResponse{
+	response := &PutTicketsIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4564,15 +4564,15 @@ func ParsePutTicketsIdResponse(rsp *http.Response) (*PutTicketsIdResponse, error
 	return response, nil
 }
 
-// ParsePatchTicketsIdAssignResponse parses an HTTP response from a PatchTicketsIdAssignWithResponse call
-func ParsePatchTicketsIdAssignResponse(rsp *http.Response) (*PatchTicketsIdAssignResponse, error) {
+// ParsePatchTicketsIDAssignResponse parses an HTTP response from a PatchTicketsIDAssignWithResponse call
+func ParsePatchTicketsIDAssignResponse(rsp *http.Response) (*PatchTicketsIDAssignResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PatchTicketsIdAssignResponse{
+	response := &PatchTicketsIDAssignResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4611,15 +4611,15 @@ func ParsePatchTicketsIdAssignResponse(rsp *http.Response) (*PatchTicketsIdAssig
 	return response, nil
 }
 
-// ParseGetTicketsIdCommentsResponse parses an HTTP response from a GetTicketsIdCommentsWithResponse call
-func ParseGetTicketsIdCommentsResponse(rsp *http.Response) (*GetTicketsIdCommentsResponse, error) {
+// ParseGetTicketsIDCommentsResponse parses an HTTP response from a GetTicketsIDCommentsWithResponse call
+func ParseGetTicketsIDCommentsResponse(rsp *http.Response) (*GetTicketsIDCommentsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetTicketsIdCommentsResponse{
+	response := &GetTicketsIDCommentsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4658,15 +4658,15 @@ func ParseGetTicketsIdCommentsResponse(rsp *http.Response) (*GetTicketsIdComment
 	return response, nil
 }
 
-// ParsePostTicketsIdCommentsResponse parses an HTTP response from a PostTicketsIdCommentsWithResponse call
-func ParsePostTicketsIdCommentsResponse(rsp *http.Response) (*PostTicketsIdCommentsResponse, error) {
+// ParsePostTicketsIDCommentsResponse parses an HTTP response from a PostTicketsIDCommentsWithResponse call
+func ParsePostTicketsIDCommentsResponse(rsp *http.Response) (*PostTicketsIDCommentsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostTicketsIdCommentsResponse{
+	response := &PostTicketsIDCommentsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4705,15 +4705,15 @@ func ParsePostTicketsIdCommentsResponse(rsp *http.Response) (*PostTicketsIdComme
 	return response, nil
 }
 
-// ParsePatchTicketsIdStatusResponse parses an HTTP response from a PatchTicketsIdStatusWithResponse call
-func ParsePatchTicketsIdStatusResponse(rsp *http.Response) (*PatchTicketsIdStatusResponse, error) {
+// ParsePatchTicketsIDStatusResponse parses an HTTP response from a PatchTicketsIDStatusWithResponse call
+func ParsePatchTicketsIDStatusResponse(rsp *http.Response) (*PatchTicketsIDStatusResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PatchTicketsIdStatusResponse{
+	response := &PatchTicketsIDStatusResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4839,15 +4839,15 @@ func ParsePostUsersResponse(rsp *http.Response) (*PostUsersResponse, error) {
 	return response, nil
 }
 
-// ParseDeleteUsersIdResponse parses an HTTP response from a DeleteUsersIdWithResponse call
-func ParseDeleteUsersIdResponse(rsp *http.Response) (*DeleteUsersIdResponse, error) {
+// ParseDeleteUsersIDResponse parses an HTTP response from a DeleteUsersIDWithResponse call
+func ParseDeleteUsersIDResponse(rsp *http.Response) (*DeleteUsersIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteUsersIdResponse{
+	response := &DeleteUsersIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4926,15 +4926,15 @@ func ParseGetUsersIDResponse(rsp *http.Response) (*GetUsersIDResponse, error) {
 	return response, nil
 }
 
-// ParsePutUsersIdResponse parses an HTTP response from a PutUsersIdWithResponse call
-func ParsePutUsersIdResponse(rsp *http.Response) (*PutUsersIdResponse, error) {
+// ParsePutUsersIDResponse parses an HTTP response from a PutUsersIDWithResponse call
+func ParsePutUsersIDResponse(rsp *http.Response) (*PutUsersIDResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PutUsersIdResponse{
+	response := &PutUsersIDResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4980,15 +4980,15 @@ func ParsePutUsersIdResponse(rsp *http.Response) (*PutUsersIdResponse, error) {
 	return response, nil
 }
 
-// ParsePatchUsersIdRoleResponse parses an HTTP response from a PatchUsersIdRoleWithResponse call
-func ParsePatchUsersIdRoleResponse(rsp *http.Response) (*PatchUsersIdRoleResponse, error) {
+// ParsePatchUsersIDRoleResponse parses an HTTP response from a PatchUsersIDRoleWithResponse call
+func ParsePatchUsersIDRoleResponse(rsp *http.Response) (*PatchUsersIDRoleResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PatchUsersIdRoleResponse{
+	response := &PatchUsersIDRoleResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -5027,15 +5027,15 @@ func ParsePatchUsersIdRoleResponse(rsp *http.Response) (*PatchUsersIdRoleRespons
 	return response, nil
 }
 
-// ParseGetUsersIdTicketsResponse parses an HTTP response from a GetUsersIdTicketsWithResponse call
-func ParseGetUsersIdTicketsResponse(rsp *http.Response) (*GetUsersIdTicketsResponse, error) {
+// ParseGetUsersIDTicketsResponse parses an HTTP response from a GetUsersIDTicketsWithResponse call
+func ParseGetUsersIDTicketsResponse(rsp *http.Response) (*GetUsersIDTicketsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetUsersIdTicketsResponse{
+	response := &GetUsersIDTicketsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

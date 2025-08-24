@@ -11,7 +11,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func (h TicketHandlers) DeleteTicketsId(c echo.Context, id openapi_types.UUID) error {
+func (h TicketHandlers) DeleteTicketsID(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
 
 	err := h.repo.DeleteTicket(ctx, id)

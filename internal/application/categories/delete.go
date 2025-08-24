@@ -7,7 +7,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func (h CategoryHandlers) DeleteCategoriesId(c echo.Context, id openapi_types.UUID) error {
+func (h CategoryHandlers) DeleteCategoriesID(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
 
 	err := h.repo.DeleteCategory(ctx, id)

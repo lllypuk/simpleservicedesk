@@ -9,7 +9,9 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func (h CategoryHandlers) GetCategoriesIdTickets(c echo.Context, id openapi_types.UUID, _ openapi.GetCategoriesIdTicketsParams) error {
+func (h CategoryHandlers) GetCategoriesIDTickets(
+	c echo.Context, id openapi_types.UUID, _ openapi.GetCategoriesIDTicketsParams,
+) error {
 	ctx := c.Request().Context()
 
 	// First verify the category exists

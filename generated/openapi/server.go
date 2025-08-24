@@ -22,16 +22,16 @@ type ServerInterface interface {
 	PostCategories(ctx echo.Context) error
 	// Delete a category
 	// (DELETE /categories/{id})
-	DeleteCategoriesId(ctx echo.Context, id openapi_types.UUID) error
+	DeleteCategoriesID(ctx echo.Context, id openapi_types.UUID) error
 	// Get a category by ID
 	// (GET /categories/{id})
 	GetCategoriesID(ctx echo.Context, id openapi_types.UUID) error
 	// Update a category
 	// (PUT /categories/{id})
-	PutCategoriesId(ctx echo.Context, id openapi_types.UUID) error
+	PutCategoriesID(ctx echo.Context, id openapi_types.UUID) error
 	// Get tickets in a category
 	// (GET /categories/{id}/tickets)
-	GetCategoriesIdTickets(ctx echo.Context, id openapi_types.UUID, params GetCategoriesIdTicketsParams) error
+	GetCategoriesIDTickets(ctx echo.Context, id openapi_types.UUID, params GetCategoriesIDTicketsParams) error
 	// List organizations with pagination
 	// (GET /organizations)
 	GetOrganizations(ctx echo.Context, params GetOrganizationsParams) error
@@ -40,19 +40,19 @@ type ServerInterface interface {
 	PostOrganizations(ctx echo.Context) error
 	// Delete an organization
 	// (DELETE /organizations/{id})
-	DeleteOrganizationsId(ctx echo.Context, id openapi_types.UUID) error
+	DeleteOrganizationsID(ctx echo.Context, id openapi_types.UUID) error
 	// Get an organization by ID
 	// (GET /organizations/{id})
 	GetOrganizationsID(ctx echo.Context, id openapi_types.UUID) error
 	// Update an organization
 	// (PUT /organizations/{id})
-	PutOrganizationsId(ctx echo.Context, id openapi_types.UUID) error
+	PutOrganizationsID(ctx echo.Context, id openapi_types.UUID) error
 	// Get tickets in an organization
 	// (GET /organizations/{id}/tickets)
-	GetOrganizationsIdTickets(ctx echo.Context, id openapi_types.UUID, params GetOrganizationsIdTicketsParams) error
+	GetOrganizationsIDTickets(ctx echo.Context, id openapi_types.UUID, params GetOrganizationsIDTicketsParams) error
 	// Get users in an organization
 	// (GET /organizations/{id}/users)
-	GetOrganizationsIdUsers(ctx echo.Context, id openapi_types.UUID, params GetOrganizationsIdUsersParams) error
+	GetOrganizationsIDUsers(ctx echo.Context, id openapi_types.UUID, params GetOrganizationsIDUsersParams) error
 	// List tickets with filtering and pagination
 	// (GET /tickets)
 	GetTickets(ctx echo.Context, params GetTicketsParams) error
@@ -61,25 +61,25 @@ type ServerInterface interface {
 	PostTickets(ctx echo.Context) error
 	// Delete a ticket
 	// (DELETE /tickets/{id})
-	DeleteTicketsId(ctx echo.Context, id openapi_types.UUID) error
+	DeleteTicketsID(ctx echo.Context, id openapi_types.UUID) error
 	// Get a ticket by ID
 	// (GET /tickets/{id})
 	GetTicketsID(ctx echo.Context, id openapi_types.UUID) error
 	// Update a ticket
 	// (PUT /tickets/{id})
-	PutTicketsId(ctx echo.Context, id openapi_types.UUID) error
+	PutTicketsID(ctx echo.Context, id openapi_types.UUID) error
 	// Assign or unassign ticket
 	// (PATCH /tickets/{id}/assign)
-	PatchTicketsIdAssign(ctx echo.Context, id openapi_types.UUID) error
+	PatchTicketsIDAssign(ctx echo.Context, id openapi_types.UUID) error
 	// Get ticket comments
 	// (GET /tickets/{id}/comments)
-	GetTicketsIdComments(ctx echo.Context, id openapi_types.UUID, params GetTicketsIdCommentsParams) error
+	GetTicketsIDComments(ctx echo.Context, id openapi_types.UUID, params GetTicketsIDCommentsParams) error
 	// Add a comment to a ticket
 	// (POST /tickets/{id}/comments)
-	PostTicketsIdComments(ctx echo.Context, id openapi_types.UUID) error
+	PostTicketsIDComments(ctx echo.Context, id openapi_types.UUID) error
 	// Update ticket status
 	// (PATCH /tickets/{id}/status)
-	PatchTicketsIdStatus(ctx echo.Context, id openapi_types.UUID) error
+	PatchTicketsIDStatus(ctx echo.Context, id openapi_types.UUID) error
 	// List users with filtering and pagination
 	// (GET /users)
 	GetUsers(ctx echo.Context, params GetUsersParams) error
@@ -88,19 +88,19 @@ type ServerInterface interface {
 	PostUsers(ctx echo.Context) error
 	// Delete a user
 	// (DELETE /users/{id})
-	DeleteUsersId(ctx echo.Context, id openapi_types.UUID) error
+	DeleteUsersID(ctx echo.Context, id openapi_types.UUID) error
 	// Get a user by ID
 	// (GET /users/{id})
 	GetUsersID(ctx echo.Context, id openapi_types.UUID) error
 	// Update a user
 	// (PUT /users/{id})
-	PutUsersId(ctx echo.Context, id openapi_types.UUID) error
+	PutUsersID(ctx echo.Context, id openapi_types.UUID) error
 	// Update user role
 	// (PATCH /users/{id}/role)
-	PatchUsersIdRole(ctx echo.Context, id openapi_types.UUID) error
+	PatchUsersIDRole(ctx echo.Context, id openapi_types.UUID) error
 	// Get user tickets
 	// (GET /users/{id}/tickets)
-	GetUsersIdTickets(ctx echo.Context, id openapi_types.UUID, params GetUsersIdTicketsParams) error
+	GetUsersIDTickets(ctx echo.Context, id openapi_types.UUID, params GetUsersIDTicketsParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -156,8 +156,8 @@ func (w *ServerInterfaceWrapper) PostCategories(ctx echo.Context) error {
 	return err
 }
 
-// DeleteCategoriesId converts echo context to params.
-func (w *ServerInterfaceWrapper) DeleteCategoriesId(ctx echo.Context) error {
+// DeleteCategoriesID converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteCategoriesID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -168,7 +168,7 @@ func (w *ServerInterfaceWrapper) DeleteCategoriesId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.DeleteCategoriesId(ctx, id)
+	err = w.Handler.DeleteCategoriesID(ctx, id)
 	return err
 }
 
@@ -188,8 +188,8 @@ func (w *ServerInterfaceWrapper) GetCategoriesID(ctx echo.Context) error {
 	return err
 }
 
-// PutCategoriesId converts echo context to params.
-func (w *ServerInterfaceWrapper) PutCategoriesId(ctx echo.Context) error {
+// PutCategoriesID converts echo context to params.
+func (w *ServerInterfaceWrapper) PutCategoriesID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -200,12 +200,12 @@ func (w *ServerInterfaceWrapper) PutCategoriesId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PutCategoriesId(ctx, id)
+	err = w.Handler.PutCategoriesID(ctx, id)
 	return err
 }
 
-// GetCategoriesIdTickets converts echo context to params.
-func (w *ServerInterfaceWrapper) GetCategoriesIdTickets(ctx echo.Context) error {
+// GetCategoriesIDTickets converts echo context to params.
+func (w *ServerInterfaceWrapper) GetCategoriesIDTickets(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -216,7 +216,7 @@ func (w *ServerInterfaceWrapper) GetCategoriesIdTickets(ctx echo.Context) error 
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetCategoriesIdTicketsParams
+	var params GetCategoriesIDTicketsParams
 	// ------------- Optional query parameter "status" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "status", ctx.QueryParams(), &params.Status)
@@ -253,7 +253,7 @@ func (w *ServerInterfaceWrapper) GetCategoriesIdTickets(ctx echo.Context) error 
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetCategoriesIdTickets(ctx, id, params)
+	err = w.Handler.GetCategoriesIDTickets(ctx, id, params)
 	return err
 }
 
@@ -319,8 +319,8 @@ func (w *ServerInterfaceWrapper) PostOrganizations(ctx echo.Context) error {
 	return err
 }
 
-// DeleteOrganizationsId converts echo context to params.
-func (w *ServerInterfaceWrapper) DeleteOrganizationsId(ctx echo.Context) error {
+// DeleteOrganizationsID converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteOrganizationsID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -331,7 +331,7 @@ func (w *ServerInterfaceWrapper) DeleteOrganizationsId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.DeleteOrganizationsId(ctx, id)
+	err = w.Handler.DeleteOrganizationsID(ctx, id)
 	return err
 }
 
@@ -351,8 +351,8 @@ func (w *ServerInterfaceWrapper) GetOrganizationsID(ctx echo.Context) error {
 	return err
 }
 
-// PutOrganizationsId converts echo context to params.
-func (w *ServerInterfaceWrapper) PutOrganizationsId(ctx echo.Context) error {
+// PutOrganizationsID converts echo context to params.
+func (w *ServerInterfaceWrapper) PutOrganizationsID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -363,12 +363,12 @@ func (w *ServerInterfaceWrapper) PutOrganizationsId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PutOrganizationsId(ctx, id)
+	err = w.Handler.PutOrganizationsID(ctx, id)
 	return err
 }
 
-// GetOrganizationsIdTickets converts echo context to params.
-func (w *ServerInterfaceWrapper) GetOrganizationsIdTickets(ctx echo.Context) error {
+// GetOrganizationsIDTickets converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOrganizationsIDTickets(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -379,7 +379,7 @@ func (w *ServerInterfaceWrapper) GetOrganizationsIdTickets(ctx echo.Context) err
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetOrganizationsIdTicketsParams
+	var params GetOrganizationsIDTicketsParams
 	// ------------- Optional query parameter "status" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "status", ctx.QueryParams(), &params.Status)
@@ -409,12 +409,12 @@ func (w *ServerInterfaceWrapper) GetOrganizationsIdTickets(ctx echo.Context) err
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetOrganizationsIdTickets(ctx, id, params)
+	err = w.Handler.GetOrganizationsIDTickets(ctx, id, params)
 	return err
 }
 
-// GetOrganizationsIdUsers converts echo context to params.
-func (w *ServerInterfaceWrapper) GetOrganizationsIdUsers(ctx echo.Context) error {
+// GetOrganizationsIDUsers converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOrganizationsIDUsers(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -425,7 +425,7 @@ func (w *ServerInterfaceWrapper) GetOrganizationsIdUsers(ctx echo.Context) error
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetOrganizationsIdUsersParams
+	var params GetOrganizationsIDUsersParams
 	// ------------- Optional query parameter "page" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
@@ -441,7 +441,7 @@ func (w *ServerInterfaceWrapper) GetOrganizationsIdUsers(ctx echo.Context) error
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetOrganizationsIdUsers(ctx, id, params)
+	err = w.Handler.GetOrganizationsIDUsers(ctx, id, params)
 	return err
 }
 
@@ -521,8 +521,8 @@ func (w *ServerInterfaceWrapper) PostTickets(ctx echo.Context) error {
 	return err
 }
 
-// DeleteTicketsId converts echo context to params.
-func (w *ServerInterfaceWrapper) DeleteTicketsId(ctx echo.Context) error {
+// DeleteTicketsID converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteTicketsID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -533,7 +533,7 @@ func (w *ServerInterfaceWrapper) DeleteTicketsId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.DeleteTicketsId(ctx, id)
+	err = w.Handler.DeleteTicketsID(ctx, id)
 	return err
 }
 
@@ -553,8 +553,8 @@ func (w *ServerInterfaceWrapper) GetTicketsID(ctx echo.Context) error {
 	return err
 }
 
-// PutTicketsId converts echo context to params.
-func (w *ServerInterfaceWrapper) PutTicketsId(ctx echo.Context) error {
+// PutTicketsID converts echo context to params.
+func (w *ServerInterfaceWrapper) PutTicketsID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -565,12 +565,12 @@ func (w *ServerInterfaceWrapper) PutTicketsId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PutTicketsId(ctx, id)
+	err = w.Handler.PutTicketsID(ctx, id)
 	return err
 }
 
-// PatchTicketsIdAssign converts echo context to params.
-func (w *ServerInterfaceWrapper) PatchTicketsIdAssign(ctx echo.Context) error {
+// PatchTicketsIDAssign converts echo context to params.
+func (w *ServerInterfaceWrapper) PatchTicketsIDAssign(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -581,12 +581,12 @@ func (w *ServerInterfaceWrapper) PatchTicketsIdAssign(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PatchTicketsIdAssign(ctx, id)
+	err = w.Handler.PatchTicketsIDAssign(ctx, id)
 	return err
 }
 
-// GetTicketsIdComments converts echo context to params.
-func (w *ServerInterfaceWrapper) GetTicketsIdComments(ctx echo.Context) error {
+// GetTicketsIDComments converts echo context to params.
+func (w *ServerInterfaceWrapper) GetTicketsIDComments(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -597,7 +597,7 @@ func (w *ServerInterfaceWrapper) GetTicketsIdComments(ctx echo.Context) error {
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetTicketsIdCommentsParams
+	var params GetTicketsIDCommentsParams
 	// ------------- Optional query parameter "include_internal" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "include_internal", ctx.QueryParams(), &params.IncludeInternal)
@@ -606,12 +606,12 @@ func (w *ServerInterfaceWrapper) GetTicketsIdComments(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetTicketsIdComments(ctx, id, params)
+	err = w.Handler.GetTicketsIDComments(ctx, id, params)
 	return err
 }
 
-// PostTicketsIdComments converts echo context to params.
-func (w *ServerInterfaceWrapper) PostTicketsIdComments(ctx echo.Context) error {
+// PostTicketsIDComments converts echo context to params.
+func (w *ServerInterfaceWrapper) PostTicketsIDComments(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -622,12 +622,12 @@ func (w *ServerInterfaceWrapper) PostTicketsIdComments(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostTicketsIdComments(ctx, id)
+	err = w.Handler.PostTicketsIDComments(ctx, id)
 	return err
 }
 
-// PatchTicketsIdStatus converts echo context to params.
-func (w *ServerInterfaceWrapper) PatchTicketsIdStatus(ctx echo.Context) error {
+// PatchTicketsIDStatus converts echo context to params.
+func (w *ServerInterfaceWrapper) PatchTicketsIDStatus(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -638,7 +638,7 @@ func (w *ServerInterfaceWrapper) PatchTicketsIdStatus(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PatchTicketsIdStatus(ctx, id)
+	err = w.Handler.PatchTicketsIDStatus(ctx, id)
 	return err
 }
 
@@ -711,8 +711,8 @@ func (w *ServerInterfaceWrapper) PostUsers(ctx echo.Context) error {
 	return err
 }
 
-// DeleteUsersId converts echo context to params.
-func (w *ServerInterfaceWrapper) DeleteUsersId(ctx echo.Context) error {
+// DeleteUsersID converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteUsersID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -723,7 +723,7 @@ func (w *ServerInterfaceWrapper) DeleteUsersId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.DeleteUsersId(ctx, id)
+	err = w.Handler.DeleteUsersID(ctx, id)
 	return err
 }
 
@@ -743,8 +743,8 @@ func (w *ServerInterfaceWrapper) GetUsersID(ctx echo.Context) error {
 	return err
 }
 
-// PutUsersId converts echo context to params.
-func (w *ServerInterfaceWrapper) PutUsersId(ctx echo.Context) error {
+// PutUsersID converts echo context to params.
+func (w *ServerInterfaceWrapper) PutUsersID(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -755,12 +755,12 @@ func (w *ServerInterfaceWrapper) PutUsersId(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PutUsersId(ctx, id)
+	err = w.Handler.PutUsersID(ctx, id)
 	return err
 }
 
-// PatchUsersIdRole converts echo context to params.
-func (w *ServerInterfaceWrapper) PatchUsersIdRole(ctx echo.Context) error {
+// PatchUsersIDRole converts echo context to params.
+func (w *ServerInterfaceWrapper) PatchUsersIDRole(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -771,12 +771,12 @@ func (w *ServerInterfaceWrapper) PatchUsersIdRole(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PatchUsersIdRole(ctx, id)
+	err = w.Handler.PatchUsersIDRole(ctx, id)
 	return err
 }
 
-// GetUsersIdTickets converts echo context to params.
-func (w *ServerInterfaceWrapper) GetUsersIdTickets(ctx echo.Context) error {
+// GetUsersIDTickets converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsersIDTickets(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
 	var id openapi_types.UUID
@@ -787,7 +787,7 @@ func (w *ServerInterfaceWrapper) GetUsersIdTickets(ctx echo.Context) error {
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetUsersIdTicketsParams
+	var params GetUsersIDTicketsParams
 	// ------------- Optional query parameter "status" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "status", ctx.QueryParams(), &params.Status)
@@ -824,7 +824,7 @@ func (w *ServerInterfaceWrapper) GetUsersIdTickets(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetUsersIdTickets(ctx, id, params)
+	err = w.Handler.GetUsersIDTickets(ctx, id, params)
 	return err
 }
 
@@ -858,32 +858,32 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/categories", wrapper.GetCategories)
 	router.POST(baseURL+"/categories", wrapper.PostCategories)
-	router.DELETE(baseURL+"/categories/:id", wrapper.DeleteCategoriesId)
+	router.DELETE(baseURL+"/categories/:id", wrapper.DeleteCategoriesID)
 	router.GET(baseURL+"/categories/:id", wrapper.GetCategoriesID)
-	router.PUT(baseURL+"/categories/:id", wrapper.PutCategoriesId)
-	router.GET(baseURL+"/categories/:id/tickets", wrapper.GetCategoriesIdTickets)
+	router.PUT(baseURL+"/categories/:id", wrapper.PutCategoriesID)
+	router.GET(baseURL+"/categories/:id/tickets", wrapper.GetCategoriesIDTickets)
 	router.GET(baseURL+"/organizations", wrapper.GetOrganizations)
 	router.POST(baseURL+"/organizations", wrapper.PostOrganizations)
-	router.DELETE(baseURL+"/organizations/:id", wrapper.DeleteOrganizationsId)
+	router.DELETE(baseURL+"/organizations/:id", wrapper.DeleteOrganizationsID)
 	router.GET(baseURL+"/organizations/:id", wrapper.GetOrganizationsID)
-	router.PUT(baseURL+"/organizations/:id", wrapper.PutOrganizationsId)
-	router.GET(baseURL+"/organizations/:id/tickets", wrapper.GetOrganizationsIdTickets)
-	router.GET(baseURL+"/organizations/:id/users", wrapper.GetOrganizationsIdUsers)
+	router.PUT(baseURL+"/organizations/:id", wrapper.PutOrganizationsID)
+	router.GET(baseURL+"/organizations/:id/tickets", wrapper.GetOrganizationsIDTickets)
+	router.GET(baseURL+"/organizations/:id/users", wrapper.GetOrganizationsIDUsers)
 	router.GET(baseURL+"/tickets", wrapper.GetTickets)
 	router.POST(baseURL+"/tickets", wrapper.PostTickets)
-	router.DELETE(baseURL+"/tickets/:id", wrapper.DeleteTicketsId)
+	router.DELETE(baseURL+"/tickets/:id", wrapper.DeleteTicketsID)
 	router.GET(baseURL+"/tickets/:id", wrapper.GetTicketsID)
-	router.PUT(baseURL+"/tickets/:id", wrapper.PutTicketsId)
-	router.PATCH(baseURL+"/tickets/:id/assign", wrapper.PatchTicketsIdAssign)
-	router.GET(baseURL+"/tickets/:id/comments", wrapper.GetTicketsIdComments)
-	router.POST(baseURL+"/tickets/:id/comments", wrapper.PostTicketsIdComments)
-	router.PATCH(baseURL+"/tickets/:id/status", wrapper.PatchTicketsIdStatus)
+	router.PUT(baseURL+"/tickets/:id", wrapper.PutTicketsID)
+	router.PATCH(baseURL+"/tickets/:id/assign", wrapper.PatchTicketsIDAssign)
+	router.GET(baseURL+"/tickets/:id/comments", wrapper.GetTicketsIDComments)
+	router.POST(baseURL+"/tickets/:id/comments", wrapper.PostTicketsIDComments)
+	router.PATCH(baseURL+"/tickets/:id/status", wrapper.PatchTicketsIDStatus)
 	router.GET(baseURL+"/users", wrapper.GetUsers)
 	router.POST(baseURL+"/users", wrapper.PostUsers)
-	router.DELETE(baseURL+"/users/:id", wrapper.DeleteUsersId)
+	router.DELETE(baseURL+"/users/:id", wrapper.DeleteUsersID)
 	router.GET(baseURL+"/users/:id", wrapper.GetUsersID)
-	router.PUT(baseURL+"/users/:id", wrapper.PutUsersId)
-	router.PATCH(baseURL+"/users/:id/role", wrapper.PatchUsersIdRole)
-	router.GET(baseURL+"/users/:id/tickets", wrapper.GetUsersIdTickets)
+	router.PUT(baseURL+"/users/:id", wrapper.PutUsersID)
+	router.PATCH(baseURL+"/users/:id/role", wrapper.PatchUsersIDRole)
+	router.GET(baseURL+"/users/:id/tickets", wrapper.GetUsersIDTickets)
 
 }

@@ -11,7 +11,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-func (h TicketHandlers) PatchTicketsIdStatus(c echo.Context, id openapi_types.UUID) error {
+func (h TicketHandlers) PatchTicketsIDStatus(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
 	var req openapi.UpdateTicketStatusRequest
 	if err := c.Bind(&req); err != nil {
