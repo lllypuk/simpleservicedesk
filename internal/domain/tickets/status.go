@@ -57,7 +57,7 @@ func (s Status) CanTransitionTo(newStatus Status) bool {
 		StatusNew: {
 			StatusInProgress,
 			StatusWaiting,
-			StatusClosed, // Можно сразу закрыть без решения
+			StatusClosed,
 		},
 		StatusInProgress: {
 			StatusWaiting,

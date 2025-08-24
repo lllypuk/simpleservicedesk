@@ -4,8 +4,122 @@
 package openapi
 
 import (
+	"time"
+
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+// Defines values for TicketPriority.
+const (
+	Critical TicketPriority = "critical"
+	High     TicketPriority = "high"
+	Low      TicketPriority = "low"
+	Normal   TicketPriority = "normal"
+)
+
+// Defines values for TicketStatus.
+const (
+	Closed     TicketStatus = "closed"
+	InProgress TicketStatus = "in_progress"
+	New        TicketStatus = "new"
+	Resolved   TicketStatus = "resolved"
+	Waiting    TicketStatus = "waiting"
+)
+
+// Defines values for UserRole.
+const (
+	Admin    UserRole = "admin"
+	Agent    UserRole = "agent"
+	Customer UserRole = "customer"
+)
+
+// Defines values for GetUsersIdTicketsParamsRelationship.
+const (
+	All      GetUsersIdTicketsParamsRelationship = "all"
+	Assignee GetUsersIdTicketsParamsRelationship = "assignee"
+	Author   GetUsersIdTicketsParamsRelationship = "author"
+)
+
+// AssignTicketRequest defines model for AssignTicketRequest.
+type AssignTicketRequest struct {
+	// AssigneeId Assignee ID (null to unassign)
+	AssigneeId *openapi_types.UUID `json:"assignee_id,omitempty"`
+}
+
+// CreateCategoryRequest defines model for CreateCategoryRequest.
+type CreateCategoryRequest struct {
+	// Description Category description
+	Description *string `json:"description,omitempty"`
+
+	// Name Category name
+	Name string `json:"name"`
+
+	// OrganizationId Organization ID
+	OrganizationId openapi_types.UUID `json:"organization_id"`
+
+	// ParentId Parent category ID (optional)
+	ParentId *openapi_types.UUID `json:"parent_id,omitempty"`
+}
+
+// CreateCategoryResponse defines model for CreateCategoryResponse.
+type CreateCategoryResponse struct {
+	// Id Created category ID
+	Id *openapi_types.UUID `json:"id,omitempty"`
+}
+
+// CreateCommentRequest defines model for CreateCommentRequest.
+type CreateCommentRequest struct {
+	// AuthorId Comment author ID
+	AuthorId openapi_types.UUID `json:"author_id"`
+
+	// Content Comment content
+	Content string `json:"content"`
+
+	// IsInternal Internal comment flag
+	IsInternal *bool `json:"is_internal,omitempty"`
+}
+
+// CreateOrganizationRequest defines model for CreateOrganizationRequest.
+type CreateOrganizationRequest struct {
+	// Domain Organization domain (optional)
+	Domain *string `json:"domain,omitempty"`
+
+	// Name Organization name
+	Name string `json:"name"`
+
+	// ParentId Parent organization ID (optional)
+	ParentId *openapi_types.UUID `json:"parent_id,omitempty"`
+}
+
+// CreateOrganizationResponse defines model for CreateOrganizationResponse.
+type CreateOrganizationResponse struct {
+	// Id Created organization ID
+	Id *openapi_types.UUID `json:"id,omitempty"`
+}
+
+// CreateTicketRequest defines model for CreateTicketRequest.
+type CreateTicketRequest struct {
+	// AssigneeId Assignee ID (optional)
+	AssigneeId *openapi_types.UUID `json:"assignee_id,omitempty"`
+
+	// AuthorId Author (requester) ID
+	AuthorId openapi_types.UUID `json:"author_id"`
+
+	// CategoryId Category ID (optional)
+	CategoryId *openapi_types.UUID `json:"category_id,omitempty"`
+
+	// Description Ticket description
+	Description string `json:"description"`
+
+	// OrganizationId Organization ID
+	OrganizationId openapi_types.UUID `json:"organization_id"`
+
+	// Priority Ticket priority level
+	Priority TicketPriority `json:"priority"`
+
+	// Title Ticket title
+	Title string `json:"title"`
+}
 
 // CreateUserRequest defines model for CreateUserRequest.
 type CreateUserRequest struct {
@@ -24,12 +138,383 @@ type ErrorResponse struct {
 	Message *string `json:"message,omitempty"`
 }
 
+// GetCategoryResponse defines model for GetCategoryResponse.
+type GetCategoryResponse struct {
+	CreatedAt      *time.Time          `json:"created_at,omitempty"`
+	Description    *string             `json:"description,omitempty"`
+	Id             *openapi_types.UUID `json:"id,omitempty"`
+	IsActive       *bool               `json:"is_active,omitempty"`
+	Name           *string             `json:"name,omitempty"`
+	OrganizationId *openapi_types.UUID `json:"organization_id,omitempty"`
+	ParentId       *openapi_types.UUID `json:"parent_id,omitempty"`
+	UpdatedAt      *time.Time          `json:"updated_at,omitempty"`
+}
+
+// GetOrganizationResponse defines model for GetOrganizationResponse.
+type GetOrganizationResponse struct {
+	CreatedAt *time.Time          `json:"created_at,omitempty"`
+	Domain    *string             `json:"domain,omitempty"`
+	Id        *openapi_types.UUID `json:"id,omitempty"`
+	IsActive  *bool               `json:"is_active,omitempty"`
+	Name      *string             `json:"name,omitempty"`
+	ParentId  *openapi_types.UUID `json:"parent_id,omitempty"`
+	UpdatedAt *time.Time          `json:"updated_at,omitempty"`
+}
+
+// GetTicketResponse defines model for GetTicketResponse.
+type GetTicketResponse struct {
+	AssigneeId     *openapi_types.UUID `json:"assignee_id,omitempty"`
+	AuthorId       *openapi_types.UUID `json:"author_id,omitempty"`
+	CategoryId     *openapi_types.UUID `json:"category_id,omitempty"`
+	ClosedAt       *time.Time          `json:"closed_at,omitempty"`
+	CreatedAt      *time.Time          `json:"created_at,omitempty"`
+	Description    *string             `json:"description,omitempty"`
+	Id             *openapi_types.UUID `json:"id,omitempty"`
+	OrganizationId *openapi_types.UUID `json:"organization_id,omitempty"`
+
+	// Priority Ticket priority level
+	Priority   *TicketPriority `json:"priority,omitempty"`
+	ResolvedAt *time.Time      `json:"resolved_at,omitempty"`
+
+	// Status Ticket status
+	Status    *TicketStatus `json:"status,omitempty"`
+	Title     *string       `json:"title,omitempty"`
+	UpdatedAt *time.Time    `json:"updated_at,omitempty"`
+}
+
 // GetUserResponse defines model for GetUserResponse.
 type GetUserResponse struct {
-	Email *openapi_types.Email `json:"email,omitempty"`
-	Id    *openapi_types.UUID  `json:"id,omitempty"`
-	Name  *string              `json:"name,omitempty"`
+	CreatedAt      *time.Time           `json:"created_at,omitempty"`
+	Email          *openapi_types.Email `json:"email,omitempty"`
+	Id             *openapi_types.UUID  `json:"id,omitempty"`
+	IsActive       *bool                `json:"is_active,omitempty"`
+	Name           *string              `json:"name,omitempty"`
+	OrganizationId *openapi_types.UUID  `json:"organization_id,omitempty"`
+
+	// Role User role in the system
+	Role      *UserRole  `json:"role,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
+
+// ListCategoriesResponse defines model for ListCategoriesResponse.
+type ListCategoriesResponse struct {
+	Categories *[]GetCategoryResponse `json:"categories,omitempty"`
+}
+
+// ListOrganizationsResponse defines model for ListOrganizationsResponse.
+type ListOrganizationsResponse struct {
+	Organizations *[]GetOrganizationResponse `json:"organizations,omitempty"`
+	Pagination    *PaginationResponse        `json:"pagination,omitempty"`
+}
+
+// ListTicketsResponse defines model for ListTicketsResponse.
+type ListTicketsResponse struct {
+	Pagination *PaginationResponse  `json:"pagination,omitempty"`
+	Tickets    *[]GetTicketResponse `json:"tickets,omitempty"`
+}
+
+// ListUsersResponse defines model for ListUsersResponse.
+type ListUsersResponse struct {
+	Pagination *PaginationResponse `json:"pagination,omitempty"`
+	Users      *[]GetUserResponse  `json:"users,omitempty"`
+}
+
+// PaginationResponse defines model for PaginationResponse.
+type PaginationResponse struct {
+	// HasNext Whether there are more pages
+	HasNext *bool `json:"has_next,omitempty"`
+
+	// Limit Items per page
+	Limit *int `json:"limit,omitempty"`
+
+	// Page Current page number
+	Page *int `json:"page,omitempty"`
+
+	// Total Total number of items
+	Total *int `json:"total,omitempty"`
+}
+
+// TicketComment defines model for TicketComment.
+type TicketComment struct {
+	AuthorId  *openapi_types.UUID `json:"author_id,omitempty"`
+	Content   *string             `json:"content,omitempty"`
+	CreatedAt *time.Time          `json:"created_at,omitempty"`
+	Id        *openapi_types.UUID `json:"id,omitempty"`
+
+	// IsInternal Internal comment (not visible to customers)
+	IsInternal *bool               `json:"is_internal,omitempty"`
+	TicketId   *openapi_types.UUID `json:"ticket_id,omitempty"`
+}
+
+// TicketPriority Ticket priority level
+type TicketPriority string
+
+// TicketStatus Ticket status
+type TicketStatus string
+
+// UpdateCategoryRequest defines model for UpdateCategoryRequest.
+type UpdateCategoryRequest struct {
+	// Description Category description
+	Description *string `json:"description,omitempty"`
+
+	// IsActive Category active status
+	IsActive *bool `json:"is_active,omitempty"`
+
+	// Name Category name
+	Name *string `json:"name,omitempty"`
+
+	// ParentId Parent category ID
+	ParentId *openapi_types.UUID `json:"parent_id,omitempty"`
+}
+
+// UpdateOrganizationRequest defines model for UpdateOrganizationRequest.
+type UpdateOrganizationRequest struct {
+	// Domain Organization domain
+	Domain *string `json:"domain,omitempty"`
+
+	// IsActive Organization active status
+	IsActive *bool `json:"is_active,omitempty"`
+
+	// Name Organization name
+	Name *string `json:"name,omitempty"`
+
+	// ParentId Parent organization ID
+	ParentId *openapi_types.UUID `json:"parent_id,omitempty"`
+}
+
+// UpdateTicketRequest defines model for UpdateTicketRequest.
+type UpdateTicketRequest struct {
+	// CategoryId Category ID
+	CategoryId *openapi_types.UUID `json:"category_id,omitempty"`
+
+	// Description Ticket description
+	Description *string `json:"description,omitempty"`
+
+	// Priority Ticket priority level
+	Priority *TicketPriority `json:"priority,omitempty"`
+
+	// Title Ticket title
+	Title *string `json:"title,omitempty"`
+}
+
+// UpdateTicketStatusRequest defines model for UpdateTicketStatusRequest.
+type UpdateTicketStatusRequest struct {
+	// Status Ticket status
+	Status TicketStatus `json:"status"`
+}
+
+// UpdateUserRequest defines model for UpdateUserRequest.
+type UpdateUserRequest struct {
+	// Email User email
+	Email *openapi_types.Email `json:"email,omitempty"`
+
+	// IsActive User active status
+	IsActive *bool `json:"is_active,omitempty"`
+
+	// Name User name
+	Name *string `json:"name,omitempty"`
+
+	// OrganizationId User organization ID
+	OrganizationId *openapi_types.UUID `json:"organization_id,omitempty"`
+}
+
+// UpdateUserRoleRequest defines model for UpdateUserRoleRequest.
+type UpdateUserRoleRequest struct {
+	// Role User role in the system
+	Role UserRole `json:"role"`
+}
+
+// UserRole User role in the system
+type UserRole string
+
+// GetCategoriesParams defines parameters for GetCategories.
+type GetCategoriesParams struct {
+	// OrganizationId Filter by organization ID
+	OrganizationId *openapi_types.UUID `form:"organization_id,omitempty" json:"organization_id,omitempty"`
+
+	// ParentId Filter by parent category ID (null for root categories)
+	ParentId *openapi_types.UUID `form:"parent_id,omitempty" json:"parent_id,omitempty"`
+
+	// IsActive Filter by active status
+	IsActive *bool `form:"is_active,omitempty" json:"is_active,omitempty"`
+
+	// IncludeChildren Include child categories in the response
+	IncludeChildren *bool `form:"include_children,omitempty" json:"include_children,omitempty"`
+}
+
+// GetCategoriesIdTicketsParams defines parameters for GetCategoriesIdTickets.
+type GetCategoriesIdTicketsParams struct {
+	// Status Filter by ticket status
+	Status *TicketStatus `form:"status,omitempty" json:"status,omitempty"`
+
+	// Priority Filter by ticket priority
+	Priority *TicketPriority `form:"priority,omitempty" json:"priority,omitempty"`
+
+	// IncludeSubcategories Include tickets from subcategories
+	IncludeSubcategories *bool `form:"include_subcategories,omitempty" json:"include_subcategories,omitempty"`
+
+	// Page Page number for pagination
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetOrganizationsParams defines parameters for GetOrganizations.
+type GetOrganizationsParams struct {
+	// Name Filter by organization name (partial match)
+	Name *string `form:"name,omitempty" json:"name,omitempty"`
+
+	// Domain Filter by organization domain
+	Domain *string `form:"domain,omitempty" json:"domain,omitempty"`
+
+	// IsActive Filter by active status
+	IsActive *bool `form:"is_active,omitempty" json:"is_active,omitempty"`
+
+	// ParentId Filter by parent organization ID
+	ParentId *openapi_types.UUID `form:"parent_id,omitempty" json:"parent_id,omitempty"`
+
+	// Page Page number for pagination
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetOrganizationsIdTicketsParams defines parameters for GetOrganizationsIdTickets.
+type GetOrganizationsIdTicketsParams struct {
+	// Status Filter by ticket status
+	Status *TicketStatus `form:"status,omitempty" json:"status,omitempty"`
+
+	// Priority Filter by ticket priority
+	Priority *TicketPriority `form:"priority,omitempty" json:"priority,omitempty"`
+
+	// Page Page number for pagination
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetOrganizationsIdUsersParams defines parameters for GetOrganizationsIdUsers.
+type GetOrganizationsIdUsersParams struct {
+	// Page Page number for pagination
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetTicketsParams defines parameters for GetTickets.
+type GetTicketsParams struct {
+	// Status Filter by ticket status
+	Status *TicketStatus `form:"status,omitempty" json:"status,omitempty"`
+
+	// Priority Filter by ticket priority
+	Priority *TicketPriority `form:"priority,omitempty" json:"priority,omitempty"`
+
+	// CategoryId Filter by category ID
+	CategoryId *openapi_types.UUID `form:"category_id,omitempty" json:"category_id,omitempty"`
+
+	// AssigneeId Filter by assignee ID
+	AssigneeId *openapi_types.UUID `form:"assignee_id,omitempty" json:"assignee_id,omitempty"`
+
+	// OrganizationId Filter by organization ID
+	OrganizationId *openapi_types.UUID `form:"organization_id,omitempty" json:"organization_id,omitempty"`
+
+	// AuthorId Filter by author ID
+	AuthorId *openapi_types.UUID `form:"author_id,omitempty" json:"author_id,omitempty"`
+
+	// Page Page number for pagination
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetTicketsIdCommentsParams defines parameters for GetTicketsIdComments.
+type GetTicketsIdCommentsParams struct {
+	// IncludeInternal Include internal comments (admin/agent only)
+	IncludeInternal *bool `form:"include_internal,omitempty" json:"include_internal,omitempty"`
+}
+
+// GetUsersParams defines parameters for GetUsers.
+type GetUsersParams struct {
+	// Name Filter by user name (partial match)
+	Name *string `form:"name,omitempty" json:"name,omitempty"`
+
+	// Email Filter by user email (partial match)
+	Email *string `form:"email,omitempty" json:"email,omitempty"`
+
+	// Role Filter by user role
+	Role *UserRole `form:"role,omitempty" json:"role,omitempty"`
+
+	// OrganizationId Filter by organization ID
+	OrganizationId *openapi_types.UUID `form:"organization_id,omitempty" json:"organization_id,omitempty"`
+
+	// IsActive Filter by user active status
+	IsActive *bool `form:"is_active,omitempty" json:"is_active,omitempty"`
+
+	// Page Page number for pagination
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetUsersIdTicketsParams defines parameters for GetUsersIdTickets.
+type GetUsersIdTicketsParams struct {
+	// Status Filter by ticket status
+	Status *TicketStatus `form:"status,omitempty" json:"status,omitempty"`
+
+	// Priority Filter by ticket priority
+	Priority *TicketPriority `form:"priority,omitempty" json:"priority,omitempty"`
+
+	// Relationship Filter by relationship to user
+	Relationship *GetUsersIdTicketsParamsRelationship `form:"relationship,omitempty" json:"relationship,omitempty"`
+
+	// Page Page number for pagination
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetUsersIdTicketsParamsRelationship defines parameters for GetUsersIdTickets.
+type GetUsersIdTicketsParamsRelationship string
+
+// PostCategoriesJSONRequestBody defines body for PostCategories for application/json ContentType.
+type PostCategoriesJSONRequestBody = CreateCategoryRequest
+
+// PutCategoriesIdJSONRequestBody defines body for PutCategoriesId for application/json ContentType.
+type PutCategoriesIdJSONRequestBody = UpdateCategoryRequest
+
+// PostOrganizationsJSONRequestBody defines body for PostOrganizations for application/json ContentType.
+type PostOrganizationsJSONRequestBody = CreateOrganizationRequest
+
+// PutOrganizationsIdJSONRequestBody defines body for PutOrganizationsId for application/json ContentType.
+type PutOrganizationsIdJSONRequestBody = UpdateOrganizationRequest
+
+// PostTicketsJSONRequestBody defines body for PostTickets for application/json ContentType.
+type PostTicketsJSONRequestBody = CreateTicketRequest
+
+// PutTicketsIdJSONRequestBody defines body for PutTicketsId for application/json ContentType.
+type PutTicketsIdJSONRequestBody = UpdateTicketRequest
+
+// PatchTicketsIdAssignJSONRequestBody defines body for PatchTicketsIdAssign for application/json ContentType.
+type PatchTicketsIdAssignJSONRequestBody = AssignTicketRequest
+
+// PostTicketsIdCommentsJSONRequestBody defines body for PostTicketsIdComments for application/json ContentType.
+type PostTicketsIdCommentsJSONRequestBody = CreateCommentRequest
+
+// PatchTicketsIdStatusJSONRequestBody defines body for PatchTicketsIdStatus for application/json ContentType.
+type PatchTicketsIdStatusJSONRequestBody = UpdateTicketStatusRequest
 
 // PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
 type PostUsersJSONRequestBody = CreateUserRequest
+
+// PutUsersIdJSONRequestBody defines body for PutUsersId for application/json ContentType.
+type PutUsersIdJSONRequestBody = UpdateUserRequest
+
+// PatchUsersIdRoleJSONRequestBody defines body for PatchUsersIdRole for application/json ContentType.
+type PatchUsersIdRoleJSONRequestBody = UpdateUserRoleRequest

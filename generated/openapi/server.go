@@ -14,17 +14,692 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get categories tree
+	// (GET /categories)
+	GetCategories(ctx echo.Context, params GetCategoriesParams) error
+	// Create a new category
+	// (POST /categories)
+	PostCategories(ctx echo.Context) error
+	// Delete a category
+	// (DELETE /categories/{id})
+	DeleteCategoriesId(ctx echo.Context, id openapi_types.UUID) error
+	// Get a category by ID
+	// (GET /categories/{id})
+	GetCategoriesID(ctx echo.Context, id openapi_types.UUID) error
+	// Update a category
+	// (PUT /categories/{id})
+	PutCategoriesId(ctx echo.Context, id openapi_types.UUID) error
+	// Get tickets in a category
+	// (GET /categories/{id}/tickets)
+	GetCategoriesIdTickets(ctx echo.Context, id openapi_types.UUID, params GetCategoriesIdTicketsParams) error
+	// List organizations with pagination
+	// (GET /organizations)
+	GetOrganizations(ctx echo.Context, params GetOrganizationsParams) error
+	// Create a new organization
+	// (POST /organizations)
+	PostOrganizations(ctx echo.Context) error
+	// Delete an organization
+	// (DELETE /organizations/{id})
+	DeleteOrganizationsId(ctx echo.Context, id openapi_types.UUID) error
+	// Get an organization by ID
+	// (GET /organizations/{id})
+	GetOrganizationsID(ctx echo.Context, id openapi_types.UUID) error
+	// Update an organization
+	// (PUT /organizations/{id})
+	PutOrganizationsId(ctx echo.Context, id openapi_types.UUID) error
+	// Get tickets in an organization
+	// (GET /organizations/{id}/tickets)
+	GetOrganizationsIdTickets(ctx echo.Context, id openapi_types.UUID, params GetOrganizationsIdTicketsParams) error
+	// Get users in an organization
+	// (GET /organizations/{id}/users)
+	GetOrganizationsIdUsers(ctx echo.Context, id openapi_types.UUID, params GetOrganizationsIdUsersParams) error
+	// List tickets with filtering and pagination
+	// (GET /tickets)
+	GetTickets(ctx echo.Context, params GetTicketsParams) error
+	// Create a new ticket
+	// (POST /tickets)
+	PostTickets(ctx echo.Context) error
+	// Delete a ticket
+	// (DELETE /tickets/{id})
+	DeleteTicketsId(ctx echo.Context, id openapi_types.UUID) error
+	// Get a ticket by ID
+	// (GET /tickets/{id})
+	GetTicketsID(ctx echo.Context, id openapi_types.UUID) error
+	// Update a ticket
+	// (PUT /tickets/{id})
+	PutTicketsId(ctx echo.Context, id openapi_types.UUID) error
+	// Assign or unassign ticket
+	// (PATCH /tickets/{id}/assign)
+	PatchTicketsIdAssign(ctx echo.Context, id openapi_types.UUID) error
+	// Get ticket comments
+	// (GET /tickets/{id}/comments)
+	GetTicketsIdComments(ctx echo.Context, id openapi_types.UUID, params GetTicketsIdCommentsParams) error
+	// Add a comment to a ticket
+	// (POST /tickets/{id}/comments)
+	PostTicketsIdComments(ctx echo.Context, id openapi_types.UUID) error
+	// Update ticket status
+	// (PATCH /tickets/{id}/status)
+	PatchTicketsIdStatus(ctx echo.Context, id openapi_types.UUID) error
+	// List users with filtering and pagination
+	// (GET /users)
+	GetUsers(ctx echo.Context, params GetUsersParams) error
 	// Create a new user
 	// (POST /users)
 	PostUsers(ctx echo.Context) error
+	// Delete a user
+	// (DELETE /users/{id})
+	DeleteUsersId(ctx echo.Context, id openapi_types.UUID) error
 	// Get a user by ID
 	// (GET /users/{id})
 	GetUsersID(ctx echo.Context, id openapi_types.UUID) error
+	// Update a user
+	// (PUT /users/{id})
+	PutUsersId(ctx echo.Context, id openapi_types.UUID) error
+	// Update user role
+	// (PATCH /users/{id}/role)
+	PatchUsersIdRole(ctx echo.Context, id openapi_types.UUID) error
+	// Get user tickets
+	// (GET /users/{id}/tickets)
+	GetUsersIdTickets(ctx echo.Context, id openapi_types.UUID, params GetUsersIdTicketsParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// GetCategories converts echo context to params.
+func (w *ServerInterfaceWrapper) GetCategories(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetCategoriesParams
+	// ------------- Optional query parameter "organization_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "organization_id", ctx.QueryParams(), &params.OrganizationId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter organization_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "parent_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "parent_id", ctx.QueryParams(), &params.ParentId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter parent_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "is_active" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "is_active", ctx.QueryParams(), &params.IsActive)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter is_active: %s", err))
+	}
+
+	// ------------- Optional query parameter "include_children" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "include_children", ctx.QueryParams(), &params.IncludeChildren)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter include_children: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetCategories(ctx, params)
+	return err
+}
+
+// PostCategories converts echo context to params.
+func (w *ServerInterfaceWrapper) PostCategories(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostCategories(ctx)
+	return err
+}
+
+// DeleteCategoriesId converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteCategoriesId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.DeleteCategoriesId(ctx, id)
+	return err
+}
+
+// GetCategoriesID converts echo context to params.
+func (w *ServerInterfaceWrapper) GetCategoriesID(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetCategoriesID(ctx, id)
+	return err
+}
+
+// PutCategoriesId converts echo context to params.
+func (w *ServerInterfaceWrapper) PutCategoriesId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PutCategoriesId(ctx, id)
+	return err
+}
+
+// GetCategoriesIdTickets converts echo context to params.
+func (w *ServerInterfaceWrapper) GetCategoriesIdTickets(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetCategoriesIdTicketsParams
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "status", ctx.QueryParams(), &params.Status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter status: %s", err))
+	}
+
+	// ------------- Optional query parameter "priority" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "priority", ctx.QueryParams(), &params.Priority)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter priority: %s", err))
+	}
+
+	// ------------- Optional query parameter "include_subcategories" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "include_subcategories", ctx.QueryParams(), &params.IncludeSubcategories)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter include_subcategories: %s", err))
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetCategoriesIdTickets(ctx, id, params)
+	return err
+}
+
+// GetOrganizations converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOrganizations(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetOrganizationsParams
+	// ------------- Optional query parameter "name" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "name", ctx.QueryParams(), &params.Name)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter name: %s", err))
+	}
+
+	// ------------- Optional query parameter "domain" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "domain", ctx.QueryParams(), &params.Domain)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter domain: %s", err))
+	}
+
+	// ------------- Optional query parameter "is_active" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "is_active", ctx.QueryParams(), &params.IsActive)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter is_active: %s", err))
+	}
+
+	// ------------- Optional query parameter "parent_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "parent_id", ctx.QueryParams(), &params.ParentId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter parent_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetOrganizations(ctx, params)
+	return err
+}
+
+// PostOrganizations converts echo context to params.
+func (w *ServerInterfaceWrapper) PostOrganizations(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostOrganizations(ctx)
+	return err
+}
+
+// DeleteOrganizationsId converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteOrganizationsId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.DeleteOrganizationsId(ctx, id)
+	return err
+}
+
+// GetOrganizationsID converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOrganizationsID(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetOrganizationsID(ctx, id)
+	return err
+}
+
+// PutOrganizationsId converts echo context to params.
+func (w *ServerInterfaceWrapper) PutOrganizationsId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PutOrganizationsId(ctx, id)
+	return err
+}
+
+// GetOrganizationsIdTickets converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOrganizationsIdTickets(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetOrganizationsIdTicketsParams
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "status", ctx.QueryParams(), &params.Status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter status: %s", err))
+	}
+
+	// ------------- Optional query parameter "priority" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "priority", ctx.QueryParams(), &params.Priority)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter priority: %s", err))
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetOrganizationsIdTickets(ctx, id, params)
+	return err
+}
+
+// GetOrganizationsIdUsers converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOrganizationsIdUsers(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetOrganizationsIdUsersParams
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetOrganizationsIdUsers(ctx, id, params)
+	return err
+}
+
+// GetTickets converts echo context to params.
+func (w *ServerInterfaceWrapper) GetTickets(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetTicketsParams
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "status", ctx.QueryParams(), &params.Status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter status: %s", err))
+	}
+
+	// ------------- Optional query parameter "priority" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "priority", ctx.QueryParams(), &params.Priority)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter priority: %s", err))
+	}
+
+	// ------------- Optional query parameter "category_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "category_id", ctx.QueryParams(), &params.CategoryId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter category_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "assignee_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "assignee_id", ctx.QueryParams(), &params.AssigneeId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter assignee_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "organization_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "organization_id", ctx.QueryParams(), &params.OrganizationId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter organization_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "author_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "author_id", ctx.QueryParams(), &params.AuthorId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter author_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetTickets(ctx, params)
+	return err
+}
+
+// PostTickets converts echo context to params.
+func (w *ServerInterfaceWrapper) PostTickets(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostTickets(ctx)
+	return err
+}
+
+// DeleteTicketsId converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteTicketsId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.DeleteTicketsId(ctx, id)
+	return err
+}
+
+// GetTicketsID converts echo context to params.
+func (w *ServerInterfaceWrapper) GetTicketsID(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetTicketsID(ctx, id)
+	return err
+}
+
+// PutTicketsId converts echo context to params.
+func (w *ServerInterfaceWrapper) PutTicketsId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PutTicketsId(ctx, id)
+	return err
+}
+
+// PatchTicketsIdAssign converts echo context to params.
+func (w *ServerInterfaceWrapper) PatchTicketsIdAssign(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PatchTicketsIdAssign(ctx, id)
+	return err
+}
+
+// GetTicketsIdComments converts echo context to params.
+func (w *ServerInterfaceWrapper) GetTicketsIdComments(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetTicketsIdCommentsParams
+	// ------------- Optional query parameter "include_internal" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "include_internal", ctx.QueryParams(), &params.IncludeInternal)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter include_internal: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetTicketsIdComments(ctx, id, params)
+	return err
+}
+
+// PostTicketsIdComments converts echo context to params.
+func (w *ServerInterfaceWrapper) PostTicketsIdComments(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostTicketsIdComments(ctx, id)
+	return err
+}
+
+// PatchTicketsIdStatus converts echo context to params.
+func (w *ServerInterfaceWrapper) PatchTicketsIdStatus(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PatchTicketsIdStatus(ctx, id)
+	return err
+}
+
+// GetUsers converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsers(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUsersParams
+	// ------------- Optional query parameter "name" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "name", ctx.QueryParams(), &params.Name)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter name: %s", err))
+	}
+
+	// ------------- Optional query parameter "email" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "email", ctx.QueryParams(), &params.Email)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter email: %s", err))
+	}
+
+	// ------------- Optional query parameter "role" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "role", ctx.QueryParams(), &params.Role)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter role: %s", err))
+	}
+
+	// ------------- Optional query parameter "organization_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "organization_id", ctx.QueryParams(), &params.OrganizationId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter organization_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "is_active" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "is_active", ctx.QueryParams(), &params.IsActive)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter is_active: %s", err))
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUsers(ctx, params)
+	return err
 }
 
 // PostUsers converts echo context to params.
@@ -33,6 +708,22 @@ func (w *ServerInterfaceWrapper) PostUsers(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostUsers(ctx)
+	return err
+}
+
+// DeleteUsersId converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteUsersId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.DeleteUsersId(ctx, id)
 	return err
 }
 
@@ -49,6 +740,91 @@ func (w *ServerInterfaceWrapper) GetUsersID(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetUsersID(ctx, id)
+	return err
+}
+
+// PutUsersId converts echo context to params.
+func (w *ServerInterfaceWrapper) PutUsersId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PutUsersId(ctx, id)
+	return err
+}
+
+// PatchUsersIdRole converts echo context to params.
+func (w *ServerInterfaceWrapper) PatchUsersIdRole(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PatchUsersIdRole(ctx, id)
+	return err
+}
+
+// GetUsersIdTickets converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsersIdTickets(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUsersIdTicketsParams
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "status", ctx.QueryParams(), &params.Status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter status: %s", err))
+	}
+
+	// ------------- Optional query parameter "priority" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "priority", ctx.QueryParams(), &params.Priority)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter priority: %s", err))
+	}
+
+	// ------------- Optional query parameter "relationship" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "relationship", ctx.QueryParams(), &params.Relationship)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter relationship: %s", err))
+	}
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUsersIdTickets(ctx, id, params)
 	return err
 }
 
@@ -80,7 +856,34 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/categories", wrapper.GetCategories)
+	router.POST(baseURL+"/categories", wrapper.PostCategories)
+	router.DELETE(baseURL+"/categories/:id", wrapper.DeleteCategoriesId)
+	router.GET(baseURL+"/categories/:id", wrapper.GetCategoriesID)
+	router.PUT(baseURL+"/categories/:id", wrapper.PutCategoriesId)
+	router.GET(baseURL+"/categories/:id/tickets", wrapper.GetCategoriesIdTickets)
+	router.GET(baseURL+"/organizations", wrapper.GetOrganizations)
+	router.POST(baseURL+"/organizations", wrapper.PostOrganizations)
+	router.DELETE(baseURL+"/organizations/:id", wrapper.DeleteOrganizationsId)
+	router.GET(baseURL+"/organizations/:id", wrapper.GetOrganizationsID)
+	router.PUT(baseURL+"/organizations/:id", wrapper.PutOrganizationsId)
+	router.GET(baseURL+"/organizations/:id/tickets", wrapper.GetOrganizationsIdTickets)
+	router.GET(baseURL+"/organizations/:id/users", wrapper.GetOrganizationsIdUsers)
+	router.GET(baseURL+"/tickets", wrapper.GetTickets)
+	router.POST(baseURL+"/tickets", wrapper.PostTickets)
+	router.DELETE(baseURL+"/tickets/:id", wrapper.DeleteTicketsId)
+	router.GET(baseURL+"/tickets/:id", wrapper.GetTicketsID)
+	router.PUT(baseURL+"/tickets/:id", wrapper.PutTicketsId)
+	router.PATCH(baseURL+"/tickets/:id/assign", wrapper.PatchTicketsIdAssign)
+	router.GET(baseURL+"/tickets/:id/comments", wrapper.GetTicketsIdComments)
+	router.POST(baseURL+"/tickets/:id/comments", wrapper.PostTicketsIdComments)
+	router.PATCH(baseURL+"/tickets/:id/status", wrapper.PatchTicketsIdStatus)
+	router.GET(baseURL+"/users", wrapper.GetUsers)
 	router.POST(baseURL+"/users", wrapper.PostUsers)
+	router.DELETE(baseURL+"/users/:id", wrapper.DeleteUsersId)
 	router.GET(baseURL+"/users/:id", wrapper.GetUsersID)
+	router.PUT(baseURL+"/users/:id", wrapper.PutUsersId)
+	router.PATCH(baseURL+"/users/:id/role", wrapper.PatchUsersIdRole)
+	router.GET(baseURL+"/users/:id/tickets", wrapper.GetUsersIdTickets)
 
 }

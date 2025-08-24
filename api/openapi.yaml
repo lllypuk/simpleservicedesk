@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: SimpleServiceDesk API
   version: 0.0.1
@@ -14,32 +14,98 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateUserRequest'
+              $ref: "#/components/schemas/CreateUserRequest"
       responses:
-        '201':
+        "201":
           description: User successfully created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateUserResponse'
-        '400':
+                $ref: "#/components/schemas/CreateUserResponse"
+        "400":
           description: Invalid input data
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
           description: User already exists
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: List users with filtering and pagination
+      description: Retrieves a list of users with optional filtering and pagination
+      tags:
+        - users
+      parameters:
+        - name: name
+          in: query
+          description: Filter by user name (partial match)
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: Filter by user email (partial match)
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: Filter by user role
+          schema:
+            $ref: "#/components/schemas/UserRole"
+        - name: organization_id
+          in: query
+          description: Filter by organization ID
+          schema:
+            type: string
+            format: uuid
+        - name: is_active
+          in: query
+          description: Filter by user active status
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListUsersResponse"
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /users/{id}:
     get:
       operationId: GetUsersID
@@ -56,30 +122,1265 @@ paths:
             format: uuid
           description: User ID
       responses:
-        '200':
+        "200":
           description: User details successfully retrieved
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetUserResponse'
-        '400':
+                $ref: "#/components/schemas/GetUserResponse"
+        "400":
           description: Invalid user ID
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
           description: User not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
           description: Failed to get user
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      summary: Update a user
+      description: Updates the user with the provided details
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: User successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserResponse"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: User with this email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      summary: Delete a user
+      description: Deletes the user with the specified ID
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID
+      responses:
+        "204":
+          description: User successfully deleted
+        "400":
+          description: Invalid user ID or user has dependencies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /users/{id}/role:
+    patch:
+      summary: Update user role
+      description: Updates the role of the specified user
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRoleRequest"
+      responses:
+        "200":
+          description: User role successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserResponse"
+        "400":
+          description: Invalid role or user ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /users/{id}/tickets:
+    get:
+      summary: Get user tickets
+      description: Retrieves tickets associated with the specified user (created by or assigned to)
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID
+        - name: status
+          in: query
+          description: Filter by ticket status
+          schema:
+            $ref: "#/components/schemas/TicketStatus"
+        - name: priority
+          in: query
+          description: Filter by ticket priority
+          schema:
+            $ref: "#/components/schemas/TicketPriority"
+        - name: relationship
+          in: query
+          description: Filter by relationship to user
+          schema:
+            type: string
+            enum: [author, assignee, all]
+            default: all
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: List of user tickets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTicketsResponse"
+        "400":
+          description: Invalid user ID or query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /tickets:
+    post:
+      summary: Create a new ticket
+      description: Create a new ticket with the provided details
+      tags:
+        - tickets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTicketRequest"
+      responses:
+        "201":
+          description: Ticket successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTicketResponse"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Category or organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: List tickets with filtering and pagination
+      description: Retrieves a list of tickets with optional filtering by status, priority, category, assignee, and organization
+      tags:
+        - tickets
+      parameters:
+        - name: status
+          in: query
+          description: Filter by ticket status
+          schema:
+            $ref: "#/components/schemas/TicketStatus"
+        - name: priority
+          in: query
+          description: Filter by ticket priority
+          schema:
+            $ref: "#/components/schemas/TicketPriority"
+        - name: category_id
+          in: query
+          description: Filter by category ID
+          schema:
+            type: string
+            format: uuid
+        - name: assignee_id
+          in: query
+          description: Filter by assignee ID
+          schema:
+            type: string
+            format: uuid
+        - name: organization_id
+          in: query
+          description: Filter by organization ID
+          schema:
+            type: string
+            format: uuid
+        - name: author_id
+          in: query
+          description: Filter by author ID
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: List of tickets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTicketsResponse"
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /tickets/{id}:
+    get:
+      operationId: GetTicketsID
+      summary: Get a ticket by ID
+      description: Retrieves ticket details using the ticket ID provided in the path
+      tags:
+        - tickets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Ticket ID
+      responses:
+        "200":
+          description: Ticket details successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTicketResponse"
+        "400":
+          description: Invalid ticket ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Failed to get ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      summary: Update a ticket
+      description: Updates the ticket with the provided details
+      tags:
+        - tickets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Ticket ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTicketRequest"
+      responses:
+        "200":
+          description: Ticket successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTicketResponse"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      summary: Delete a ticket
+      description: Deletes the ticket with the specified ID
+      tags:
+        - tickets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Ticket ID
+      responses:
+        "204":
+          description: Ticket successfully deleted
+        "400":
+          description: Invalid ticket ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /tickets/{id}/status:
+    patch:
+      summary: Update ticket status
+      description: Updates the status of the ticket with proper transition validation
+      tags:
+        - tickets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Ticket ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTicketStatusRequest"
+      responses:
+        "200":
+          description: Ticket status successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTicketResponse"
+        "400":
+          description: Invalid status transition or input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /tickets/{id}/assign:
+    patch:
+      summary: Assign or unassign ticket
+      description: Assigns a ticket to an agent or unassigns it
+      tags:
+        - tickets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Ticket ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignTicketRequest"
+      responses:
+        "200":
+          description: Ticket assignment successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTicketResponse"
+        "400":
+          description: Invalid assignee ID or input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ticket or assignee not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /tickets/{id}/comments:
+    post:
+      summary: Add a comment to a ticket
+      description: Adds a new comment to the specified ticket
+      tags:
+        - tickets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Ticket ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequest"
+      responses:
+        "201":
+          description: Comment successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketComment"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: Get ticket comments
+      description: Retrieves all comments for the specified ticket
+      tags:
+        - tickets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Ticket ID
+        - name: include_internal
+          in: query
+          description: Include internal comments (admin/agent only)
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of ticket comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TicketComment"
+        "400":
+          description: Invalid ticket ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /organizations:
+    post:
+      summary: Create a new organization
+      description: Create a new organization with the provided details
+      tags:
+        - organizations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrganizationRequest"
+      responses:
+        "201":
+          description: Organization successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateOrganizationResponse"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Organization with this name or domain already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: List organizations with pagination
+      description: Retrieves a list of organizations with optional filtering and pagination
+      tags:
+        - organizations
+      parameters:
+        - name: name
+          in: query
+          description: Filter by organization name (partial match)
+          schema:
+            type: string
+        - name: domain
+          in: query
+          description: Filter by organization domain
+          schema:
+            type: string
+        - name: is_active
+          in: query
+          description: Filter by active status
+          schema:
+            type: boolean
+        - name: parent_id
+          in: query
+          description: Filter by parent organization ID
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: List of organizations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListOrganizationsResponse"
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /organizations/{id}:
+    get:
+      operationId: GetOrganizationsID
+      summary: Get an organization by ID
+      description: Retrieves organization details using the organization ID provided in the path
+      tags:
+        - organizations
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization ID
+      responses:
+        "200":
+          description: Organization details successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOrganizationResponse"
+        "400":
+          description: Invalid organization ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Failed to get organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      summary: Update an organization
+      description: Updates the organization with the provided details
+      tags:
+        - organizations
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrganizationRequest"
+      responses:
+        "200":
+          description: Organization successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOrganizationResponse"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Organization with this name or domain already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      summary: Delete an organization
+      description: Deletes the organization with the specified ID
+      tags:
+        - organizations
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization ID
+      responses:
+        "204":
+          description: Organization successfully deleted
+        "400":
+          description: Invalid organization ID or organization has dependencies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /organizations/{id}/users:
+    get:
+      summary: Get users in an organization
+      description: Retrieves all users belonging to the specified organization
+      tags:
+        - organizations
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization ID
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: List of users in the organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListUsersResponse"
+        "400":
+          description: Invalid organization ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /organizations/{id}/tickets:
+    get:
+      summary: Get tickets in an organization
+      description: Retrieves all tickets belonging to the specified organization
+      tags:
+        - organizations
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Organization ID
+        - name: status
+          in: query
+          description: Filter by ticket status
+          schema:
+            $ref: "#/components/schemas/TicketStatus"
+        - name: priority
+          in: query
+          description: Filter by ticket priority
+          schema:
+            $ref: "#/components/schemas/TicketPriority"
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: List of tickets in the organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTicketsResponse"
+        "400":
+          description: Invalid organization ID or query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /categories:
+    post:
+      summary: Create a new category
+      description: Create a new category with the provided details
+      tags:
+        - categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+      responses:
+        "201":
+          description: Category successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateCategoryResponse"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Organization or parent category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Category with this name already exists in the organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: Get categories tree
+      description: Retrieves the hierarchical tree structure of categories
+      tags:
+        - categories
+      parameters:
+        - name: organization_id
+          in: query
+          description: Filter by organization ID
+          schema:
+            type: string
+            format: uuid
+        - name: parent_id
+          in: query
+          description: Filter by parent category ID (null for root categories)
+          schema:
+            type: string
+            format: uuid
+        - name: is_active
+          in: query
+          description: Filter by active status
+          schema:
+            type: boolean
+        - name: include_children
+          in: query
+          description: Include child categories in the response
+          schema:
+            type: boolean
+            default: true
+      responses:
+        "200":
+          description: Categories tree structure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListCategoriesResponse"
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /categories/{id}:
+    get:
+      operationId: GetCategoriesID
+      summary: Get a category by ID
+      description: Retrieves category details using the category ID provided in the path
+      tags:
+        - categories
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Category ID
+      responses:
+        "200":
+          description: Category details successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetCategoryResponse"
+        "400":
+          description: Invalid category ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Failed to get category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      summary: Update a category
+      description: Updates the category with the provided details
+      tags:
+        - categories
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Category ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCategoryRequest"
+      responses:
+        "200":
+          description: Category successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetCategoryResponse"
+        "400":
+          description: Invalid input data or circular reference detected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Category with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      summary: Delete a category
+      description: Deletes the category with the specified ID
+      tags:
+        - categories
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Category ID
+      responses:
+        "204":
+          description: Category successfully deleted
+        "400":
+          description: Invalid category ID or category has dependencies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /categories/{id}/tickets:
+    get:
+      summary: Get tickets in a category
+      description: Retrieves all tickets belonging to the specified category
+      tags:
+        - categories
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Category ID
+        - name: status
+          in: query
+          description: Filter by ticket status
+          schema:
+            $ref: "#/components/schemas/TicketStatus"
+        - name: priority
+          in: query
+          description: Filter by ticket priority
+          schema:
+            $ref: "#/components/schemas/TicketPriority"
+        - name: include_subcategories
+          in: query
+          description: Include tickets from subcategories
+          schema:
+            type: boolean
+            default: false
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: List of tickets in the category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTicketsResponse"
+        "400":
+          description: Invalid category ID or query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -115,8 +1416,434 @@ components:
         email:
           type: string
           format: email
+        role:
+          $ref: "#/components/schemas/UserRole"
+        organization_id:
+          type: string
+          format: uuid
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     ErrorResponse:
       type: object
       properties:
         message:
           type: string
+
+    # Ticket schemas
+    TicketStatus:
+      type: string
+      enum:
+        - new
+        - in_progress
+        - waiting
+        - resolved
+        - closed
+      description: Ticket status
+
+    TicketPriority:
+      type: string
+      enum:
+        - low
+        - normal
+        - high
+        - critical
+      description: Ticket priority level
+
+    CreateTicketRequest:
+      type: object
+      required:
+        - title
+        - description
+        - priority
+        - organization_id
+        - author_id
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          description: Ticket title
+        description:
+          type: string
+          maxLength: 5000
+          description: Ticket description
+        priority:
+          $ref: "#/components/schemas/TicketPriority"
+        category_id:
+          type: string
+          format: uuid
+          description: Category ID (optional)
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization ID
+        author_id:
+          type: string
+          format: uuid
+          description: Author (requester) ID
+        assignee_id:
+          type: string
+          format: uuid
+          description: Assignee ID (optional)
+
+    UpdateTicketRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+          description: Ticket title
+        description:
+          type: string
+          maxLength: 5000
+          description: Ticket description
+        priority:
+          $ref: "#/components/schemas/TicketPriority"
+        category_id:
+          type: string
+          format: uuid
+          description: Category ID
+
+    UpdateTicketStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: "#/components/schemas/TicketStatus"
+
+    AssignTicketRequest:
+      type: object
+      properties:
+        assignee_id:
+          type: string
+          format: uuid
+          description: Assignee ID (null to unassign)
+
+    GetTicketResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: "#/components/schemas/TicketStatus"
+        priority:
+          $ref: "#/components/schemas/TicketPriority"
+        category_id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        author_id:
+          type: string
+          format: uuid
+        assignee_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        resolved_at:
+          type: string
+          format: date-time
+        closed_at:
+          type: string
+          format: date-time
+
+    ListTicketsResponse:
+      type: object
+      properties:
+        tickets:
+          type: array
+          items:
+            $ref: "#/components/schemas/GetTicketResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationResponse"
+
+    TicketComment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticket_id:
+          type: string
+          format: uuid
+        author_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+          maxLength: 2000
+        is_internal:
+          type: boolean
+          description: Internal comment (not visible to customers)
+        created_at:
+          type: string
+          format: date-time
+
+    CreateCommentRequest:
+      type: object
+      required:
+        - content
+        - author_id
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Comment content
+        author_id:
+          type: string
+          format: uuid
+          description: Comment author ID
+        is_internal:
+          type: boolean
+          default: false
+          description: Internal comment flag
+
+    # Organization schemas
+    CreateOrganizationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Organization name
+        domain:
+          type: string
+          description: Organization domain (optional)
+        parent_id:
+          type: string
+          format: uuid
+          description: Parent organization ID (optional)
+
+    CreateOrganizationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Created organization ID
+
+    UpdateOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Organization name
+        domain:
+          type: string
+          description: Organization domain
+        parent_id:
+          type: string
+          format: uuid
+          description: Parent organization ID
+        is_active:
+          type: boolean
+          description: Organization active status
+
+    GetOrganizationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        domain:
+          type: string
+        parent_id:
+          type: string
+          format: uuid
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ListOrganizationsResponse:
+      type: object
+      properties:
+        organizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/GetOrganizationResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationResponse"
+
+    # Category schemas
+    CreateCategoryRequest:
+      type: object
+      required:
+        - name
+        - organization_id
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Category name
+        description:
+          type: string
+          maxLength: 500
+          description: Category description
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization ID
+        parent_id:
+          type: string
+          format: uuid
+          description: Parent category ID (optional)
+
+    CreateCategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Created category ID
+
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Category name
+        description:
+          type: string
+          maxLength: 500
+          description: Category description
+        parent_id:
+          type: string
+          format: uuid
+          description: Parent category ID
+        is_active:
+          type: boolean
+          description: Category active status
+
+    GetCategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        organization_id:
+          type: string
+          format: uuid
+        parent_id:
+          type: string
+          format: uuid
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ListCategoriesResponse:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/GetCategoryResponse"
+
+    # Extended User schemas
+    UserRole:
+      type: string
+      enum:
+        - customer
+        - agent
+        - admin
+      description: User role in the system
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: User name
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 255
+          description: User email
+        organization_id:
+          type: string
+          format: uuid
+          description: User organization ID
+        is_active:
+          type: boolean
+          description: User active status
+
+    UpdateUserRoleRequest:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          $ref: "#/components/schemas/UserRole"
+
+    ListUsersResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/GetUserResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationResponse"
+
+    # Common schemas
+    PaginationResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of items
+        page:
+          type: integer
+          description: Current page number
+        limit:
+          type: integer
+          description: Items per page
+        has_next:
+          type: boolean
+          description: Whether there are more pages
