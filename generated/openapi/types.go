@@ -184,9 +184,16 @@ type GetTicketResponse struct {
 
 // GetUserResponse defines model for GetUserResponse.
 type GetUserResponse struct {
-	Email *openapi_types.Email `json:"email,omitempty"`
-	Id    *openapi_types.UUID  `json:"id,omitempty"`
-	Name  *string              `json:"name,omitempty"`
+	CreatedAt      *time.Time           `json:"created_at,omitempty"`
+	Email          *openapi_types.Email `json:"email,omitempty"`
+	Id             *openapi_types.UUID  `json:"id,omitempty"`
+	IsActive       *bool                `json:"is_active,omitempty"`
+	Name           *string              `json:"name,omitempty"`
+	OrganizationId *openapi_types.UUID  `json:"organization_id,omitempty"`
+
+	// Role User role in the system
+	Role      *UserRole  `json:"role,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
 // ListCategoriesResponse defines model for ListCategoriesResponse.
@@ -301,8 +308,14 @@ type UpdateUserRequest struct {
 	// Email User email
 	Email *openapi_types.Email `json:"email,omitempty"`
 
+	// IsActive User active status
+	IsActive *bool `json:"is_active,omitempty"`
+
 	// Name User name
 	Name *string `json:"name,omitempty"`
+
+	// OrganizationId User organization ID
+	OrganizationId *openapi_types.UUID `json:"organization_id,omitempty"`
 }
 
 // UpdateUserRoleRequest defines model for UpdateUserRoleRequest.
@@ -438,6 +451,9 @@ type GetUsersParams struct {
 
 	// OrganizationId Filter by organization ID
 	OrganizationId *openapi_types.UUID `form:"organization_id,omitempty" json:"organization_id,omitempty"`
+
+	// IsActive Filter by user active status
+	IsActive *bool `form:"is_active,omitempty" json:"is_active,omitempty"`
 
 	// Page Page number for pagination
 	Page *int `form:"page,omitempty" json:"page,omitempty"`

@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"errors"
+	"time"
 
 	domain "simpleservicedesk/internal/domain/users"
 
@@ -10,14 +11,20 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type mongoUser struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	UserID       uuid.UUID          `bson:"user_id"`
-	Name         string             `bson:"name"`
-	Email        string             `bson:"email"`
-	PasswordHash []byte             `bson:"password_hash"`
+	ID             primitive.ObjectID `bson:"_id,omitempty"`
+	UserID         uuid.UUID          `bson:"user_id"`
+	Name           string             `bson:"name"`
+	Email          string             `bson:"email"`
+	PasswordHash   []byte             `bson:"password_hash"`
+	Role           string             `bson:"role"`
+	OrganizationID *uuid.UUID         `bson:"organization_id,omitempty"`
+	IsActive       bool               `bson:"is_active"`
+	CreatedAt      time.Time          `bson:"created_at"`
+	UpdatedAt      time.Time          `bson:"updated_at"`
 }
 
 type MongoRepo struct {
@@ -50,10 +57,15 @@ func (r *MongoRepo) CreateUser(
 	}
 
 	mu := mongoUser{
-		UserID:       u.ID(),
-		Name:         u.Name(),
-		Email:        email,
-		PasswordHash: passwordHash,
+		UserID:         u.ID(),
+		Name:           u.Name(),
+		Email:          email,
+		PasswordHash:   passwordHash,
+		Role:           string(u.Role()),
+		OrganizationID: u.OrganizationID(),
+		IsActive:       u.IsActive(),
+		CreatedAt:      u.CreatedAt(),
+		UpdatedAt:      u.UpdatedAt(),
 	}
 	_, err = r.collection.InsertOne(ctx, mu)
 	if err != nil {
@@ -73,7 +85,15 @@ func (r *MongoRepo) GetUser(ctx context.Context, userID uuid.UUID) (*domain.User
 		return nil, err
 	}
 
-	user, err := domain.NewUser(userID, mu.Name, mu.Email, mu.PasswordHash)
+	role, err := domain.ParseRole(mu.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := domain.NewUserWithDetails(
+		userID, mu.Name, mu.Email, mu.PasswordHash, role,
+		mu.OrganizationID, mu.IsActive, mu.CreatedAt, mu.UpdatedAt,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +112,15 @@ func (r *MongoRepo) UpdateUser(ctx context.Context,
 		return nil, err
 	}
 
-	entity, err := domain.NewUser(mu.UserID, mu.Name, mu.Email, mu.PasswordHash)
+	role, err := domain.ParseRole(mu.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	entity, err := domain.NewUserWithDetails(
+		mu.UserID, mu.Name, mu.Email, mu.PasswordHash, role,
+		mu.OrganizationID, mu.IsActive, mu.CreatedAt, mu.UpdatedAt,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -106,12 +134,120 @@ func (r *MongoRepo) UpdateUser(ctx context.Context,
 	}
 
 	update := bson.M{"$set": bson.M{
-		"name":  entity.Name(),
-		"email": entity.Email(),
+		"name":            entity.Name(),
+		"email":           entity.Email(),
+		"role":            string(entity.Role()),
+		"organization_id": entity.OrganizationID(),
+		"is_active":       entity.IsActive(),
+		"updated_at":      entity.UpdatedAt(),
 	}}
 	_, err = r.collection.UpdateOne(ctx, bson.M{"user_id": userID}, update)
 	if err != nil {
 		return nil, err
 	}
 	return entity, nil
+}
+
+// UserFilter определяет фильтры для поиска пользователей
+type UserFilter struct {
+	Name           string
+	Email          string
+	Role           *domain.Role
+	OrganizationID *uuid.UUID
+	IsActive       *bool
+	Offset         int
+	Limit          int
+}
+
+func (r *MongoRepo) ListUsers(ctx context.Context, filter UserFilter) ([]*domain.User, error) {
+	bsonFilter := bson.M{}
+
+	if filter.Name != "" {
+		bsonFilter["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
+	}
+	if filter.Email != "" {
+		bsonFilter["email"] = bson.M{"$regex": filter.Email, "$options": "i"}
+	}
+	if filter.Role != nil {
+		bsonFilter["role"] = string(*filter.Role)
+	}
+	if filter.OrganizationID != nil {
+		bsonFilter["organization_id"] = *filter.OrganizationID
+	}
+	if filter.IsActive != nil {
+		bsonFilter["is_active"] = *filter.IsActive
+	}
+
+	opts := options.Find()
+	opts.SetSort(bson.D{{Key: "created_at", Value: -1}})
+	if filter.Limit > 0 {
+		opts.SetLimit(int64(filter.Limit))
+	}
+	if filter.Offset > 0 {
+		opts.SetSkip(int64(filter.Offset))
+	}
+
+	cursor, err := r.collection.Find(ctx, bsonFilter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var users []*domain.User
+	for cursor.Next(ctx) {
+		var mu mongoUser
+		if decodeErr := cursor.Decode(&mu); decodeErr != nil {
+			return nil, decodeErr
+		}
+
+		role, parseErr := domain.ParseRole(mu.Role)
+		if parseErr != nil {
+			return nil, parseErr
+		}
+
+		user, userErr := domain.NewUserWithDetails(
+			mu.UserID, mu.Name, mu.Email, mu.PasswordHash, role,
+			mu.OrganizationID, mu.IsActive, mu.CreatedAt, mu.UpdatedAt,
+		)
+		if userErr != nil {
+			return nil, userErr
+		}
+
+		users = append(users, user)
+	}
+
+	return users, cursor.Err()
+}
+
+func (r *MongoRepo) DeleteUser(ctx context.Context, userID uuid.UUID) error {
+	result, err := r.collection.DeleteOne(ctx, bson.M{"user_id": userID})
+	if err != nil {
+		return err
+	}
+	if result.DeletedCount == 0 {
+		return domain.ErrUserNotFound
+	}
+	return nil
+}
+
+func (r *MongoRepo) CountUsers(ctx context.Context, filter UserFilter) (int64, error) {
+	bsonFilter := bson.M{}
+
+	if filter.Name != "" {
+		bsonFilter["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
+	}
+	if filter.Email != "" {
+		bsonFilter["email"] = bson.M{"$regex": filter.Email, "$options": "i"}
+	}
+	if filter.Role != nil {
+		bsonFilter["role"] = string(*filter.Role)
+	}
+	if filter.OrganizationID != nil {
+		bsonFilter["organization_id"] = *filter.OrganizationID
+	}
+	if filter.IsActive != nil {
+		bsonFilter["is_active"] = *filter.IsActive
+	}
+
+	return r.collection.CountDocuments(ctx, bsonFilter)
 }

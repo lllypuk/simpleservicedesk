@@ -473,10 +473,7 @@ components:
 
 4. **Phase 4**: ✅ Completed - Categories API moved to current_task.md
 
-5. **Phase 5**: Extended Users API
-   - Добавить недостающие операции для users
-   - Unit и integration tests
-   - Полное тестирование всего API
+5. **Phase 5**: ✅ Moved to current_task.md - Extended Users API
 
 ### Definition of Done
 - [ ] Все endpoints реализованы и работают корректно

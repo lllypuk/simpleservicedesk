@@ -67,6 +67,11 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: is_active
+          in: query
+          description: Filter by user active status
+          schema:
+            type: boolean
         - name: page
           in: query
           description: Page number for pagination
@@ -1411,6 +1416,19 @@ components:
         email:
           type: string
           format: email
+        role:
+          $ref: "#/components/schemas/UserRole"
+        organization_id:
+          type: string
+          format: uuid
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     ErrorResponse:
       type: object
       properties:
@@ -1778,11 +1796,22 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 255
           description: User name
         email:
           type: string
           format: email
+          minLength: 1
+          maxLength: 255
           description: User email
+        organization_id:
+          type: string
+          format: uuid
+          description: User organization ID
+        is_active:
+          type: boolean
+          description: User active status
 
     UpdateUserRoleRequest:
       type: object

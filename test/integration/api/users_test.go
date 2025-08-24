@@ -293,10 +293,10 @@ func (s *UserAPITestSuite) TestHTTPMethodValidation() {
 			expectedStatus: http.StatusMethodNotAllowed,
 		},
 		{
-			name:           "DELETE to /users/{id} - not implemented",
+			name:           "DELETE to /users/{id} - not found",
 			method:         http.MethodDelete,
 			path:           "/users/" + uuid.New().String(),
-			expectedStatus: http.StatusNotImplemented,
+			expectedStatus: http.StatusNotFound,
 		},
 		{
 			name:           "PATCH to /users/{id} - not allowed",

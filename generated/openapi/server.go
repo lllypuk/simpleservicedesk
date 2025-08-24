@@ -676,6 +676,13 @@ func (w *ServerInterfaceWrapper) GetUsers(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter organization_id: %s", err))
 	}
 
+	// ------------- Optional query parameter "is_active" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "is_active", ctx.QueryParams(), &params.IsActive)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter is_active: %s", err))
+	}
+
 	// ------------- Optional query parameter "page" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)

@@ -2,11 +2,13 @@ package application
 
 import (
 	"context"
+	"strings"
 
 	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
+	infraUsers "simpleservicedesk/internal/infrastructure/users"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -64,14 +66,19 @@ func (m *mockUserRepository) UpdateUser(
 	id uuid.UUID,
 	updateFn func(*users.User) (bool, error),
 ) (*users.User, error) {
-	// Simple mock - just create a dummy user and call updateFn
-	user, _ := users.NewUser(id, "Test User", "test@example.com", []byte("hash"))
+	// Check if user exists in our mock store
+	user, exists := m.users[id]
+	if !exists {
+		return nil, users.ErrUserNotFound
+	}
+
 	updated, err := updateFn(user)
 	if err != nil {
 		return nil, err
 	}
 	if updated {
-		return user, nil
+		// Store updated user back
+		m.users[id] = user
 	}
 	return user, nil
 }
@@ -83,6 +90,93 @@ func (m *mockUserRepository) GetUser(_ context.Context, id uuid.UUID) (*users.Us
 		return nil, users.ErrUserNotFound
 	}
 	return user, nil
+}
+
+func (m *mockUserRepository) ListUsers(_ context.Context, filter infraUsers.UserFilter) ([]*users.User, error) {
+	var result []*users.User
+	count := 0
+
+	for _, user := range m.users {
+		if !m.userMatchesFilter(user, filter) {
+			continue
+		}
+
+		if m.shouldLimitResults(filter, count) {
+			break
+		}
+		if m.shouldIncludeInResults(filter, count) {
+			result = append(result, user)
+		}
+		count++
+	}
+
+	return result, nil
+}
+
+func (m *mockUserRepository) userMatchesFilter(user *users.User, filter infraUsers.UserFilter) bool {
+	if filter.Name != "" && !strings.Contains(strings.ToLower(user.Name()), strings.ToLower(filter.Name)) {
+		return false
+	}
+	if filter.Email != "" && !strings.Contains(strings.ToLower(user.Email()), strings.ToLower(filter.Email)) {
+		return false
+	}
+	if filter.Role != nil && user.Role() != *filter.Role {
+		return false
+	}
+	if filter.OrganizationID != nil {
+		if user.OrganizationID() == nil || *user.OrganizationID() != *filter.OrganizationID {
+			return false
+		}
+	}
+	if filter.IsActive != nil && user.IsActive() != *filter.IsActive {
+		return false
+	}
+	return true
+}
+
+func (m *mockUserRepository) shouldLimitResults(filter infraUsers.UserFilter, count int) bool {
+	return filter.Limit > 0 && count >= filter.Offset+filter.Limit
+}
+
+func (m *mockUserRepository) shouldIncludeInResults(filter infraUsers.UserFilter, count int) bool {
+	return count >= filter.Offset
+}
+
+func (m *mockUserRepository) DeleteUser(_ context.Context, id uuid.UUID) error {
+	_, exists := m.users[id]
+	if !exists {
+		return users.ErrUserNotFound
+	}
+	delete(m.users, id)
+	return nil
+}
+
+func (m *mockUserRepository) CountUsers(_ context.Context, filter infraUsers.UserFilter) (int64, error) {
+	count := int64(0)
+
+	for _, user := range m.users {
+		// Apply the same filtering as ListUsers
+		if filter.Name != "" && !strings.Contains(strings.ToLower(user.Name()), strings.ToLower(filter.Name)) {
+			continue
+		}
+		if filter.Email != "" && !strings.Contains(strings.ToLower(user.Email()), strings.ToLower(filter.Email)) {
+			continue
+		}
+		if filter.Role != nil && user.Role() != *filter.Role {
+			continue
+		}
+		if filter.OrganizationID != nil {
+			if user.OrganizationID() == nil || *user.OrganizationID() != *filter.OrganizationID {
+				continue
+			}
+		}
+		if filter.IsActive != nil && user.IsActive() != *filter.IsActive {
+			continue
+		}
+		count++
+	}
+
+	return count, nil
 }
 
 // mockTicketRepository is a simple mock for testing
