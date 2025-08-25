@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"simpleservicedesk/generated/openapi"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/labstack/echo/v4"
 )
@@ -11,23 +12,21 @@ import (
 func (h CategoryHandlers) GetCategories(c echo.Context, params openapi.GetCategoriesParams) error {
 	ctx := c.Request().Context()
 
-	// Build filter from query parameters
-	filter := CategoryFilter{}
-
-	if params.OrganizationId != nil {
-		oid := *params.OrganizationId
-		filter.OrganizationID = &oid
+	// Convert OpenAPI params to filter using the centralized converter
+	filter, err := queries.FromOpenAPICategoryParams(params)
+	if err != nil {
+		msg := err.Error()
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
 
-	if params.ParentId != nil {
-		pid := *params.ParentId
-		filter.ParentID = &pid
+	// Validate filter with business rules
+	filter, validateErr := filter.ValidateAndSetDefaults()
+	if validateErr != nil {
+		msg := validateErr.Error()
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
 
-	if params.IsActive != nil {
-		filter.IsActive = params.IsActive
-	}
-
+	// Get categories from repository
 	categoriesList, err := h.repo.ListCategories(ctx, filter)
 	if err != nil {
 		return h.handleCategoryError(c, err)

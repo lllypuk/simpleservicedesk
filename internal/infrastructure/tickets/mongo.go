@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"simpleservicedesk/internal/application"
 	domain "simpleservicedesk/internal/domain/tickets"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -169,7 +169,7 @@ func (r *MongoRepo) UpdateTicket(
 }
 
 // ListTickets retrieves tickets based on filter criteria
-func (r *MongoRepo) ListTickets(ctx context.Context, filter application.TicketFilter) ([]*domain.Ticket, error) {
+func (r *MongoRepo) ListTickets(ctx context.Context, filter queries.TicketFilter) ([]*domain.Ticket, error) {
 	query := r.buildFilterQuery(filter)
 
 	opts := options.Find()
@@ -368,7 +368,7 @@ func (r *MongoRepo) mongoToDomain(mongoDoc *mongoTicket) (*domain.Ticket, error)
 	return ticket, nil
 }
 
-func (r *MongoRepo) buildFilterQuery(filter application.TicketFilter) bson.M {
+func (r *MongoRepo) buildFilterQuery(filter queries.TicketFilter) bson.M {
 	query := bson.M{}
 
 	if filter.Status != nil {
@@ -416,7 +416,7 @@ func (r *MongoRepo) buildFilterQuery(filter application.TicketFilter) bson.M {
 	return query
 }
 
-func (r *MongoRepo) buildSortOptions(filter application.TicketFilter) bson.D {
+func (r *MongoRepo) buildSortOptions(filter queries.TicketFilter) bson.D {
 	var sort bson.D
 
 	sortBy := "created_at" // default

@@ -12,6 +12,7 @@ import (
 	"simpleservicedesk/internal/application"
 	domain "simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/infrastructure/tickets"
+	"simpleservicedesk/internal/queries"
 	"simpleservicedesk/test/integration/shared"
 
 	"github.com/google/uuid"
@@ -261,7 +262,7 @@ func (s *TicketRepositoryIntegrationSuite) testFilteringAndSorting(repo applicat
 
 		// Test filtering by priority
 		highPriority := domain.PriorityHigh
-		result, err := repo.ListTickets(ctx, application.TicketFilter{
+		result, err := repo.ListTickets(ctx, queries.TicketFilter{
 			Priority: &highPriority,
 		})
 		s.Require().NoError(err)
@@ -269,39 +270,39 @@ func (s *TicketRepositoryIntegrationSuite) testFilteringAndSorting(repo applicat
 		s.Equal("High Priority Ticket", result[0].Title())
 
 		// Test filtering by organization
-		result, err = repo.ListTickets(ctx, application.TicketFilter{
+		result, err = repo.ListTickets(ctx, queries.TicketFilter{
 			OrganizationID: &orgID1,
 		})
 		s.Require().NoError(err)
 		s.Len(result, 2) // High and Critical tickets
 
 		// Test filtering by assignee
-		result, err = repo.ListTickets(ctx, application.TicketFilter{
+		result, err = repo.ListTickets(ctx, queries.TicketFilter{
 			AssigneeID: &assigneeID,
 		})
 		s.Require().NoError(err)
 		s.Len(result, 2) // Assigned tickets
 
 		// Test filtering by author
-		result, err = repo.ListTickets(ctx, application.TicketFilter{
+		result, err = repo.ListTickets(ctx, queries.TicketFilter{
 			AuthorID: &authorID1,
 		})
 		s.Require().NoError(err)
 		s.Len(result, 3) // authorID1 created 3 tickets
 
 		// Test pagination
-		result, err = repo.ListTickets(ctx, application.TicketFilter{
-			Limit:  2,
-			Offset: 1,
-		})
+		paginationFilter := queries.TicketFilter{}
+		paginationFilter.Limit = 2
+		paginationFilter.Offset = 1
+		result, err = repo.ListTickets(ctx, paginationFilter)
 		s.Require().NoError(err)
 		s.Len(result, 2)
 
 		// Test sorting by priority
-		result, err = repo.ListTickets(ctx, application.TicketFilter{
-			SortBy:    "priority",
-			SortOrder: "desc",
-		})
+		sortFilter := queries.TicketFilter{}
+		sortFilter.SortBy = "priority"
+		sortFilter.SortOrder = "desc"
+		result, err = repo.ListTickets(ctx, sortFilter)
 		s.Require().NoError(err)
 		s.Len(result, 4)
 		// Should be ordered: Critical, High, Normal, Low
@@ -312,10 +313,12 @@ func (s *TicketRepositoryIntegrationSuite) testFilteringAndSorting(repo applicat
 
 		// Test date filtering
 		now := time.Now()
-		result, err = repo.ListTickets(ctx, application.TicketFilter{
-			CreatedAfter:  &[]time.Time{now.Add(-1 * time.Hour)}[0],
-			CreatedBefore: &[]time.Time{now.Add(1 * time.Hour)}[0],
-		})
+		dateFilter := queries.TicketFilter{}
+		beforeTime := now.Add(-1 * time.Hour)
+		afterTime := now.Add(1 * time.Hour)
+		dateFilter.CreatedAfter = &beforeTime
+		dateFilter.CreatedBefore = &afterTime
+		result, err = repo.ListTickets(ctx, dateFilter)
 		s.Require().NoError(err)
 		s.Len(result, 4) // All tickets should be within this range
 	})

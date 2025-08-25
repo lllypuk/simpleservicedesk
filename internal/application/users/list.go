@@ -4,8 +4,7 @@ import (
 	"net/http"
 
 	"simpleservicedesk/generated/openapi"
-	"simpleservicedesk/internal/domain/users"
-	infraUsers "simpleservicedesk/internal/infrastructure/users"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/labstack/echo/v4"
 )
@@ -13,44 +12,20 @@ import (
 func (h UserHandlers) GetUsers(c echo.Context, params openapi.GetUsersParams) error {
 	ctx := c.Request().Context()
 
-	const defaultLimit = 20
-	// Создаем фильтр на основе параметров
-	filter := infraUsers.UserFilter{
-		Offset: 0,
-		Limit:  defaultLimit, // Значение по умолчанию
+	// Convert OpenAPI params to filter using the centralized converter
+	filter, err := queries.FromOpenAPIUserParams(params)
+	if err != nil {
+		msg := err.Error()
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
 
-	if params.Name != nil {
-		filter.Name = *params.Name
+	// Validate filter with business rules
+	filter, validateErr := filter.ValidateAndSetDefaults()
+	if validateErr != nil {
+		msg := validateErr.Error()
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
-	if params.Email != nil {
-		filter.Email = *params.Email
-	}
-	if params.Role != nil {
-		role, err := users.ParseRole(string(*params.Role))
-		if err == nil {
-			filter.Role = &role
-		}
-	}
-	if params.OrganizationId != nil {
-		filter.OrganizationID = params.OrganizationId
-	}
-	if params.IsActive != nil {
-		filter.IsActive = params.IsActive
-	}
-
-	// Обрабатываем пагинацию
-	if params.Page != nil && *params.Page > 1 {
-		filter.Offset = (*params.Page - 1) * filter.Limit
-	}
-	if params.Limit != nil && *params.Limit > 0 {
-		filter.Limit = *params.Limit
-		if params.Page != nil && *params.Page > 1 {
-			filter.Offset = (*params.Page - 1) * filter.Limit
-		}
-	}
-
-	// Получаем список пользователей
+	// Get users from repository
 	usersList, err := h.repo.ListUsers(ctx, filter)
 	if err != nil {
 		return handleUserError(c, err)

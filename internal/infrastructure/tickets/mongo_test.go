@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"simpleservicedesk/internal/application"
 	domain "simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/infrastructure/tickets"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -300,14 +300,14 @@ func TestMongoRepo_ListTickets(t *testing.T) {
 	}
 
 	t.Run("no filter", func(t *testing.T) {
-		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{})
+		result, ticketErr := repo.ListTickets(ctx, queries.TicketFilter{})
 		require.NoError(t, ticketErr)
 		assert.Len(t, result, 3)
 	})
 
 	t.Run("filter by priority", func(t *testing.T) {
 		priority := domain.PriorityHigh
-		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, queries.TicketFilter{
 			Priority: &priority,
 		})
 		require.NoError(t, ticketErr)
@@ -316,7 +316,7 @@ func TestMongoRepo_ListTickets(t *testing.T) {
 	})
 
 	t.Run("filter by organization", func(t *testing.T) {
-		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, queries.TicketFilter{
 			OrganizationID: &orgID1,
 		})
 		require.NoError(t, ticketErr)
@@ -324,7 +324,7 @@ func TestMongoRepo_ListTickets(t *testing.T) {
 	})
 
 	t.Run("filter by author", func(t *testing.T) {
-		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
+		result, ticketErr := repo.ListTickets(ctx, queries.TicketFilter{
 			AuthorID: &authorID2,
 		})
 		require.NoError(t, ticketErr)
@@ -333,26 +333,26 @@ func TestMongoRepo_ListTickets(t *testing.T) {
 	})
 
 	t.Run("with limit", func(t *testing.T) {
-		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
-			Limit: 2,
-		})
+		filter := queries.TicketFilter{}
+		filter.Limit = 2
+		result, ticketErr := repo.ListTickets(ctx, filter)
 		require.NoError(t, ticketErr)
 		assert.Len(t, result, 2)
 	})
 
 	t.Run("with offset", func(t *testing.T) {
-		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
-			Offset: 1,
-		})
+		filter := queries.TicketFilter{}
+		filter.Offset = 1
+		result, ticketErr := repo.ListTickets(ctx, filter)
 		require.NoError(t, ticketErr)
 		assert.Len(t, result, 2)
 	})
 
 	t.Run("sort by priority descending", func(t *testing.T) {
-		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
-			SortBy:    "priority",
-			SortOrder: "desc",
-		})
+		filter := queries.TicketFilter{}
+		filter.SortBy = "priority"
+		filter.SortOrder = "desc"
+		result, ticketErr := repo.ListTickets(ctx, filter)
 		require.NoError(t, ticketErr)
 		assert.Len(t, result, 3)
 		// Should be ordered: Critical, High, Normal
@@ -366,10 +366,10 @@ func TestMongoRepo_ListTickets(t *testing.T) {
 		before := now.Add(-1 * time.Hour)
 		after := now.Add(1 * time.Hour)
 
-		result, ticketErr := repo.ListTickets(ctx, application.TicketFilter{
-			CreatedAfter:  &before,
-			CreatedBefore: &after,
-		})
+		filter := queries.TicketFilter{}
+		filter.CreatedAfter = &before
+		filter.CreatedBefore = &after
+		result, ticketErr := repo.ListTickets(ctx, filter)
 		require.NoError(t, ticketErr)
 		assert.Len(t, result, 3) // All sliceTickets should be within this range
 	})

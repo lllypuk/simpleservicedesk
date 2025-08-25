@@ -8,6 +8,7 @@ import (
 
 	"simpleservicedesk/internal/application"
 	domain "simpleservicedesk/internal/domain/categories"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -183,7 +184,7 @@ func (r *MongoRepo) UpdateCategory(
 
 func (r *MongoRepo) ListCategories(
 	ctx context.Context,
-	filter application.CategoryFilter,
+	filter queries.CategoryFilter,
 ) ([]*domain.Category, error) {
 	query := bson.M{}
 
