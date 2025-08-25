@@ -17,6 +17,7 @@ import (
 	"simpleservicedesk/internal/application"
 	domain "simpleservicedesk/internal/domain/organizations"
 	organizationsInfra "simpleservicedesk/internal/infrastructure/organizations"
+	"simpleservicedesk/internal/queries"
 )
 
 type MongoRepoSuite struct {
@@ -256,7 +257,7 @@ func (s *MongoRepoSuite) TestListOrganizations() {
 	}
 
 	// Test listing all organizations
-	filter := application.OrganizationFilter{}
+	filter := queries.OrganizationFilter{}
 	result, err := s.repo.ListOrganizations(ctx, filter)
 	s.Require().NoError(err)
 	s.Len(result, 3)
@@ -299,12 +300,11 @@ func (s *MongoRepoSuite) TestListOrganizationsWithPagination() {
 	}
 
 	// Test pagination
-	filter := application.OrganizationFilter{
-		Limit:     5,
-		Offset:    0,
-		SortBy:    "name",
-		SortOrder: "asc",
-	}
+	filter := queries.OrganizationFilter{}
+	filter.Limit = 5
+	filter.Offset = 0
+	filter.SortBy = "name"
+	filter.SortOrder = "asc"
 
 	firstPage, err := s.repo.ListOrganizations(ctx, filter)
 	s.Require().NoError(err)
@@ -489,7 +489,7 @@ func (s *MongoRepoSuite) TestHierarchicalOperations() {
 
 	// Test filtering by parent
 	techID := tech.ID()
-	filter := application.OrganizationFilter{
+	filter := queries.OrganizationFilter{
 		ParentID: &techID,
 	}
 	techChildren, err := s.repo.ListOrganizations(ctx, filter)
@@ -497,7 +497,7 @@ func (s *MongoRepoSuite) TestHierarchicalOperations() {
 	s.Len(techChildren, 2) // Development and QA
 
 	// Test root-only filter
-	filter = application.OrganizationFilter{
+	filter = queries.OrganizationFilter{
 		IsRootOnly: true,
 	}
 	rootOrgs, err := s.repo.ListOrganizations(ctx, filter)
@@ -677,7 +677,7 @@ func (s *MongoRepoSuite) TestLargeHierarchyOperations() {
 	// Test listing children
 	start = time.Now()
 	rootID := root.ID()
-	filter := application.OrganizationFilter{
+	filter := queries.OrganizationFilter{
 		ParentID: &rootID,
 	}
 	result, err := s.repo.ListOrganizations(ctx, filter)

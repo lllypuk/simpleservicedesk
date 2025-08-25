@@ -8,7 +8,7 @@ import (
 	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
-	infraUsers "simpleservicedesk/internal/infrastructure/users"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -92,7 +92,7 @@ func (m *mockUserRepository) GetUser(_ context.Context, id uuid.UUID) (*users.Us
 	return user, nil
 }
 
-func (m *mockUserRepository) ListUsers(_ context.Context, filter infraUsers.UserFilter) ([]*users.User, error) {
+func (m *mockUserRepository) ListUsers(_ context.Context, filter queries.UserFilter) ([]*users.User, error) {
 	var result []*users.User
 	count := 0
 
@@ -113,14 +113,16 @@ func (m *mockUserRepository) ListUsers(_ context.Context, filter infraUsers.User
 	return result, nil
 }
 
-func (m *mockUserRepository) userMatchesFilter(user *users.User, filter infraUsers.UserFilter) bool {
-	if filter.Name != "" && !strings.Contains(strings.ToLower(user.Name()), strings.ToLower(filter.Name)) {
+func (m *mockUserRepository) userMatchesFilter(user *users.User, filter queries.UserFilter) bool {
+	if filter.Name != nil && *filter.Name != "" &&
+		!strings.Contains(strings.ToLower(user.Name()), strings.ToLower(*filter.Name)) {
 		return false
 	}
-	if filter.Email != "" && !strings.Contains(strings.ToLower(user.Email()), strings.ToLower(filter.Email)) {
+	if filter.Email != nil && *filter.Email != "" &&
+		!strings.Contains(strings.ToLower(user.Email()), strings.ToLower(*filter.Email)) {
 		return false
 	}
-	if filter.Role != nil && user.Role() != *filter.Role {
+	if filter.Role != nil && *filter.Role != "" && string(user.Role()) != *filter.Role {
 		return false
 	}
 	if filter.OrganizationID != nil {
@@ -134,11 +136,11 @@ func (m *mockUserRepository) userMatchesFilter(user *users.User, filter infraUse
 	return true
 }
 
-func (m *mockUserRepository) shouldLimitResults(filter infraUsers.UserFilter, count int) bool {
+func (m *mockUserRepository) shouldLimitResults(filter queries.UserFilter, count int) bool {
 	return filter.Limit > 0 && count >= filter.Offset+filter.Limit
 }
 
-func (m *mockUserRepository) shouldIncludeInResults(filter infraUsers.UserFilter, count int) bool {
+func (m *mockUserRepository) shouldIncludeInResults(filter queries.UserFilter, count int) bool {
 	return count >= filter.Offset
 }
 
@@ -151,26 +153,11 @@ func (m *mockUserRepository) DeleteUser(_ context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (m *mockUserRepository) CountUsers(_ context.Context, filter infraUsers.UserFilter) (int64, error) {
+func (m *mockUserRepository) CountUsers(_ context.Context, filter queries.UserFilter) (int64, error) {
 	count := int64(0)
 
 	for _, user := range m.users {
-		// Apply the same filtering as ListUsers
-		if filter.Name != "" && !strings.Contains(strings.ToLower(user.Name()), strings.ToLower(filter.Name)) {
-			continue
-		}
-		if filter.Email != "" && !strings.Contains(strings.ToLower(user.Email()), strings.ToLower(filter.Email)) {
-			continue
-		}
-		if filter.Role != nil && user.Role() != *filter.Role {
-			continue
-		}
-		if filter.OrganizationID != nil {
-			if user.OrganizationID() == nil || *user.OrganizationID() != *filter.OrganizationID {
-				continue
-			}
-		}
-		if filter.IsActive != nil && user.IsActive() != *filter.IsActive {
+		if !m.userMatchesFilter(user, filter) {
 			continue
 		}
 		count++
@@ -231,7 +218,7 @@ func (m *mockTicketRepository) GetTicket(_ context.Context, id uuid.UUID) (*tick
 
 func (m *mockTicketRepository) ListTickets(
 	_ context.Context,
-	_ TicketFilter,
+	_ queries.TicketFilter,
 ) ([]*tickets.Ticket, error) {
 	result := make([]*tickets.Ticket, 0, len(m.tickets))
 	for _, ticket := range m.tickets {
@@ -304,7 +291,7 @@ func (m *mockOrganizationRepository) GetOrganization(
 
 func (m *mockOrganizationRepository) ListOrganizations(
 	_ context.Context,
-	filter OrganizationFilter,
+	filter queries.OrganizationFilter,
 ) ([]*organizations.Organization, error) {
 	var result []*organizations.Organization
 	count := 0
@@ -401,7 +388,7 @@ func (m *mockCategoryRepository) GetCategory(
 
 func (m *mockCategoryRepository) ListCategories(
 	_ context.Context,
-	filter CategoryFilter,
+	filter queries.CategoryFilter,
 ) ([]*categories.Category, error) {
 	var result []*categories.Category
 	count := 0
@@ -423,7 +410,7 @@ func (m *mockCategoryRepository) ListCategories(
 	return result, nil
 }
 
-func (m *mockCategoryRepository) matchesFilter(category *categories.Category, filter CategoryFilter) bool {
+func (m *mockCategoryRepository) matchesFilter(category *categories.Category, filter queries.CategoryFilter) bool {
 	if filter.OrganizationID != nil && category.OrganizationID() != *filter.OrganizationID {
 		return false
 	}
@@ -433,7 +420,10 @@ func (m *mockCategoryRepository) matchesFilter(category *categories.Category, fi
 	return m.matchesParentFilter(category, filter)
 }
 
-func (m *mockCategoryRepository) matchesParentFilter(category *categories.Category, filter CategoryFilter) bool {
+func (m *mockCategoryRepository) matchesParentFilter(
+	category *categories.Category,
+	filter queries.CategoryFilter,
+) bool {
 	if filter.ParentID == nil {
 		return true
 	}
@@ -446,11 +436,11 @@ func (m *mockCategoryRepository) matchesParentFilter(category *categories.Catego
 	return true
 }
 
-func (m *mockCategoryRepository) shouldBreakOnLimit(filter CategoryFilter, count int) bool {
+func (m *mockCategoryRepository) shouldBreakOnLimit(filter queries.CategoryFilter, count int) bool {
 	return filter.Limit > 0 && count >= filter.Offset+filter.Limit
 }
 
-func (m *mockCategoryRepository) shouldIncludeInResult(filter CategoryFilter, count int) bool {
+func (m *mockCategoryRepository) shouldIncludeInResult(filter queries.CategoryFilter, count int) bool {
 	return count >= filter.Offset
 }
 

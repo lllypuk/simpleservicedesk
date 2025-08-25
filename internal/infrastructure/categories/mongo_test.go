@@ -17,6 +17,7 @@ import (
 	"simpleservicedesk/internal/application"
 	domain "simpleservicedesk/internal/domain/categories"
 	categoriesInfra "simpleservicedesk/internal/infrastructure/categories"
+	"simpleservicedesk/internal/queries"
 )
 
 type MongoRepoSuite struct {
@@ -260,7 +261,7 @@ func (s *MongoRepoSuite) TestListCategories() {
 	}
 
 	// Test listing all categories
-	filter := application.CategoryFilter{
+	filter := queries.CategoryFilter{
 		OrganizationID: &s.orgID,
 	}
 	result, err := s.repo.ListCategories(ctx, filter)
@@ -296,13 +297,13 @@ func (s *MongoRepoSuite) TestListCategoriesWithPagination() {
 	}
 
 	// Test pagination
-	filter := application.CategoryFilter{
+	filter := queries.CategoryFilter{
 		OrganizationID: &s.orgID,
-		Limit:          5,
-		Offset:         0,
-		SortBy:         "name",
-		SortOrder:      "asc",
 	}
+	filter.Limit = 5
+	filter.Offset = 0
+	filter.SortBy = "name"
+	filter.SortOrder = "asc"
 
 	firstPage, err := s.repo.ListCategories(ctx, filter)
 	s.Require().NoError(err)
@@ -493,7 +494,7 @@ func (s *MongoRepoSuite) TestHierarchicalOperations() {
 
 	// Test filtering by parent
 	itID := it.ID()
-	filter := application.CategoryFilter{
+	filter := queries.CategoryFilter{
 		ParentID: &itID,
 	}
 	itChildren, err := s.repo.ListCategories(ctx, filter)
@@ -501,7 +502,7 @@ func (s *MongoRepoSuite) TestHierarchicalOperations() {
 	s.Len(itChildren, 2) // Hardware and Software
 
 	// Test root-only filter
-	filter = application.CategoryFilter{
+	filter = queries.CategoryFilter{
 		IsRootOnly: true,
 	}
 	rootCategories, err := s.repo.ListCategories(ctx, filter)
@@ -677,7 +678,7 @@ func (s *MongoRepoSuite) TestLargeHierarchyOperations() {
 	// Test listing children
 	start = time.Now()
 	rootID := root.ID()
-	filter := application.CategoryFilter{
+	filter := queries.CategoryFilter{
 		ParentID: &rootID,
 	}
 	result, err := s.repo.ListCategories(ctx, filter)

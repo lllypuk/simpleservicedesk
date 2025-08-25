@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"simpleservicedesk/generated/openapi"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/labstack/echo/v4"
 )
@@ -11,16 +12,18 @@ import (
 func (h OrganizationHandlers) GetOrganizations(c echo.Context, params openapi.GetOrganizationsParams) error {
 	ctx := c.Request().Context()
 
-	filter := OrganizationFilter{
-		Limit:  DefaultPageLimit,
-		Offset: 0,
+	// Convert OpenAPI params to filter using the centralized converter
+	filter, err := queries.FromOpenAPIOrganizationParams(params)
+	if err != nil {
+		msg := err.Error()
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
 
-	if params.Page != nil && *params.Page > 0 {
-		filter.Offset = (*params.Page - 1) * filter.Limit
-	}
-	if params.Limit != nil && *params.Limit > 0 && *params.Limit <= 100 {
-		filter.Limit = *params.Limit
+	// Validate filter with business rules
+	filter, validateErr := filter.ValidateAndSetDefaults()
+	if validateErr != nil {
+		msg := validateErr.Error()
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
 
 	orgs, err := h.repo.ListOrganizations(ctx, filter)

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	domain "simpleservicedesk/internal/domain/users"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -148,28 +149,17 @@ func (r *MongoRepo) UpdateUser(ctx context.Context,
 	return entity, nil
 }
 
-// UserFilter определяет фильтры для поиска пользователей
-type UserFilter struct {
-	Name           string
-	Email          string
-	Role           *domain.Role
-	OrganizationID *uuid.UUID
-	IsActive       *bool
-	Offset         int
-	Limit          int
-}
-
-func (r *MongoRepo) ListUsers(ctx context.Context, filter UserFilter) ([]*domain.User, error) {
+func (r *MongoRepo) ListUsers(ctx context.Context, filter queries.UserFilter) ([]*domain.User, error) {
 	bsonFilter := bson.M{}
 
-	if filter.Name != "" {
-		bsonFilter["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
+	if filter.Name != nil && *filter.Name != "" {
+		bsonFilter["name"] = bson.M{"$regex": *filter.Name, "$options": "i"}
 	}
-	if filter.Email != "" {
-		bsonFilter["email"] = bson.M{"$regex": filter.Email, "$options": "i"}
+	if filter.Email != nil && *filter.Email != "" {
+		bsonFilter["email"] = bson.M{"$regex": *filter.Email, "$options": "i"}
 	}
-	if filter.Role != nil {
-		bsonFilter["role"] = string(*filter.Role)
+	if filter.Role != nil && *filter.Role != "" {
+		bsonFilter["role"] = *filter.Role
 	}
 	if filter.OrganizationID != nil {
 		bsonFilter["organization_id"] = *filter.OrganizationID
@@ -230,17 +220,17 @@ func (r *MongoRepo) DeleteUser(ctx context.Context, userID uuid.UUID) error {
 	return nil
 }
 
-func (r *MongoRepo) CountUsers(ctx context.Context, filter UserFilter) (int64, error) {
+func (r *MongoRepo) CountUsers(ctx context.Context, filter queries.UserFilter) (int64, error) {
 	bsonFilter := bson.M{}
 
-	if filter.Name != "" {
-		bsonFilter["name"] = bson.M{"$regex": filter.Name, "$options": "i"}
+	if filter.Name != nil && *filter.Name != "" {
+		bsonFilter["name"] = bson.M{"$regex": *filter.Name, "$options": "i"}
 	}
-	if filter.Email != "" {
-		bsonFilter["email"] = bson.M{"$regex": filter.Email, "$options": "i"}
+	if filter.Email != nil && *filter.Email != "" {
+		bsonFilter["email"] = bson.M{"$regex": *filter.Email, "$options": "i"}
 	}
-	if filter.Role != nil {
-		bsonFilter["role"] = string(*filter.Role)
+	if filter.Role != nil && *filter.Role != "" {
+		bsonFilter["role"] = *filter.Role
 	}
 	if filter.OrganizationID != nil {
 		bsonFilter["organization_id"] = *filter.OrganizationID

@@ -8,6 +8,7 @@ import (
 
 	"simpleservicedesk/internal/application"
 	domain "simpleservicedesk/internal/domain/organizations"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -183,7 +184,7 @@ func (r *MongoRepo) UpdateOrganization(
 
 func (r *MongoRepo) ListOrganizations(
 	ctx context.Context,
-	filter application.OrganizationFilter,
+	filter queries.OrganizationFilter,
 ) ([]*domain.Organization, error) {
 	query := bson.M{}
 
