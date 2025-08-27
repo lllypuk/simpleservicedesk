@@ -69,15 +69,15 @@ func NewMongoRepo(db *mongo.Database) *MongoRepo {
 	// Create indexes for better performance
 	ctx := context.Background()
 	indexes := []mongo.IndexModel{
-		{Keys: bson.D{{Key: "ticket_id", Value: 1}}, Options: options.Index().SetUnique(true)},
-		{Keys: bson.D{{Key: "status", Value: 1}}},
-		{Keys: bson.D{{Key: "priority", Value: 1}}},
-		{Keys: bson.D{{Key: "assignee_id", Value: 1}}},
-		{Keys: bson.D{{Key: "author_id", Value: 1}}},
-		{Keys: bson.D{{Key: "organization_id", Value: 1}}},
-		{Keys: bson.D{{Key: "category_id", Value: 1}}},
-		{Keys: bson.D{{Key: "created_at", Value: -1}}},
-		{Keys: bson.D{{Key: "updated_at", Value: -1}}},
+		{Keys: bson.D{{"ticket_id", 1}}, Options: options.Index().SetUnique(true)},
+		{Keys: bson.D{{"status", 1}}},
+		{Keys: bson.D{{"priority", 1}}},
+		{Keys: bson.D{{"assignee_id", 1}}},
+		{Keys: bson.D{{"author_id", 1}}},
+		{Keys: bson.D{{"organization_id", 1}}},
+		{Keys: bson.D{{"category_id", 1}}},
+		{Keys: bson.D{{"created_at", -1}}},
+		{Keys: bson.D{{"updated_at", -1}}},
 	}
 
 	_, _ = collection.Indexes().CreateMany(ctx, indexes)
@@ -230,8 +230,8 @@ func (r *MongoRepo) ListTickets(ctx context.Context, filter queries.TicketFilter
 
 // sortTicketsByPriority sorts tickets by priority weight
 func (r *MongoRepo) sortTicketsByPriority(tickets []*domain.Ticket, ascending bool) {
-	for i := range len(tickets) - 1 {
-		for j := range len(tickets) - i - 1 {
+	for i := 0; i < len(tickets)-1; i++ {
+		for j := 0; j < len(tickets)-i-1; j++ {
 			var shouldSwap bool
 			if ascending {
 				shouldSwap = tickets[j].Priority().Weight() > tickets[j+1].Priority().Weight()
