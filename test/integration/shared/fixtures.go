@@ -5,6 +5,7 @@ package shared
 
 import (
 	"simpleservicedesk/generated/openapi"
+	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
@@ -164,4 +165,88 @@ func (td TestOrganizationData) CreateDomainOrganization() (*organizations.Organi
 		return organizations.CreateRootOrganization(td.Name, td.Domain)
 	}
 	return organizations.CreateSubOrganization(td.Name, td.Domain, *td.ParentID)
+}
+
+// TestCategoryData provides common test category data
+type TestCategoryData struct {
+	Name           string
+	Description    string
+	OrganizationID uuid.UUID
+	ParentID       *uuid.UUID
+	IsActive       bool
+}
+
+// Common test categories
+var (
+	TestCategoryRoot1 = TestCategoryData{
+		Name:           "IT Support",
+		Description:    "IT Support category",
+		OrganizationID: uuid.New(), // Will be set in tests
+		ParentID:       nil,
+		IsActive:       true,
+	}
+
+	TestCategoryRoot2 = TestCategoryData{
+		Name:           "HR",
+		Description:    "Human Resources category",
+		OrganizationID: uuid.New(), // Will be set in tests
+		ParentID:       nil,
+		IsActive:       true,
+	}
+
+	TestCategoryChild1 = TestCategoryData{
+		Name:           "Hardware Issues",
+		Description:    "Hardware related issues",
+		OrganizationID: uuid.New(), // Will be set in tests
+		ParentID:       nil,        // Will be set in tests
+		IsActive:       true,
+	}
+
+	TestCategoryChild2 = TestCategoryData{
+		Name:           "Software Issues",
+		Description:    "Software related issues",
+		OrganizationID: uuid.New(), // Will be set in tests
+		ParentID:       nil,        // Will be set in tests
+		IsActive:       true,
+	}
+
+	TestCategoryInactive = TestCategoryData{
+		Name:           "Deprecated Category",
+		Description:    "This category is inactive",
+		OrganizationID: uuid.New(), // Will be set in tests
+		ParentID:       nil,
+		IsActive:       false,
+	}
+)
+
+// NewTestCategory creates test data for a category with specified organization
+func NewTestCategory(name, description string, orgID uuid.UUID, parentID *uuid.UUID, isActive bool) TestCategoryData {
+	return TestCategoryData{
+		Name:           name,
+		Description:    description,
+		OrganizationID: orgID,
+		ParentID:       parentID,
+		IsActive:       isActive,
+	}
+}
+
+// CreateCategoryRequest creates an OpenAPI category request
+func (td TestCategoryData) CreateCategoryRequest() openapi.CreateCategoryRequest {
+	return openapi.CreateCategoryRequest{
+		Name:           td.Name,
+		Description:    &td.Description,
+		OrganizationId: td.OrganizationID,
+		ParentId:       td.ParentID,
+	}
+}
+
+// CreateDomainCategory creates a domain category entity
+func (td TestCategoryData) CreateDomainCategory() (*categories.Category, error) {
+	return categories.NewCategory(
+		uuid.New(),
+		td.Name,
+		td.Description,
+		td.OrganizationID,
+		td.ParentID,
+	)
 }
