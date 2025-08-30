@@ -1,156 +1,196 @@
-# Задача: Добавление API тестов для Categories (интеграционное тестирование)
+# Текущая задача: Phase 1 - Service Layer Refactoring
 
-## Обзор проекта
+## Обзор
 
-SimpleServiceDesk - это Go-приложение сервисной службы, построенное по принципам чистой архитектуры с использованием:
-- **Web Framework**: Echo v4
-- **База данных**: MongoDB с testcontainers для тестирования
-- **Кодогенерация**: oapi-codegen из OpenAPI 3.0 спецификации
-- **Тестирование**: testcontainers-go для интеграционных тестов с реальным MongoDB
+Первая фаза внедрения HTMX интерфейса в проект SimpleServiceDesk. Основная цель - создание сервисного слоя для устранения дублирования кода между API и будущими веб-хэндлерами.
 
-## Анализ текущего состояния
+## Цели Phase 1
 
-### Структура тестов
-Проект использует централизованную структуру интеграционных тестов:
-```
-test/integration/
-├── api/           # HTTP API интеграционные тесты
-│   ├── users_test.go      ✅ РЕАЛИЗОВАН
-│   ├── tickets_test.go    ✅ РЕАЛИЗОВАН
-│   ├── organizations_test.go ✅ РЕАЛИЗОВАН
-│   └── categories_test.go ❌ ОТСУТСТВУЕТ
-├── repositories/  # Тесты репозиториев с testcontainers
-└── shared/       # Общие утилиты и настройки тестов
-```
+1. **Создать сервисные интерфейсы** для бизнес-логики
+2. **Рефакторинг существующих API хэндлеров** для использования сервисов
+3. **Обновить HTTP сервер** для поддержки сервисного слоя
+4. **Сохранить совместимость** существующих API контрактов
 
-### Существующая реализация Categories API
+## Детальный план выполнения
 
-**OpenAPI Endpoints** (из `api/openapi.yaml`):
-- `POST /categories` - Создание категории
-- `GET /categories` - Список категорий с иерархическим древом
-- `GET /categories/{id}` - Получение категории по ID
-- `PUT /categories/{id}` - Обновление категории
-- `DELETE /categories/{id}` - Удаление категории
-- `GET /categories/{id}/tickets` - Получение билетов категории
+### Шаг 1: Создание сервисных интерфейсов
 
-**Ключевые особенности Categories API**:
-- Иерархическая структура (parent_id, children)
-- Фильтрация по organization_id, parent_id, is_active
-- Поддержка include_children и include_subcategories
-- Валидация существования parent_id и organization_id
+**Создать директорию**: `internal/application/services/`
 
-**Application Layer** (полностью реализован):
-- `internal/application/categories/` - все CRUD операции с unit тестами
-- Handlers: create.go, get.go, list.go, update.go, delete.go, tickets.go
+**Файлы для создания**:
+- `internal/application/services/interfaces.go` - Общие интерфейсы и типы
+- `internal/application/services/user_service.go` - Сервис пользователей
+- `internal/application/services/ticket_service.go` - Сервис тикетов
+- `internal/application/services/category_service.go` - Сервис категорий
+- `internal/application/services/organization_service.go` - Сервис организаций
 
-**Infrastructure Layer**:
-- `internal/infrastructure/categories/mongo.go` - MongoDB репозиторий
-
-## Задача
-
-**Цель**: Создать полное интеграционное тестирование Categories API по образцу существующих тестов users_test.go, tickets_test.go, organizations_test.go.
-
-### Требования к реализации
-
-1. **Файл**: `test/integration/api/categories_test.go`
-
-2. **Структура теста**:
-   ```go
-   //go:build integration
-   // +build integration
-
-   package api_test
-
-   type CategoryAPITestSuite struct {
-       shared.IntegrationSuite
-   }
-   ```
-
-3. **Обязательные тестовые сценарии**:
-
-   **POST /categories** - Создание категории:
-   - ✅ Успешное создание root категории
-   - ✅ Успешное создание дочерней категории
-   - ❌ Невалидные данные (пустое имя, невалидный organization_id)
-   - ❌ Несуществующий parent_id
-   - ❌ Дублирование имени в organization
-   - ❌ Несуществующий organization_id
-
-   **GET /categories** - Список категорий:
-   - ✅ Получение всех категорий
-   - ✅ Фильтрация по organization_id
-   - ✅ Фильтрация по parent_id (root категории)
-   - ✅ Фильтрация по is_active
-   - ✅ include_children=true/false
-   - ✅ Пустой результат для несуществующей organization
-
-   **GET /categories/{id}** - Получение по ID:
-   - ✅ Успешное получение существующей категории
-   - ❌ Несуществующий ID
-   - ❌ Невалидный UUID format
-
-   **PUT /categories/{id}** - Обновление:
-   - ✅ Успешное обновление name, description, is_active
-   - ✅ Изменение parent_id (перемещение в иерархии)
-   - ❌ Невалидные данные
-   - ❌ Несуществующий ID
-   - ❌ Несуществующий parent_id
-   - ❌ Циклические ссылки (parent_id указывает на самого себя или потомка)
-
-   **DELETE /categories/{id}** - Удаление:
-   - ✅ Успешное удаление категории без детей
-   - ✅ Удаление с каскадным обновлением дочерних категорий
-   - ❌ Несуществующий ID
-   - ❌ Невалидный UUID
-
-   **GET /categories/{id}/tickets** - Билеты категории:
-   - ✅ Получение билетов категории
-   - ✅ include_subcategories=true/false
-   - ✅ Пустой результат для категории без билетов
-   - ❌ Несуществующая категория
-
-4. **Тестовые данные** (добавить в `shared/fixtures.go`):
-   ```go
-   // TestCategoryData для различных тестовых сценариев
-   type TestCategoryData struct {
-       Name           string
-       Description    string
-       OrganizationID uuid.UUID
-       ParentID       *uuid.UUID
-       IsActive       bool
-   }
-
-   var (
-       TestCategoryRoot1 = TestCategoryData{...}
-       TestCategoryChild1 = TestCategoryData{...}
-       // и т.д.
-   )
-   ```
-
-5. **Соблюдение паттернов**:
-   - Использовать `shared.IntegrationSuite` как базу
-   - Следовать структуре существующих API тестов
-   - Использовать testcontainers для реального MongoDB
-   - Тесты должны быть изолированными (SetupTest/TearDownTest)
-   - Build tag `//go:build integration`
-
-6. **Валидация ответов**:
-   - Проверка HTTP статус кодов
-   - Валидация JSON структуры ответов
-   - Проверка бизнес-логики (иерархия, фильтры)
-   - Проверка error responses
-
-## Команды для разработки
-
-После реализации обязательно запустить:
-```bash
-make lint                    # Форматирование и линтеры
-make test-integration        # Все интеграционные тесты
-make test-api               # Только HTTP API тесты
+**Структура UserService (пример)**:
+```go
+type UserService interface {
+    CreateUser(ctx context.Context, req CreateUserRequest) (*domain.User, error)
+    GetUser(ctx context.Context, id uuid.UUID) (*domain.User, error)
+    UpdateUser(ctx context.Context, id uuid.UUID, req UpdateUserRequest) (*domain.User, error)
+    DeleteUser(ctx context.Context, id uuid.UUID) error
+    ListUsers(ctx context.Context, filter queries.UserFilter) ([]*domain.User, int64, error)
+    UpdateUserRole(ctx context.Context, id uuid.UUID, role domain.Role) (*domain.User, error)
+    GetUserTickets(ctx context.Context, userID uuid.UUID, filter queries.TicketFilter) ([]*domain.Ticket, int64, error)
+}
 ```
 
-## Ожидаемый результат
+### Шаг 2: Реализация сервисов
 
-Файл `test/integration/api/categories_test.go` с полным покрытием всех Categories API endpoints, соответствующий качеству и структуре существующих интеграционных тестов в проекте.
+**Переместить бизнес-логику** из существующих хэндлеров в сервисы:
 
-Тесты должны проходить команду `make test-api` и обеспечивать надежную валидацию всей функциональности Categories API.
+**Из `internal/application/users/create.go`**:
+- Валидация пароля
+- Хэширование пароля
+- Создание пользователя через репозиторий
+- Обработка ошибок домена
+
+**Из `internal/application/users/update.go`**:
+- Валидация обновлений
+- Логика обновления полей
+- Проверка прав доступа
+
+**Из других хэндлеров**:
+- Аналогично для tickets, categories, organizations
+
+### Шаг 3: Рефакторинг существующих хэндлеров
+
+**Создать новую структуру директорий**:
+```
+internal/application/handlers/
+├── api/                    # Перемещенные API хэндлеры
+│   ├── users/
+│   ├── tickets/
+│   ├── categories/
+│   └── organizations/
+```
+
+**Обновить API хэндлеры**:
+- Убрать бизнес-логику
+- Оставить только HTTP-специфичную логику (binding, response formatting)
+- Использовать сервисы для выполнения операций
+
+**Пример рефакторинга** `PostUsers`:
+```go
+// Было: прямая работа с репозиторием + бизнес-логика
+func (h UserHandlers) PostUsers(c echo.Context) error {
+    // Валидация, хэширование пароля, создание пользователя
+}
+
+// Стало: делегирование сервису
+func (h UserHandlers) PostUsers(c echo.Context) error {
+    var req openapi.CreateUserRequest
+    if err := c.Bind(&req); err != nil {
+        return err
+    }
+
+    user, err := h.userService.CreateUser(ctx, CreateUserRequest{
+        Name:     req.Name,
+        Email:    string(req.Email),
+        Password: req.Password,
+    })
+
+    // Обработка ошибок и формирование ответа
+}
+```
+
+### Шаг 4: Обновление HTTP сервера
+
+**Модификация `internal/application/http_server.go`**:
+- Добавить создание сервисов
+- Передавать сервисы в хэндлеры вместо репозиториев
+- Подготовить структуру для будущих веб-хэндлеров
+
+**Новая структура SetupHTTPServer**:
+```go
+func SetupHTTPServer(
+    userRepo UserRepository,
+    ticketRepo TicketRepository,
+    organizationRepo OrganizationRepository,
+    categoryRepo CategoryRepository,
+) *echo.Echo {
+    // Создание сервисов
+    userService := services.NewUserService(userRepo)
+    ticketService := services.NewTicketService(ticketRepo)
+    // ...
+
+    // Создание хэндлеров с сервисами
+    apiHandlers := setupAPIHandlers(userService, ticketService, ...)
+
+    // Регистрация маршрутов
+    registerAPIRoutes(e, apiHandlers)
+
+    return e
+}
+```
+
+## Критерии завершения
+
+### ✅ Сервисы созданы и работают
+- [ ] Все 4 сервиса реализованы (Users, Tickets, Categories, Organizations)
+- [ ] Бизнес-логика перенесена из хэндлеров в сервисы
+- [ ] Сервисы используют репозитории для доступа к данным
+
+### ✅ API хэндлеры рефакторены
+- [ ] Хэндлеры перемещены в `internal/application/handlers/api/`
+- [ ] Хэндлеры используют сервисы вместо прямого доступа к репозиториям
+- [ ] Сохранена совместимость API контрактов
+
+### ✅ HTTP сервер обновлен
+- [ ] `http_server.go` использует сервисный слой
+- [ ] Dependency injection настроен правильно
+- [ ] Подготовлена структура для будущих веб-хэндлеров
+
+### ✅ Тесты проходят
+- [ ] `make test` проходит успешно
+- [ ] `make test-integration` проходит успешно
+- [ ] Существующие API тесты продолжают работать
+
+### ✅ Код качество
+- [ ] `make lint` проходит без ошибок
+- [ ] Код соответствует стандартам проекта
+- [ ] Комментарии и документация обновлены
+
+## Задачи для выполнения
+
+### Неделя 1: Создание сервисного слоя
+1. **День 1-2**: Создать интерфейсы сервисов и базовые структуры
+2. **День 3-4**: Реализовать UserService с переносом логики из хэндлеров
+3. **День 5**: Создать тесты для UserService
+
+### Неделя 2: Расширение сервисов
+1. **День 1-2**: Реализовать TicketService
+2. **День 3**: Реализовать CategoryService и OrganizationService
+3. **День 4-5**: Рефакторинг всех API хэндлеров
+
+### Неделя 3: Интеграция и тестирование
+1. **День 1-2**: Обновить HTTP сервер и dependency injection
+2. **День 3-4**: Обновить все тесты
+3. **День 5**: Финальное тестирование и исправление багов
+
+## Риски и митигация
+
+**Риск**: Нарушение существующих API контрактов
+**Митигация**: Тщательное тестирование интеграционными тестами
+
+**Риск**: Усложнение кода без реальной пользы
+**Митигация**: Четкое разделение ответственности, простые интерфейсы
+
+**Риск**: Ошибки при переносе бизнес-логики
+**Митигация**: Пошаговый рефакторинг, проверка тестами на каждом этапе
+
+## Следующие шаги
+
+После завершения Phase 1:
+- **Phase 2**: Создание веб-инфраструктуры (шаблоны, статические файлы)
+- **Phase 3**: Реализация основных веб-страниц
+- **Phase 4**: Продвинутые HTMX функции
+
+## Документация
+
+Обновить документацию:
+- README.md - добавить информацию о сервисном слое
+- CLAUDE.md - обновить архитектурную секцию
+- Добавить примеры использования сервисов в коде

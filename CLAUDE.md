@@ -59,6 +59,7 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 ## Key Technologies
 
 - **Web Framework**: Echo v4 for HTTP routing and middleware
+- **HTMX 2.0.4 + PicoCSS 2.1.1** - Modern web interface without complex JavaScript
 - **Storage**: MongoDB (primary)
 - **Code Generation**: oapi-codegen from OpenAPI 3.0 specs
 - **Testing**: testcontainers-go for integration tests with real MongoDB
@@ -72,6 +73,48 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 4. Update application/infrastructure layers as needed
 5. Run `make lint` before committing
 6. Ensure all tests pass with `make test`
+
+### Web Interface Architecture
+The project includes a complete web interface built with modern technologies:
+
+**Frontend Stack:**
+- **HTMX 2.0.4** - Dynamic updates without complex JavaScript (MANDATORY: use HTMX 2+ only)
+- **PicoCSS 2.1.1** - Minimalist CSS framework for clean UI (MANDATORY: use PicoCSS 2+ only)
+- **Go Templates** - Server-side rendering with layout system
+- **Progressive Web App** - Installable with offline capabilities
+
+**🚨 CRITICAL Frontend Development Rules:**
+1. **MANDATORY: Use HTMX 2.0.4+** - Never downgrade to HTMX v1.x
+2. **MANDATORY: Use PicoCSS 2.1.1+** - Leverage class-less approach and modern CSS variables
+3. **AVOID JavaScript** - Use HTMX for dynamic behavior instead of custom JS
+4. **Server-Side First** - Prefer server rendering over client-side solutions
+5. **HTMX-Only Interactivity** - Use hx-* attributes for all dynamic features
+
+**Web Components:**
+- `internal/web/handlers/` - Authentication, dashboard, and HTMX endpoints
+- `internal/web/middleware/` - Session management, CSRF protection, auth guards
+- `internal/web/templates/` - HTML templates with layouts and components
+- `internal/web/static/` - CSS, JS, and image assets
+- `internal/web/models/` - Form validation and web-specific data structures
+
+**User Experience:**
+- Responsive design works on mobile and desktop
+- Real-time updates via HTMX without page refreshes
+- Form validation with immediate feedback
+- Accessible interface following modern UX principles
+
+## Testing Local Interface
+When testing the web interface locally, use the `--noproxy` flag to bypass proxy settings:
+```bash
+# Test health endpoint
+curl -s --noproxy '*' 127.0.0.1:8080/health
+
+# Test main page
+curl -s --noproxy '*' 127.0.0.1:8080/
+
+# Test login page
+curl -s --noproxy '*' 127.0.0.1:8080/login
+```
 
 ## Current Development Status
 
@@ -87,7 +130,7 @@ All major development phases have been successfully completed. The service is no
 - ✅ **Phase 1**: Complete OpenAPI specification with all endpoints
 - ✅ **Phase 2**: Tickets API - Full CRUD + status transitions + comments + assignments
 - ✅ **Phase 3**: Organizations API - Complete hierarchical organization management
-- ✅ **Phase 4**: Categories API - Full tree-structured category management 
+- ✅ **Phase 4**: Categories API - Full tree-structured category management
 - ✅ **Phase 5**: Extended Users API - Complete user management with role controls
 
 ### ✅ Final API Implementation Status
@@ -141,7 +184,7 @@ internal/
 
 **End-to-End Tests** (`test/integration/e2e/`) - ✅ READY FOR WORKFLOWS:
 - Infrastructure ready for full workflow testing
-- User journey simulation capabilities  
+- User journey simulation capabilities
 - Multiple service interaction testing
 - Tagged with `//go:build integration,e2e`
 
@@ -206,7 +249,7 @@ func TestInternalFunction(t *testing.T) { ... }
 // ✅ CORRECT - Always use this
 package tickets_test
 import "myproject/internal/infrastructure/tickets"
-func TestPublicAPI(t *testing.T) { 
+func TestPublicAPI(t *testing.T) {
     repo := tickets.NewMongoRepo(db) // Only test public API
 }
 ```
