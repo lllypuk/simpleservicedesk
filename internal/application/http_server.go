@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"simpleservicedesk/generated/openapi"
-	"simpleservicedesk/internal/application/categories"
-	"simpleservicedesk/internal/application/organizations"
-	"simpleservicedesk/internal/application/tickets"
-	"simpleservicedesk/internal/application/users"
+	"simpleservicedesk/internal/application/handlers/api/categories"
+	"simpleservicedesk/internal/application/handlers/api/organizations"
+	"simpleservicedesk/internal/application/handlers/api/tickets"
+	"simpleservicedesk/internal/application/handlers/api/users"
+	"simpleservicedesk/internal/application/services"
+	"simpleservicedesk/internal/interfaces"
 	"simpleservicedesk/pkg/echomiddleware"
 
 	"github.com/labstack/echo/v4"
@@ -23,10 +25,10 @@ type httpServer struct {
 }
 
 func SetupHTTPServer(
-	userRepo UserRepository,
-	ticketRepo TicketRepository,
-	organizationRepo OrganizationRepository,
-	categoryRepo CategoryRepository,
+	userRepo interfaces.UserRepository,
+	ticketRepo interfaces.TicketRepository,
+	organizationRepo interfaces.OrganizationRepository,
+	categoryRepo interfaces.CategoryRepository,
 ) *echo.Echo {
 	e := echo.New()
 
@@ -39,11 +41,18 @@ func SetupHTTPServer(
 		return c.String(http.StatusOK, "pong")
 	})
 
+	// Create services
+	userService := services.NewUserService(userRepo, ticketRepo)
+	ticketService := services.NewTicketService(ticketRepo)
+	categoryService := services.NewCategoryService(categoryRepo, ticketRepo)
+	organizationService := services.NewOrganizationService(organizationRepo, userRepo, ticketRepo)
+
+	// Setup handlers with services
 	server := httpServer{}
-	server.UserHandlers = users.SetupHandlers(userRepo)
-	server.TicketHandlers = tickets.SetupHandlers(ticketRepo)
-	server.CategoryHandlers = categories.SetupHandlers(categoryRepo)
-	server.OrganizationHandlers = organizations.SetupHandlers(organizationRepo)
+	server.UserHandlers = users.SetupHandlers(userService)
+	server.TicketHandlers = tickets.SetupHandlers(ticketService)
+	server.CategoryHandlers = categories.SetupHandlers(categoryService)
+	server.OrganizationHandlers = organizations.SetupHandlers(organizationService)
 
 	// Register routes generated from OpenAPI
 	openapi.RegisterHandlers(e, server)

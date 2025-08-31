@@ -37,12 +37,12 @@ func TestBaseFilterValidate(t *testing.T) {
 				Limit: -1,
 			},
 			expectError: true,
-			errorMsg:    "limit must be non-negative",
+			errorMsg:    "limit must be at least 1",
 		},
 		{
 			name: "limit too large",
 			filter: queries.BaseFilter{
-				Limit: 1001,
+				Limit: 101,
 			},
 			expectError: true,
 			errorMsg:    "limit too large",
@@ -50,6 +50,7 @@ func TestBaseFilterValidate(t *testing.T) {
 		{
 			name: "negative offset",
 			filter: queries.BaseFilter{
+				Limit:  10,
 				Offset: -1,
 			},
 			expectError: true,
@@ -58,6 +59,7 @@ func TestBaseFilterValidate(t *testing.T) {
 		{
 			name: "invalid sort field",
 			filter: queries.BaseFilter{
+				Limit:  10,
 				SortBy: "invalid_field",
 			},
 			expectError: true,
@@ -66,6 +68,7 @@ func TestBaseFilterValidate(t *testing.T) {
 		{
 			name: "invalid sort order",
 			filter: queries.BaseFilter{
+				Limit:     10,
 				SortOrder: "invalid_order",
 			},
 			expectError: true,
@@ -199,7 +202,8 @@ func TestUserFilterValidate(t *testing.T) {
 		{
 			name: "empty name filter",
 			filter: queries.UserFilter{
-				Name: stringPtr("   "),
+				BaseFilter: queries.BaseFilter{Limit: 10},
+				Name:       stringPtr("   "),
 			},
 			expectError: true,
 			errorMsg:    "user name filter cannot be empty",
@@ -207,7 +211,8 @@ func TestUserFilterValidate(t *testing.T) {
 		{
 			name: "empty email filter",
 			filter: queries.UserFilter{
-				Email: stringPtr(""),
+				BaseFilter: queries.BaseFilter{Limit: 10},
+				Email:      stringPtr(""),
 			},
 			expectError: true,
 			errorMsg:    "user email filter cannot be empty",
@@ -215,7 +220,8 @@ func TestUserFilterValidate(t *testing.T) {
 		{
 			name: "invalid role",
 			filter: queries.UserFilter{
-				Role: stringPtr("invalid_role"),
+				BaseFilter: queries.BaseFilter{Limit: 10},
+				Role:       stringPtr("invalid_role"),
 			},
 			expectError: true,
 			errorMsg:    "invalid user role",
@@ -223,7 +229,8 @@ func TestUserFilterValidate(t *testing.T) {
 		{
 			name: "valid role uppercase",
 			filter: queries.UserFilter{
-				Role: stringPtr("ADMIN"),
+				BaseFilter: queries.BaseFilter{Limit: 10},
+				Role:       stringPtr("ADMIN"),
 			},
 			expectError: false, // Should pass as validation converts to lowercase
 		},
@@ -265,7 +272,8 @@ func TestCategoryFilterValidate(t *testing.T) {
 		{
 			name: "empty name filter",
 			filter: queries.CategoryFilter{
-				Name: stringPtr("  "),
+				BaseFilter: queries.BaseFilter{Limit: 10},
+				Name:       stringPtr("  "),
 			},
 			expectError: true,
 			errorMsg:    "category name filter cannot be empty",
@@ -308,7 +316,8 @@ func TestOrganizationFilterValidate(t *testing.T) {
 		{
 			name: "empty name filter",
 			filter: queries.OrganizationFilter{
-				Name: stringPtr(""),
+				BaseFilter: queries.BaseFilter{Limit: 10},
+				Name:       stringPtr(""),
 			},
 			expectError: true,
 			errorMsg:    "organization name filter cannot be empty",
@@ -316,7 +325,8 @@ func TestOrganizationFilterValidate(t *testing.T) {
 		{
 			name: "empty domain filter",
 			filter: queries.OrganizationFilter{
-				Domain: stringPtr("   "),
+				BaseFilter: queries.BaseFilter{Limit: 10},
+				Domain:     stringPtr("   "),
 			},
 			expectError: true,
 			errorMsg:    "organization domain filter cannot be empty",

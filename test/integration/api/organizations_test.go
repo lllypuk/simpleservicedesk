@@ -300,7 +300,7 @@ func (s *OrganizationAPITestSuite) TestListOrganizationsIntegration() {
 		},
 		{
 			name:           "list with large limit",
-			queryParams:    "?limit=200",
+			queryParams:    "?limit=100",
 			expectedStatus: http.StatusOK,
 			minResults:     0,
 		},
@@ -612,16 +612,16 @@ func (s *OrganizationAPITestSuite) TestNotImplementedEndpoints() {
 		expectedStatus int
 	}{
 		{
-			name:           "get organization users - not implemented",
+			name:           "get organization users - implemented",
 			method:         http.MethodGet,
 			path:           fmt.Sprintf("/organizations/%s/users", createdOrgID.String()),
-			expectedStatus: http.StatusNotImplemented,
+			expectedStatus: http.StatusOK,
 		},
 		{
-			name:           "get organization tickets - not implemented",
+			name:           "get organization tickets - implemented",
 			method:         http.MethodGet,
 			path:           fmt.Sprintf("/organizations/%s/tickets", createdOrgID.String()),
-			expectedStatus: http.StatusNotImplemented,
+			expectedStatus: http.StatusOK,
 		},
 		{
 			name:           "get organization hierarchy - endpoint not found",
@@ -638,6 +638,23 @@ func (s *OrganizationAPITestSuite) TestNotImplementedEndpoints() {
 			s.HTTPServer.ServeHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
+
+			// For implemented endpoints, verify they return valid JSON structure
+			if tt.expectedStatus == http.StatusOK {
+				if strings.Contains(tt.path, "/users") {
+					var resp openapi.ListUsersResponse
+					err := json.Unmarshal(rec.Body.Bytes(), &resp)
+					s.Assert().NoError(err)
+					s.Assert().NotNil(resp.Users)
+					s.Assert().NotNil(resp.Pagination)
+				} else if strings.Contains(tt.path, "/tickets") {
+					var resp openapi.ListTicketsResponse
+					err := json.Unmarshal(rec.Body.Bytes(), &resp)
+					s.Assert().NoError(err)
+					s.Assert().NotNil(resp.Tickets)
+					s.Assert().NotNil(resp.Pagination)
+				}
+			}
 		})
 	}
 }

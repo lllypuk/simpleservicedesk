@@ -16,7 +16,8 @@ const (
 	defaultSortByName = "name"
 
 	// Validation limits
-	maxLimit = 1000
+	maxLimit = 100
+	minLimit = 1
 )
 
 // Validate checks TicketFilter for business rule compliance
@@ -94,8 +95,8 @@ func (f UserFilter) Validate() error {
 
 // Validate checks BaseFilter for common validation rules
 func (f BaseFilter) Validate() error {
-	if f.Limit < 0 {
-		return fmt.Errorf("limit must be non-negative, got: %d", f.Limit)
+	if f.Limit < minLimit {
+		return fmt.Errorf("limit must be at least %d, got: %d", minLimit, f.Limit)
 	}
 	if f.Limit > maxLimit {
 		return fmt.Errorf("limit too large, maximum: %d, got: %d", maxLimit, f.Limit)
@@ -179,7 +180,7 @@ func contains(slice []string, item string) bool {
 
 // ValidateAndSetDefaults validates the filter and sets sensible defaults
 func (f TicketFilter) ValidateAndSetDefaults() (TicketFilter, error) {
-	// Set defaults
+	// Set defaults only if limits are not provided (0 value)
 	if f.Limit == 0 {
 		f.Limit = 20
 	}

@@ -686,21 +686,21 @@ func (s *CategoryAPITestSuite) TestGetCategoryTicketsIntegration() {
 			categoryID:     categoryID.String(),
 			url:            fmt.Sprintf("/categories/%s/tickets", categoryID.String()),
 			expectedStatus: http.StatusOK,
-			expectedCount:  0, // No tickets found - category association might not be working
+			expectedCount:  1, // One ticket should be found with category association
 		},
 		{
 			name:           "get tickets with include_subcategories=false",
 			categoryID:     categoryID.String(),
 			url:            fmt.Sprintf("/categories/%s/tickets?include_subcategories=false", categoryID.String()),
 			expectedStatus: http.StatusOK,
-			expectedCount:  0, // No tickets found
+			expectedCount:  1, // One ticket should be found
 		},
 		{
 			name:           "get tickets with include_subcategories=true",
 			categoryID:     categoryID.String(),
 			url:            fmt.Sprintf("/categories/%s/tickets?include_subcategories=true", categoryID.String()),
 			expectedStatus: http.StatusOK,
-			expectedCount:  0, // No tickets found
+			expectedCount:  1, // One ticket should be found
 		},
 		{
 			name:           "nonexistent category",

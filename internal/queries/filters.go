@@ -70,3 +70,12 @@ type UserFilter struct {
 	OrganizationID *uuid.UUID `json:"organization_id,omitempty"`
 	IsActive       *bool      `json:"is_active,omitempty"`
 }
+
+// CommentFilter - SINGLE source of truth for comment filtering
+type CommentFilter struct {
+	BaseFilter
+	TimeRangeFilter
+
+	TicketID *uuid.UUID `json:"ticket_id,omitempty"`
+	AuthorID *uuid.UUID `json:"author_id,omitempty"`
+}
