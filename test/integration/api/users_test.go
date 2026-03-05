@@ -125,7 +125,7 @@ func (s *UserAPITestSuite) TestCreateUserIntegration() {
 			req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -148,6 +148,74 @@ func (s *UserAPITestSuite) TestCreateUserIntegration() {
 	}
 }
 
+func (s *UserAPITestSuite) TestRequestValidationIntegration() {
+	tests := []struct {
+		name    string
+		method  string
+		path    string
+		request any
+	}{
+		{
+			name:   "missing required field",
+			method: http.MethodPost,
+			path:   "/users",
+			request: map[string]any{
+				"name":  "Missing Password User",
+				"email": "missing.password@example.com",
+			},
+		},
+		{
+			name:   "wrong type",
+			method: http.MethodPost,
+			path:   "/users",
+			request: map[string]any{
+				"name":     "Wrong Type User",
+				"email":    "wrong.type@example.com",
+				"password": 123456,
+			},
+		},
+		{
+			name:    "invalid enum",
+			method:  http.MethodPatch,
+			path:    fmt.Sprintf("/users/%s/role", uuid.New().String()),
+			request: map[string]any{"role": "superadmin"},
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			var reqBody []byte
+			var err error
+
+			switch request := tt.request.(type) {
+			case nil:
+				reqBody = nil
+			case string:
+				reqBody = []byte(request)
+			default:
+				reqBody, err = json.Marshal(request)
+				s.Require().NoError(err)
+			}
+
+			req := httptest.NewRequest(tt.method, tt.path, bytes.NewBuffer(reqBody))
+			if tt.request != nil {
+				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			}
+
+			rec := httptest.NewRecorder()
+			s.ServeAuthenticatedHTTP(rec, req)
+
+			s.Require().Equal(http.StatusBadRequest, rec.Code, "Response: %s", rec.Body.String())
+
+			var errorResp openapi.ErrorResponse
+			err = json.Unmarshal(rec.Body.Bytes(), &errorResp)
+			s.Require().NoError(err)
+			s.Require().NotNil(errorResp.Message)
+			s.Require().NotEmpty(strings.TrimSpace(*errorResp.Message))
+		})
+	}
+}
+
 func (s *UserAPITestSuite) TestGetUserIntegration() {
 	// First create a user to test getting
 	createReq := shared.TestUser2.CreateUserRequest()
@@ -155,7 +223,7 @@ func (s *UserAPITestSuite) TestGetUserIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var createResp openapi.CreateUserResponse
@@ -193,7 +261,7 @@ func (s *UserAPITestSuite) TestGetUserIntegration() {
 			url := fmt.Sprintf("/users/%s", tt.userID)
 			testReq := httptest.NewRequest(http.MethodGet, url, nil)
 			testRec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(testRec, testReq)
+			s.ServeAuthenticatedHTTP(testRec, testReq)
 
 			s.Assert().Equal(tt.expectedStatus, testRec.Code, "Response: %s", testRec.Body.String())
 
@@ -244,12 +312,12 @@ func (s *UserAPITestSuite) TestContentTypeValidation() {
 		{
 			name:           "missing content type",
 			contentType:    "",
-			expectedStatus: http.StatusUnsupportedMediaType,
+			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "invalid content type",
 			contentType:    "text/plain",
-			expectedStatus: http.StatusUnsupportedMediaType,
+			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
@@ -260,7 +328,7 @@ func (s *UserAPITestSuite) TestContentTypeValidation() {
 				req.Header.Set(echo.HeaderContentType, tt.contentType)
 			}
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 		})
@@ -290,7 +358,7 @@ func (s *UserAPITestSuite) TestHTTPMethodValidation() {
 			name:           "PUT to /users - not allowed",
 			method:         http.MethodPut,
 			path:           "/users",
-			expectedStatus: http.StatusMethodNotAllowed,
+			expectedStatus: http.StatusNotFound,
 		},
 		{
 			name:           "DELETE to /users/{id} - not found",
@@ -302,7 +370,7 @@ func (s *UserAPITestSuite) TestHTTPMethodValidation() {
 			name:           "PATCH to /users/{id} - not allowed",
 			method:         http.MethodPatch,
 			path:           "/users/" + uuid.New().String(),
-			expectedStatus: http.StatusMethodNotAllowed,
+			expectedStatus: http.StatusNotFound,
 		},
 	}
 
@@ -320,7 +388,7 @@ func (s *UserAPITestSuite) TestHTTPMethodValidation() {
 				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			}
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 		})
@@ -341,7 +409,7 @@ func (s *UserAPITestSuite) TestLargePayloadHandling() {
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 
 	// Should be accepted since domain only validates non-empty names
 	s.Assert().Equal(http.StatusCreated, rec.Code, "Response: %s", rec.Body.String())
@@ -402,7 +470,7 @@ func (s *UserAPITestSuite) TestSpecialCharactersInInput() {
 			req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expected, rec.Code, "Response: %s", rec.Body.String())
 		})

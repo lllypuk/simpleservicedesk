@@ -12,10 +12,17 @@ import (
 
 func (h UserHandlers) PutUsersID(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
+	isAdmin, allowed := authorizeSelfOrAdmin(c, id)
+	if !allowed {
+		return nil
+	}
 
 	var req openapi.UpdateUserRequest
 	if err := c.Bind(&req); err != nil {
 		return err
+	}
+	if !isAdmin && requestContainsAdminOnlyUserFields(req) {
+		return c.NoContent(http.StatusForbidden)
 	}
 
 	user, err := h.repo.UpdateUser(ctx, id, func(user *users.User) (bool, error) {
@@ -41,8 +48,8 @@ func (h UserHandlers) applyUserUpdates(req *openapi.UpdateUserRequest, user *use
 	}
 
 	// Update email if provided
-	if req.Email != nil && string(*req.Email) != user.Email() {
-		if err := user.ChangeEmail(string(*req.Email)); err != nil {
+	if req.Email != nil && normalizeEmail(string(*req.Email)) != user.Email() {
+		if err := user.ChangeEmail(normalizeEmail(string(*req.Email))); err != nil {
 			return false, err
 		}
 		hasChanges = true
@@ -70,4 +77,8 @@ func (h UserHandlers) applyUserUpdates(req *openapi.UpdateUserRequest, user *use
 	}
 
 	return hasChanges, nil
+}
+
+func requestContainsAdminOnlyUserFields(req openapi.UpdateUserRequest) bool {
+	return req.OrganizationId != nil || req.IsActive != nil
 }

@@ -1,0 +1,151 @@
+package auth_test
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+
+	"simpleservicedesk/generated/openapi"
+	appauth "simpleservicedesk/internal/application/auth"
+
+	"github.com/labstack/echo/v4"
+)
+
+type failingLoginService struct{}
+
+func (f failingLoginService) Login(_ context.Context, _, _ string) (string, error) {
+	return "", errors.New("repository unavailable")
+}
+
+func (s *AuthSuite) TestLogin() {
+	s.Run("Success", func() {
+		createUserRequest := openapi.CreateUserRequest{
+			Name:     "Alice",
+			Email:    "alice@example.com",
+			Password: "correct-password",
+		}
+		createUserBody, err := json.Marshal(createUserRequest)
+		s.Require().NoError(err)
+
+		createUserReq := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(createUserBody))
+		createUserReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		createUserRecorder := httptest.NewRecorder()
+		s.HTTPServer.ServeHTTP(createUserRecorder, createUserReq)
+		s.Require().Equal(http.StatusCreated, createUserRecorder.Code)
+
+		loginRequest := openapi.LoginRequest{
+			Email:    "alice@example.com",
+			Password: "correct-password",
+		}
+		loginBody, err := json.Marshal(loginRequest)
+		s.Require().NoError(err)
+
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(loginBody))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		s.HTTPServer.ServeHTTP(rec, req)
+
+		s.Require().Equal(http.StatusOK, rec.Code)
+
+		var response openapi.LoginResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		s.Require().NoError(err)
+		s.Require().NotEmpty(response.Token)
+	})
+
+	s.Run("Wrong password returns 401", func() {
+		createUserRequest := openapi.CreateUserRequest{
+			Name:     "Bob",
+			Email:    "bob@example.com",
+			Password: "correct-password",
+		}
+		createUserBody, err := json.Marshal(createUserRequest)
+		s.Require().NoError(err)
+
+		createUserReq := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(createUserBody))
+		createUserReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		createUserRecorder := httptest.NewRecorder()
+		s.HTTPServer.ServeHTTP(createUserRecorder, createUserReq)
+		s.Require().Equal(http.StatusCreated, createUserRecorder.Code)
+
+		loginRequest := openapi.LoginRequest{
+			Email:    "bob@example.com",
+			Password: "wrong-password",
+		}
+		loginBody, err := json.Marshal(loginRequest)
+		s.Require().NoError(err)
+
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(loginBody))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		s.HTTPServer.ServeHTTP(rec, req)
+
+		s.Require().Equal(http.StatusUnauthorized, rec.Code)
+	})
+
+	s.Run("Nonexistent user returns 401", func() {
+		loginRequest := openapi.LoginRequest{
+			Email:    "ghost@example.com",
+			Password: "any-password",
+		}
+		loginBody, err := json.Marshal(loginRequest)
+		s.Require().NoError(err)
+
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(loginBody))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		s.HTTPServer.ServeHTTP(rec, req)
+
+		s.Require().Equal(http.StatusUnauthorized, rec.Code)
+	})
+
+	s.Run("Invalid JSON returns 400", func() {
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBufferString(`{"email":`))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		s.HTTPServer.ServeHTTP(rec, req)
+
+		s.Require().Equal(http.StatusBadRequest, rec.Code)
+	})
+
+	s.Run("Missing fields returns 400", func() {
+		loginBody, err := json.Marshal(map[string]string{"email": "  "})
+		s.Require().NoError(err)
+
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(loginBody))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		s.HTTPServer.ServeHTTP(rec, req)
+
+		s.Require().Equal(http.StatusBadRequest, rec.Code)
+	})
+}
+
+func (s *AuthSuite) TestLoginInternalErrorResponse() {
+	handler := appauth.SetupHandlers(failingLoginService{})
+
+	loginBody, err := json.Marshal(openapi.LoginRequest{
+		Email:    "alice@example.com",
+		Password: "correct-password",
+	})
+	s.Require().NoError(err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(loginBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	err = handler.PostLogin(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusInternalServerError, rec.Code)
+
+	var response openapi.ErrorResponse
+	unmarshalErr := json.Unmarshal(rec.Body.Bytes(), &response)
+	s.Require().NoError(unmarshalErr)
+	s.Require().NotNil(response.Message)
+	s.Require().Equal("internal server error", *response.Message)
+}

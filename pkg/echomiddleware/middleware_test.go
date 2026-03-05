@@ -195,8 +195,8 @@ func TestPutRequestIDContext(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var capturedReqID interface{}
-			var capturedTraceID interface{}
+			var capturedReqID any
+			var capturedTraceID any
 
 			middleware := echoMw.PutRequestIDContext(func(c echo.Context) error {
 				ctx := c.Request().Context()
@@ -340,7 +340,7 @@ func TestMiddlewareIntegration(t *testing.T) {
 		reqID := ctx.Value(contextkeys.RequestIDCtxKey)
 		traceID := ctx.Value(contextkeys.TraceIDCtxKey)
 
-		response := map[string]interface{}{
+		response := map[string]any{
 			"request_id": reqID,
 			"trace_id":   traceID,
 		}
@@ -358,7 +358,7 @@ func TestMiddlewareIntegration(t *testing.T) {
 	assert.Equal(t, 200, rec.Code)
 
 	// Verify response contains context values
-	var response map[string]interface{}
+	var response map[string]any
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 

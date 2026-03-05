@@ -13,8 +13,24 @@ import (
 
 func (h TicketHandlers) DeleteTicketsID(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
+	authUserID, role, ok := authUser(c)
+	if !ok {
+		return nil
+	}
 
-	err := h.repo.DeleteTicket(ctx, id)
+	ticket, err := h.repo.GetTicket(ctx, id)
+	if err != nil {
+		msg := err.Error()
+		if errors.Is(err, tickets.ErrTicketNotFound) {
+			return c.JSON(http.StatusNotFound, openapi.ErrorResponse{Message: &msg})
+		}
+		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
+	}
+	if !hasElevatedTicketAccess(role) && ticket.AuthorID() != authUserID {
+		return c.NoContent(http.StatusForbidden)
+	}
+
+	err = h.repo.DeleteTicket(ctx, id)
 	if err != nil {
 		msg := err.Error()
 		if errors.Is(err, tickets.ErrTicketNotFound) {

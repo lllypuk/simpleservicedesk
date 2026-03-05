@@ -13,9 +13,26 @@ import (
 
 func (h TicketHandlers) PutTicketsID(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
+	authUserID, role, ok := authUser(c)
+	if !ok {
+		return nil
+	}
+
+	existingTicket, err := h.repo.GetTicket(ctx, id)
+	if err != nil {
+		msg := err.Error()
+		if errors.Is(err, tickets.ErrTicketNotFound) {
+			return c.JSON(http.StatusNotFound, openapi.ErrorResponse{Message: &msg})
+		}
+		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
+	}
+	if !hasElevatedTicketAccess(role) && existingTicket.AuthorID() != authUserID {
+		return c.NoContent(http.StatusForbidden)
+	}
+
 	var req openapi.UpdateTicketRequest
-	if err := c.Bind(&req); err != nil {
-		return err
+	if bindErr := c.Bind(&req); bindErr != nil {
+		return bindErr
 	}
 
 	ticket, err := h.repo.UpdateTicket(ctx, id, func(ticket *tickets.Ticket) (bool, error) {
@@ -68,10 +85,7 @@ func (h TicketHandlers) applyTicketUpdates(ticket *tickets.Ticket, req openapi.U
 }
 
 func (h TicketHandlers) updateTicketPriority(ticket *tickets.Ticket, priorityStr openapi.TicketPriority) error {
-	priority, err := tickets.ParsePriority(string(priorityStr))
-	if err != nil {
-		return err
-	}
+	priority := tickets.Priority(priorityStr)
 	return ticket.UpdatePriority(priority)
 }
 

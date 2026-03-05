@@ -9,7 +9,6 @@ import (
 )
 
 type UsersSuite struct {
-	suite.Suite
 	application.ServerSuite
 }
 

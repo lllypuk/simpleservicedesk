@@ -6,12 +6,14 @@ package shared
 import (
 	"context"
 	"testing"
+	"time"
 
 	"simpleservicedesk/internal/application"
+	userdomain "simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/internal/infrastructure/categories"
 	"simpleservicedesk/internal/infrastructure/organizations"
 	"simpleservicedesk/internal/infrastructure/tickets"
-	"simpleservicedesk/internal/infrastructure/users"
+	userrepo "simpleservicedesk/internal/infrastructure/users"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -32,7 +34,10 @@ type IntegrationSuite struct {
 	MongoContainer    *mongodb.MongoDBContainer
 	MongoDB           *mongo.Database
 	MongoClient       *mongo.Client
+	defaultAdminToken string
 }
+
+const testRateLimitRPS = 1000
 
 // MongoIntegrationSuite extends IntegrationSuite with MongoDB setup
 type MongoIntegrationSuite struct {
@@ -79,13 +84,24 @@ func (s *IntegrationSuite) SetupSuite() {
 	s.T().Cleanup(cleanup)
 
 	// Initialize real repositories
-	s.UsersRepo = users.NewMongoRepo(s.MongoDB)
+	s.UsersRepo = userrepo.NewMongoRepo(s.MongoDB)
 	s.TicketsRepo = tickets.NewMongoRepo(s.MongoDB)
 	s.OrganizationsRepo = organizations.NewMongoRepo(s.MongoDB)
 	s.CategoriesRepo = categories.NewMongoRepo(s.MongoDB)
 
 	// Initialize HTTP server with real repositories
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
+	server, err := application.SetupHTTPServer(
+		s.UsersRepo,
+		s.TicketsRepo,
+		s.OrganizationsRepo,
+		s.CategoriesRepo,
+		"integration-test-jwt-signing-key",
+		time.Hour,
+		[]string{"*"},
+		testRateLimitRPS,
+	)
+	s.Require().NoError(err)
+	s.HTTPServer = server
 }
 
 // SetupTest runs before each test to ensure clean database state
@@ -101,7 +117,21 @@ func (s *IntegrationSuite) SetupTest() {
 	}
 
 	// Re-initialize HTTP server to ensure clean state
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
+	server, err := application.SetupHTTPServer(
+		s.UsersRepo,
+		s.TicketsRepo,
+		s.OrganizationsRepo,
+		s.CategoriesRepo,
+		"integration-test-jwt-signing-key",
+		time.Hour,
+		[]string{"*"},
+		testRateLimitRPS,
+	)
+	s.Require().NoError(err)
+	s.HTTPServer = server
+
+	admin := s.MustCreateAndLoginTestUser(userdomain.RoleAdmin)
+	s.defaultAdminToken = admin.Token
 }
 
 // SetupSuite initializes the MongoDB integration test suite

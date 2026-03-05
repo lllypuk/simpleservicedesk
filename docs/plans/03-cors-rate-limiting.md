@@ -1,0 +1,39 @@
+# Plan: Add CORS and Rate Limiting
+
+## Overview
+Configure CORS to allow frontend applications to interact with the API.
+Add rate limiting to protect against abuse.
+
+## Validation Commands
+- `make test`
+- `make lint`
+
+---
+
+### Task 1: Add CORS middleware
+- [x] Configure Echo's built-in CORS middleware in `http_server.go`
+- [x] Set allowed origins (configurable via env `CORS_ALLOWED_ORIGINS`, default `*`)
+- [x] Set allowed methods: GET, POST, PATCH, PUT, DELETE, OPTIONS
+- [x] Set allowed headers: Content-Type, Authorization
+- [x] Expose headers: X-Request-Id
+- [x] Add config fields to `internal/config.go`
+- [x] Mark completed
+
+### Task 2: Add rate limiting
+- [x] Use Echo's built-in rate limiter middleware or `golang.org/x/time/rate`
+- [x] Configure global rate limit (configurable via env `RATE_LIMIT_RPS`, default 100)
+- [x] Apply stricter limit to `POST /login` (e.g., 5 req/min per IP) to prevent brute force
+- [x] Return `429 Too Many Requests` with `Retry-After` header
+- [x] Add config fields to `internal/config.go`
+- [x] Mark completed
+
+### Task 3: Add tests
+- [x] Test CORS preflight requests return correct headers
+- [x] Test rate limiter returns 429 when exceeded
+- [x] Test login endpoint has stricter rate limit
+- [x] Mark completed
+
+### Task 4: Update configuration docs
+- [x] Add new env variables to `.env.example`
+- [x] Update `README.md` environment variables table
+- [x] Mark completed

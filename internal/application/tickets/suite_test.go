@@ -9,7 +9,6 @@ import (
 )
 
 type TicketsSuite struct {
-	suite.Suite
 	application.ServerSuite
 }
 

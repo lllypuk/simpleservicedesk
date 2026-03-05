@@ -1,6 +1,7 @@
 package internal_test
 
 import (
+	"encoding/base64"
 	"os"
 	"testing"
 	"time"
@@ -20,8 +21,15 @@ func TestLoadConfig(t *testing.T) {
 		"SERVER_PORT",
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
+		"CORS_ALLOWED_ORIGINS",
+		"RATE_LIMIT_RPS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
+		"JWT_SECRET",
+		"JWT_EXPIRATION",
+		"BOOTSTRAP_ADMIN_NAME",
+		"BOOTSTRAP_ADMIN_EMAIL",
+		"BOOTSTRAP_ADMIN_PASSWORD",
 	}
 
 	for _, key := range envVars {
@@ -50,10 +58,25 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, "8080", config.Server.Port)
 		assert.Equal(t, 2*time.Second, config.Server.InterruptTimeout)
 		assert.Equal(t, 5*time.Second, config.Server.ReadHeaderTimeout)
+		assert.Equal(t, []string{"*"}, config.Server.CORSAllowedOrigins)
+		assert.Equal(t, 100, config.Server.RateLimitRPS)
 
 		// Test mongo defaults
 		assert.Equal(t, "mongodb://localhost:27017", config.Mongo.URI)
 		assert.Equal(t, "servicedesk", config.Mongo.Database)
+
+		// Test auth defaults
+		assert.NotEmpty(t, config.Auth.JWTSigningKey)
+		assert.Equal(t, 24*time.Hour, config.Auth.JWTExpiration)
+	})
+
+	t.Run("production requires jwt secret", func(t *testing.T) {
+		t.Setenv("ENV_TYPE", "production")
+		t.Setenv("JWT_SECRET", "")
+
+		_, err := internal.LoadConfig()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt secret is required in production environment")
 	})
 
 	t.Run("custom configuration from environment", func(t *testing.T) {
@@ -62,8 +85,15 @@ func TestLoadConfig(t *testing.T) {
 		t.Setenv("SERVER_PORT", "9090")
 		t.Setenv("INTERRUPT_TIMEOUT", "10s")
 		t.Setenv("READ_HEADER_TIMEOUT", "30s")
+		t.Setenv("CORS_ALLOWED_ORIGINS", "https://app.example.com,https://admin.example.com")
+		t.Setenv("RATE_LIMIT_RPS", "150")
 		t.Setenv("MONGO_URI", "mongodb://custom-host:27017")
 		t.Setenv("MONGO_DATABASE", "custom_db")
+		t.Setenv("JWT_SECRET", "custom-jwt-secret-with-sufficient-length-123")
+		t.Setenv("JWT_EXPIRATION", "12h")
+		t.Setenv("BOOTSTRAP_ADMIN_NAME", "Bootstrap Root")
+		t.Setenv("BOOTSTRAP_ADMIN_EMAIL", "root@example.com")
+		t.Setenv("BOOTSTRAP_ADMIN_PASSWORD", "bootstrap-password")
 
 		config, err := internal.LoadConfig()
 		require.NoError(t, err)
@@ -73,10 +103,23 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, "9090", config.Server.Port)
 		assert.Equal(t, 10*time.Second, config.Server.InterruptTimeout)
 		assert.Equal(t, 30*time.Second, config.Server.ReadHeaderTimeout)
+		assert.Equal(
+			t,
+			[]string{"https://app.example.com", "https://admin.example.com"},
+			config.Server.CORSAllowedOrigins,
+		)
+		assert.Equal(t, 150, config.Server.RateLimitRPS)
 
 		// Test mongo custom values
 		assert.Equal(t, "mongodb://custom-host:27017", config.Mongo.URI)
 		assert.Equal(t, "custom_db", config.Mongo.Database)
+
+		// Test auth custom values
+		assert.Equal(t, "custom-jwt-secret-with-sufficient-length-123", config.Auth.JWTSigningKey)
+		assert.Equal(t, 12*time.Hour, config.Auth.JWTExpiration)
+		assert.Equal(t, "Bootstrap Root", config.Auth.BootstrapAdminName)
+		assert.Equal(t, "root@example.com", config.Auth.BootstrapAdminEmail)
+		assert.Equal(t, "bootstrap-password", config.Auth.BootstrapAdminPassword)
 	})
 
 	t.Run("invalid interrupt timeout", func(t *testing.T) {
@@ -96,6 +139,14 @@ func TestLoadConfig(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "could not parse read header timeout")
 	})
+
+	t.Run("invalid jwt expiration", func(t *testing.T) {
+		t.Setenv("JWT_EXPIRATION", "invalid-duration")
+
+		_, err := internal.LoadConfig()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "could not parse jwt expiration")
+	})
 }
 
 func TestLoadServer(t *testing.T) {
@@ -106,6 +157,8 @@ func TestLoadServer(t *testing.T) {
 		"SERVER_PORT",
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
+		"CORS_ALLOWED_ORIGINS",
+		"RATE_LIMIT_RPS",
 	}
 
 	for _, key := range envVars {
@@ -135,10 +188,12 @@ func TestLoadServer(t *testing.T) {
 			name:    "default values",
 			envVars: map[string]string{},
 			expected: internal.Server{
-				Environment:       environment.Testing,
-				Port:              "8080",
-				InterruptTimeout:  2 * time.Second,
-				ReadHeaderTimeout: 5 * time.Second,
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
 			},
 		},
 		{
@@ -147,10 +202,12 @@ func TestLoadServer(t *testing.T) {
 				"ENV_TYPE": "production",
 			},
 			expected: internal.Server{
-				Environment:       environment.Production,
-				Port:              "8080",
-				InterruptTimeout:  2 * time.Second,
-				ReadHeaderTimeout: 5 * time.Second,
+				Environment:        environment.Production,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
 			},
 		},
 		{
@@ -159,10 +216,12 @@ func TestLoadServer(t *testing.T) {
 				"SERVER_PORT": "3000",
 			},
 			expected: internal.Server{
-				Environment:       environment.Testing,
-				Port:              "3000",
-				InterruptTimeout:  2 * time.Second,
-				ReadHeaderTimeout: 5 * time.Second,
+				Environment:        environment.Testing,
+				Port:               "3000",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
 			},
 		},
 		{
@@ -172,10 +231,54 @@ func TestLoadServer(t *testing.T) {
 				"READ_HEADER_TIMEOUT": "60s",
 			},
 			expected: internal.Server{
-				Environment:       environment.Testing,
-				Port:              "8080",
-				InterruptTimeout:  30 * time.Second,
-				ReadHeaderTimeout: 60 * time.Second,
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   30 * time.Second,
+				ReadHeaderTimeout:  60 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
+			},
+		},
+		{
+			name: "custom cors origins",
+			envVars: map[string]string{
+				"CORS_ALLOWED_ORIGINS": "https://app.example.com, https://admin.example.com",
+			},
+			expected: internal.Server{
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"https://app.example.com", "https://admin.example.com"},
+				RateLimitRPS:       100,
+			},
+		},
+		{
+			name: "empty cors origins uses default wildcard",
+			envVars: map[string]string{
+				"CORS_ALLOWED_ORIGINS": "",
+			},
+			expected: internal.Server{
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
+			},
+		},
+		{
+			name: "custom rate limit rps",
+			envVars: map[string]string{
+				"RATE_LIMIT_RPS": "250",
+			},
+			expected: internal.Server{
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       250,
 			},
 		},
 		{
@@ -189,6 +292,20 @@ func TestLoadServer(t *testing.T) {
 			name: "invalid read header timeout",
 			envVars: map[string]string{
 				"READ_HEADER_TIMEOUT": "not-a-duration",
+			},
+			expectedError: true,
+		},
+		{
+			name: "invalid rate limit rps",
+			envVars: map[string]string{
+				"RATE_LIMIT_RPS": "invalid",
+			},
+			expectedError: true,
+		},
+		{
+			name: "non-positive rate limit rps",
+			envVars: map[string]string{
+				"RATE_LIMIT_RPS": "0",
 			},
 			expectedError: true,
 		},
@@ -317,6 +434,115 @@ func TestLoadMongo(t *testing.T) {
 	}
 }
 
+func TestLoadAuth(t *testing.T) {
+	originalEnv := make(map[string]string)
+	envVars := []string{
+		"JWT_SECRET",
+		"JWT_EXPIRATION",
+		"BOOTSTRAP_ADMIN_NAME",
+		"BOOTSTRAP_ADMIN_EMAIL",
+		"BOOTSTRAP_ADMIN_PASSWORD",
+	}
+
+	for _, key := range envVars {
+		if val, exists := os.LookupEnv(key); exists {
+			originalEnv[key] = val
+		}
+		os.Unsetenv(key)
+	}
+
+	defer func() {
+		for _, key := range envVars {
+			os.Unsetenv(key)
+		}
+		for key, val := range originalEnv {
+			t.Setenv(key, val)
+		}
+	}()
+
+	t.Run("default values", func(t *testing.T) {
+		auth, err := internal.LoadAuth(environment.Testing)
+		require.NoError(t, err)
+		assert.NotEmpty(t, auth.JWTSigningKey)
+		assert.Equal(t, 24*time.Hour, auth.JWTExpiration)
+
+		_, decodeErr := base64.RawStdEncoding.DecodeString(auth.JWTSigningKey)
+		require.NoError(t, decodeErr)
+	})
+
+	t.Run("custom values", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "custom-secret-with-sufficient-length-123")
+		t.Setenv("JWT_EXPIRATION", "6h")
+		t.Setenv("BOOTSTRAP_ADMIN_NAME", "Bootstrap Root")
+		t.Setenv("BOOTSTRAP_ADMIN_EMAIL", "root@example.com")
+		t.Setenv("BOOTSTRAP_ADMIN_PASSWORD", "bootstrap-password")
+
+		auth, err := internal.LoadAuth(environment.Production)
+		require.NoError(t, err)
+		assert.Equal(t, "custom-secret-with-sufficient-length-123", auth.JWTSigningKey)
+		assert.Equal(t, 6*time.Hour, auth.JWTExpiration)
+		assert.Equal(t, "Bootstrap Root", auth.BootstrapAdminName)
+		assert.Equal(t, "root@example.com", auth.BootstrapAdminEmail)
+		assert.Equal(t, "bootstrap-password", auth.BootstrapAdminPassword)
+	})
+
+	t.Run("empty secret generates default", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "")
+
+		auth, err := internal.LoadAuth(environment.Testing)
+		require.NoError(t, err)
+		assert.NotEmpty(t, auth.JWTSigningKey)
+	})
+
+	t.Run("production requires explicit secret", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "")
+
+		_, err := internal.LoadAuth(environment.Production)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt secret is required in production environment")
+	})
+
+	t.Run("production rejects weak secret length", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "short-secret")
+
+		_, err := internal.LoadAuth(environment.Production)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt secret must be at least")
+	})
+
+	t.Run("production rejects insecure default secret", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "change-me-in-production")
+
+		_, err := internal.LoadAuth(environment.Production)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt secret uses an insecure default value")
+	})
+
+	t.Run("invalid expiration", func(t *testing.T) {
+		t.Setenv("JWT_EXPIRATION", "bad-value")
+
+		_, err := internal.LoadAuth(environment.Testing)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "could not parse jwt expiration")
+	})
+
+	t.Run("zero expiration is invalid", func(t *testing.T) {
+		t.Setenv("JWT_EXPIRATION", "0s")
+
+		_, err := internal.LoadAuth(environment.Testing)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt expiration must be greater than zero")
+	})
+
+	t.Run("negative expiration is invalid", func(t *testing.T) {
+		t.Setenv("JWT_EXPIRATION", "-1s")
+
+		_, err := internal.LoadAuth(environment.Testing)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt expiration must be greater than zero")
+	})
+}
+
 func TestGetEnv(t *testing.T) {
 	testKey := "TEST_GET_ENV_KEY"
 
@@ -350,8 +576,15 @@ func TestConfigurationValidation(t *testing.T) {
 		"SERVER_PORT",
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
+		"CORS_ALLOWED_ORIGINS",
+		"RATE_LIMIT_RPS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
+		"JWT_SECRET",
+		"JWT_EXPIRATION",
+		"BOOTSTRAP_ADMIN_NAME",
+		"BOOTSTRAP_ADMIN_EMAIL",
+		"BOOTSTRAP_ADMIN_PASSWORD",
 	}
 
 	for _, key := range envVars {
@@ -412,8 +645,15 @@ func testConfigurationValidation(t *testing.T, envVars map[string]string, expect
 		"SERVER_PORT",
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
+		"CORS_ALLOWED_ORIGINS",
+		"RATE_LIMIT_RPS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
+		"JWT_SECRET",
+		"JWT_EXPIRATION",
+		"BOOTSTRAP_ADMIN_NAME",
+		"BOOTSTRAP_ADMIN_EMAIL",
+		"BOOTSTRAP_ADMIN_PASSWORD",
 	}
 
 	for _, key := range configEnvVars {
@@ -437,6 +677,8 @@ func testConfigurationValidation(t *testing.T, envVars map[string]string, expect
 		assert.NotEmpty(t, config.Server.Port)
 		assert.NotEmpty(t, config.Mongo.URI)
 		assert.NotEmpty(t, config.Mongo.Database)
+		assert.NotEmpty(t, config.Auth.JWTSigningKey)
+		assert.NotZero(t, config.Auth.JWTExpiration)
 	}
 }
 
@@ -471,9 +713,9 @@ func TestEnvironmentTypeHandling(t *testing.T) {
 			expected: environment.Type("staging"),
 		},
 		{
-			name:     "case sensitive",
+			name:     "normalizes env value case",
 			envValue: "PRODUCTION",
-			expected: environment.Type("PRODUCTION"),
+			expected: environment.Production,
 		},
 	}
 

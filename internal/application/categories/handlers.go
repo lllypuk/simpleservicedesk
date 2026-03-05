@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"simpleservicedesk/internal/domain/categories"
+	ticketdomain "simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/queries"
 
 	"github.com/google/uuid"
@@ -21,12 +22,18 @@ type CategoryRepository interface {
 	DeleteCategory(ctx context.Context, id uuid.UUID) error
 }
 
-type CategoryHandlers struct {
-	repo CategoryRepository
+type TicketRepository interface {
+	ListTickets(ctx context.Context, filter queries.TicketFilter) ([]*ticketdomain.Ticket, error)
 }
 
-func SetupHandlers(repo CategoryRepository) CategoryHandlers {
+type CategoryHandlers struct {
+	repo       CategoryRepository
+	ticketRepo TicketRepository
+}
+
+func SetupHandlers(repo CategoryRepository, ticketRepo TicketRepository) CategoryHandlers {
 	return CategoryHandlers{
-		repo: repo,
+		repo:       repo,
+		ticketRepo: ticketRepo,
 	}
 }

@@ -8,6 +8,10 @@ import (
 )
 
 func (h UserHandlers) GetUsersID(c echo.Context, id openapitypes.UUID) error {
+	if _, allowed := authorizeSelfOrAdmin(c, id); !allowed {
+		return nil
+	}
+
 	user, err := h.repo.GetUser(c.Request().Context(), id)
 	if err != nil {
 		return handleUserError(c, err)

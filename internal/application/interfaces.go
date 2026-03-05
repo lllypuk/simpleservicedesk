@@ -42,7 +42,6 @@ type CategoryTree struct {
 	Children []*CategoryTree      `json:"children,omitempty"`
 }
 
-//nolint:dupl // CategoryRepository and OrganizationRepository have similar patterns by design
 type CategoryRepository interface {
 	CreateCategory(ctx context.Context, createFn func() (*categories.Category, error)) (*categories.Category, error)
 	UpdateCategory(
@@ -62,7 +61,6 @@ type OrganizationTree struct {
 	Children     []*OrganizationTree         `json:"children,omitempty"`
 }
 
-//nolint:dupl // CategoryRepository and OrganizationRepository have similar patterns by design
 type OrganizationRepository interface {
 	CreateOrganization(
 		ctx context.Context,
@@ -75,6 +73,7 @@ type OrganizationRepository interface {
 	) (*organizations.Organization, error)
 	GetOrganization(ctx context.Context, id uuid.UUID) (*organizations.Organization, error)
 	ListOrganizations(ctx context.Context, filter queries.OrganizationFilter) ([]*organizations.Organization, error)
+	CountOrganizations(ctx context.Context, filter queries.OrganizationFilter) (int64, error)
 	GetOrganizationHierarchy(ctx context.Context, rootID uuid.UUID) (*OrganizationTree, error)
 	DeleteOrganization(ctx context.Context, id uuid.UUID) error
 }

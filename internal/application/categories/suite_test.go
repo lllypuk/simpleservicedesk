@@ -9,7 +9,6 @@ import (
 )
 
 type CategoriesSuite struct {
-	suite.Suite
 	application.ServerSuite
 }
 

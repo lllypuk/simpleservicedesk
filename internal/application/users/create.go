@@ -18,23 +18,13 @@ func (h UserHandlers) PostUsers(c echo.Context) error {
 		return err
 	}
 
-	// Валидация пароля на уровне хэндлера
-	if req.Password == "" {
-		msg := "password is required"
-		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
-	}
-	if len(req.Password) < domain.MinPasswordLength {
-		msg := "password must be at least 6 characters long"
-		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
-	}
-
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		msg := "failed to process password"
 		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
 	}
 
-	email := string(req.Email)
+	email := normalizeEmail(string(req.Email))
 	user, err := h.repo.CreateUser(ctx, email, passwordHash, func() (*domain.User, error) {
 		return domain.CreateUser(req.Name, email, passwordHash)
 	})

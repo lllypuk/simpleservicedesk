@@ -39,7 +39,7 @@ func (s *TicketsSuite) TestAssignTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(createResp.Id)
 
 		ticketID := *createResp.Id
@@ -63,7 +63,7 @@ func (s *TicketsSuite) TestAssignTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.AssigneeId)
 		s.Equal(assigneeID, *resp.AssigneeId)
 	})
@@ -93,7 +93,7 @@ func (s *TicketsSuite) TestAssignTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// First assign the ticket
@@ -132,7 +132,7 @@ func (s *TicketsSuite) TestAssignTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Nil(resp.AssigneeId)
 	})
 
@@ -158,7 +158,7 @@ func (s *TicketsSuite) TestAssignTicket() {
 
 		var resp openapi.ErrorResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Message)
 	})
 
@@ -201,7 +201,7 @@ func (s *TicketsSuite) TestAssignTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Try to assign with invalid JSON
@@ -243,7 +243,7 @@ func (s *TicketsSuite) TestAssignTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// First assignment
@@ -282,7 +282,7 @@ func (s *TicketsSuite) TestAssignTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(secondRec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.AssigneeId)
 		s.Equal(secondAssigneeID, *resp.AssigneeId)
 	})

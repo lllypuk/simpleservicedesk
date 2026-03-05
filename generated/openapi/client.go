@@ -112,6 +112,11 @@ type ClientInterface interface {
 	// GetCategoriesIDTickets request
 	GetCategoriesIDTickets(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIDTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PostLoginWithBody request with any body
+	PostLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostLogin(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetOrganizations request
 	GetOrganizations(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -288,6 +293,30 @@ func (c *Client) PutCategoriesID(ctx context.Context, id openapi_types.UUID, bod
 
 func (c *Client) GetCategoriesIDTickets(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIDTicketsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetCategoriesIDTicketsRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostLoginRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostLogin(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostLoginRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1062,6 +1091,46 @@ func NewGetCategoriesIDTicketsRequest(server string, id openapi_types.UUID, para
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPostLoginRequest calls the generic PostLogin builder with application/json body
+func NewPostLoginRequest(server string, body PostLoginJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostLoginRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostLoginRequestWithBody generates requests for PostLogin with any type of body
+func NewPostLoginRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/login")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -2571,6 +2640,11 @@ type ClientWithResponsesInterface interface {
 	// GetCategoriesIDTicketsWithResponse request
 	GetCategoriesIDTicketsWithResponse(ctx context.Context, id openapi_types.UUID, params *GetCategoriesIDTicketsParams, reqEditors ...RequestEditorFn) (*GetCategoriesIDTicketsResponse, error)
 
+	// PostLoginWithBodyWithResponse request with any body
+	PostLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostLoginResponse, error)
+
+	PostLoginWithResponse(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostLoginResponse, error)
+
 	// GetOrganizationsWithResponse request
 	GetOrganizationsWithResponse(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsResponse, error)
 
@@ -2805,6 +2879,31 @@ func (r GetCategoriesIDTicketsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetCategoriesIDTicketsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostLoginResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *LoginResponse
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostLoginResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostLoginResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3452,6 +3551,23 @@ func (c *ClientWithResponses) GetCategoriesIDTicketsWithResponse(ctx context.Con
 	return ParseGetCategoriesIDTicketsResponse(rsp)
 }
 
+// PostLoginWithBodyWithResponse request with arbitrary body returning *PostLoginResponse
+func (c *ClientWithResponses) PostLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostLoginResponse, error) {
+	rsp, err := c.PostLoginWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostLoginResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostLoginWithResponse(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostLoginResponse, error) {
+	rsp, err := c.PostLogin(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostLoginResponse(rsp)
+}
+
 // GetOrganizationsWithResponse request returning *GetOrganizationsResponse
 func (c *ClientWithResponses) GetOrganizationsWithResponse(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsResponse, error) {
 	rsp, err := c.GetOrganizations(ctx, params, reqEditors...)
@@ -4008,6 +4124,53 @@ func ParseGetCategoriesIDTicketsResponse(rsp *http.Response) (*GetCategoriesIDTi
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostLoginResponse parses an HTTP response from a PostLoginWithResponse call
+func ParsePostLoginResponse(rsp *http.Response) (*PostLoginResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostLoginResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest LoginResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
 		var dest ErrorResponse

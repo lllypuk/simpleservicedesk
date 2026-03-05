@@ -30,7 +30,7 @@ func (s *UsersSuite) TestCreateUser() {
 		var resp openapi.CreateUserResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &resp)
 		s.Require().NoError(err)
-		s.Require().NotEqual("", resp.Id)
+		s.Require().NotEmpty(resp.Id)
 		s.Require().NotEqual(uuid.Nil, resp.Id)
 	})
 }

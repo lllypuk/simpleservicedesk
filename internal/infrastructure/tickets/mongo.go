@@ -386,7 +386,9 @@ func (r *MongoRepo) buildFilterQuery(filter queries.TicketFilter) bson.M {
 	if filter.OrganizationID != nil {
 		query["organization_id"] = *filter.OrganizationID
 	}
-	if filter.CategoryID != nil {
+	if len(filter.CategoryIDs) > 0 {
+		query["category_id"] = bson.M{"$in": filter.CategoryIDs}
+	} else if filter.CategoryID != nil {
 		query["category_id"] = *filter.CategoryID
 	}
 

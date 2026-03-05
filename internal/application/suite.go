@@ -2,17 +2,24 @@ package application
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"regexp"
 	"strings"
+	"time"
 
+	authdomain "simpleservicedesk/internal/domain/auth"
 	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/internal/queries"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type ServerSuite struct {
@@ -24,6 +31,12 @@ type ServerSuite struct {
 	OrganizationsRepo OrganizationRepository // Interface for organization repository
 	CategoriesRepo    CategoryRepository     // Interface for category repository
 }
+
+const (
+	testBypassHeaderKey = "X-Test-Bypass"
+	testAuthUserID      = "00000000-0000-0000-0000-000000000001"
+	testRateLimitRPS    = 1000
+)
 
 // mockUserRepository is a simple mock for testing
 type mockUserRepository struct {
@@ -44,8 +57,10 @@ func (m *mockUserRepository) CreateUser(
 	_ []byte,
 	createFn func() (*users.User, error),
 ) (*users.User, error) {
+	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
+
 	// Check for duplicate email
-	if m.createdEmails[email] {
+	if m.createdEmails[normalizedEmail] {
 		return nil, users.ErrUserAlreadyExist
 	}
 
@@ -55,7 +70,7 @@ func (m *mockUserRepository) CreateUser(
 	}
 
 	// Track the email and store the user
-	m.createdEmails[email] = true
+	m.createdEmails[normalizedEmail] = true
 	m.users[user.ID()] = user
 
 	return user, nil
@@ -118,9 +133,11 @@ func (m *mockUserRepository) userMatchesFilter(user *users.User, filter queries.
 		!strings.Contains(strings.ToLower(user.Name()), strings.ToLower(*filter.Name)) {
 		return false
 	}
-	if filter.Email != nil && *filter.Email != "" &&
-		!strings.Contains(strings.ToLower(user.Email()), strings.ToLower(*filter.Email)) {
-		return false
+	if filter.Email != nil && *filter.Email != "" {
+		re, err := regexp.Compile("(?i)" + *filter.Email)
+		if err != nil || !re.MatchString(user.Email()) {
+			return false
+		}
 	}
 	if filter.Role != nil && *filter.Role != "" && string(user.Role()) != *filter.Role {
 		return false
@@ -309,6 +326,13 @@ func (m *mockOrganizationRepository) ListOrganizations(
 	return result, nil
 }
 
+func (m *mockOrganizationRepository) CountOrganizations(
+	_ context.Context,
+	_ queries.OrganizationFilter,
+) (int64, error) {
+	return int64(len(m.orgs)), nil
+}
+
 func (m *mockOrganizationRepository) DeleteOrganization(_ context.Context, id uuid.UUID) error {
 	_, exists := m.orgs[id]
 	if !exists {
@@ -476,6 +500,92 @@ func (s *ServerSuite) SetupTest() {
 	s.OrganizationsRepo = newMockOrganizationRepository()
 	s.CategoriesRepo = newMockCategoryRepository()
 
+	mockUsersRepo, ok := s.UsersRepo.(*mockUserRepository)
+	s.Require().True(ok)
+	s.Require().NoError(seedDefaultAuthUser(mockUsersRepo, users.RoleAdmin))
+
 	// Initialize HTTP server with mock repositories
-	s.HTTPServer = SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
+	server, err := SetupHTTPServer(
+		s.UsersRepo,
+		s.TicketsRepo,
+		s.OrganizationsRepo,
+		s.CategoriesRepo,
+		"test-jwt-signing-key",
+		time.Hour,
+		[]string{"*"},
+		testRateLimitRPS,
+	)
+	s.Require().NoError(err)
+	s.HTTPServer = server
+	attachDefaultTestAuthHeader(s.HTTPServer, "test-jwt-signing-key", users.RoleAdmin)
+}
+
+func seedDefaultAuthUser(repo *mockUserRepository, role users.Role) error {
+	testUserID, err := uuid.Parse(testAuthUserID)
+	if err != nil {
+		return err
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	email := fmt.Sprintf("test-auth-%s@example.com", role.String())
+	now := time.Now().UTC()
+	user, err := users.NewUserWithDetails(
+		testUserID,
+		"Test Auth User",
+		email,
+		passwordHash,
+		role,
+		nil,
+		true,
+		now,
+		now,
+	)
+	if err != nil {
+		return err
+	}
+
+	repo.users[user.ID()] = user
+	repo.createdEmails[email] = true
+	return nil
+}
+
+func attachDefaultTestAuthHeader(server *echo.Echo, signingKey string, role users.Role) {
+	server.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if strings.EqualFold(strings.TrimSpace(c.Request().Header.Get(testBypassHeaderKey)), "true") {
+				return next(c)
+			}
+
+			if strings.TrimSpace(c.Request().Header.Get(echo.HeaderAuthorization)) == "" {
+				token, err := createTestToken(signingKey, testAuthUserID, role)
+				if err != nil {
+					return echo.NewHTTPError(http.StatusInternalServerError, "failed to create test auth token")
+				}
+
+				c.Request().Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
+			}
+
+			return next(c)
+		}
+	})
+}
+
+func createTestToken(signingKey, userID string, role users.Role) (string, error) {
+	issuedAt := time.Now().UTC()
+	claims := authdomain.Claims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   userID,
+			IssuedAt:  jwt.NewNumericDate(issuedAt),
+			ExpiresAt: jwt.NewNumericDate(issuedAt.Add(time.Hour)),
+		},
+		UserID: userID,
+		Role:   role,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(signingKey))
 }

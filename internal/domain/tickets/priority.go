@@ -2,6 +2,7 @@ package tickets
 
 import (
 	"errors"
+	"slices"
 	"strings"
 )
 
@@ -53,12 +54,7 @@ func (p Priority) String() string {
 
 // IsValid проверяет, является ли приоритет валидным
 func (p Priority) IsValid() bool {
-	for _, priority := range AllPriorities() {
-		if p == priority {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(AllPriorities(), p)
 }
 
 // ParsePriority преобразует строку в приоритет

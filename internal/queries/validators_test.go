@@ -1,5 +1,4 @@
 //go:build !integration
-// +build !integration
 
 package queries_test
 
@@ -190,16 +189,16 @@ func TestUserFilterValidate(t *testing.T) {
 				BaseFilter: queries.BaseFilter{
 					Limit: 20,
 				},
-				Name:  stringPtr("John Doe"),
-				Email: stringPtr("john@example.com"),
-				Role:  stringPtr("admin"),
+				Name:  new("John Doe"),
+				Email: new("john@example.com"),
+				Role:  new("admin"),
 			},
 			expectError: false,
 		},
 		{
 			name: "empty name filter",
 			filter: queries.UserFilter{
-				Name: stringPtr("   "),
+				Name: new("   "),
 			},
 			expectError: true,
 			errorMsg:    "user name filter cannot be empty",
@@ -207,7 +206,7 @@ func TestUserFilterValidate(t *testing.T) {
 		{
 			name: "empty email filter",
 			filter: queries.UserFilter{
-				Email: stringPtr(""),
+				Email: new(""),
 			},
 			expectError: true,
 			errorMsg:    "user email filter cannot be empty",
@@ -215,7 +214,7 @@ func TestUserFilterValidate(t *testing.T) {
 		{
 			name: "invalid role",
 			filter: queries.UserFilter{
-				Role: stringPtr("invalid_role"),
+				Role: new("invalid_role"),
 			},
 			expectError: true,
 			errorMsg:    "invalid user role",
@@ -223,7 +222,7 @@ func TestUserFilterValidate(t *testing.T) {
 		{
 			name: "valid role uppercase",
 			filter: queries.UserFilter{
-				Role: stringPtr("ADMIN"),
+				Role: new("ADMIN"),
 			},
 			expectError: false, // Should pass as validation converts to lowercase
 		},
@@ -256,16 +255,16 @@ func TestCategoryFilterValidate(t *testing.T) {
 				BaseFilter: queries.BaseFilter{
 					Limit: 50,
 				},
-				Name:           stringPtr("Technology"),
+				Name:           new("Technology"),
 				OrganizationID: &uuid.UUID{},
-				IsActive:       boolPtr(true),
+				IsActive:       new(true),
 			},
 			expectError: false,
 		},
 		{
 			name: "empty name filter",
 			filter: queries.CategoryFilter{
-				Name: stringPtr("  "),
+				Name: new("  "),
 			},
 			expectError: true,
 			errorMsg:    "category name filter cannot be empty",
@@ -299,16 +298,16 @@ func TestOrganizationFilterValidate(t *testing.T) {
 				BaseFilter: queries.BaseFilter{
 					Limit: 30,
 				},
-				Name:     stringPtr("ACME Corp"),
-				Domain:   stringPtr("acme.com"),
-				IsActive: boolPtr(true),
+				Name:     new("ACME Corp"),
+				Domain:   new("acme.com"),
+				IsActive: new(true),
 			},
 			expectError: false,
 		},
 		{
 			name: "empty name filter",
 			filter: queries.OrganizationFilter{
-				Name: stringPtr(""),
+				Name: new(""),
 			},
 			expectError: true,
 			errorMsg:    "organization name filter cannot be empty",
@@ -316,7 +315,7 @@ func TestOrganizationFilterValidate(t *testing.T) {
 		{
 			name: "empty domain filter",
 			filter: queries.OrganizationFilter{
-				Domain: stringPtr("   "),
+				Domain: new("   "),
 			},
 			expectError: true,
 			errorMsg:    "organization domain filter cannot be empty",
@@ -335,13 +334,4 @@ func TestOrganizationFilterValidate(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper functions
-func stringPtr(s string) *string {
-	return &s
-}
-
-func boolPtr(b bool) *bool {
-	return &b
 }

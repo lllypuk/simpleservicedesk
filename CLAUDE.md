@@ -35,7 +35,7 @@ This is a Go service desk application following clean architecture principles:
 
 ### Domain Layer (`internal/domain/`)
 Core business entities with their own validation and business logic:
-- **Users**: Role-based access control (Admin, Agent, User)
+- **Users**: Role-based access control (Admin, Agent, Customer)
 - **Tickets**: Status transitions (Open → InProgress → Resolved → Closed) and priority levels
 - **Organizations**: Hierarchical structures
 - **Categories**: Nested categorization system
@@ -56,11 +56,22 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 - Type definitions
 - OpenAPI specifications
 
+### Authentication & Authorization
+
+JWT authentication and role-based authorization are part of the standard request flow:
+- Login endpoint: `POST /login` (public) exchanges email/password for a JWT
+- Auth service: `internal/application/auth/service.go` handles login, token generation, and token validation
+- JWT claims model: `internal/domain/auth` defines login DTOs and token claims (`user_id`, `role`, registered claims)
+- Authentication middleware: `pkg/echomiddleware/auth.go` validates Bearer tokens and injects claims into request context
+- Authorization middleware: `pkg/echomiddleware/authorize.go` enforces role checks and owner-or-role access patterns
+- Protected routes are wired in `internal/application/http_server.go` by access level (public, authenticated, agent+, admin)
+
 ## Key Technologies
 
 - **Web Framework**: Echo v4 for HTTP routing and middleware
 - **Storage**: MongoDB (primary)
 - **Code Generation**: oapi-codegen from OpenAPI 3.0 specs
+- **Authentication**: JWT via `github.com/golang-jwt/jwt/v5`
 - **Testing**: testcontainers-go for integration tests with real MongoDB
 - **Logging**: Structured logging using Go's slog package
 
@@ -75,34 +86,16 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 
 ## Current Development Status
 
-✅ **ALL CORE DEVELOPMENT COMPLETED - READY FOR PRODUCTION**
+Status is tracked by plan files in `docs/plans/`.
 
-### 🎯 Project Status: CORE APIs FULLY IMPLEMENTED
-
-**Last Updated**: August 24, 2025
-
-All major development phases have been successfully completed. The service is now feature-complete with comprehensive API coverage and robust testing infrastructure.
-
-### ✅ Completed Phases - ALL DONE
-- ✅ **Phase 1**: Complete OpenAPI specification with all endpoints
-- ✅ **Phase 2**: Tickets API - Full CRUD + status transitions + comments + assignments
-- ✅ **Phase 3**: Organizations API - Complete hierarchical organization management
-- ✅ **Phase 4**: Categories API - Full tree-structured category management 
-- ✅ **Phase 5**: Extended Users API - Complete user management with role controls
-
-### ✅ Final API Implementation Status
-- **Users API**: ✅ Full CRUD + role management + user tickets + extended operations
-- **Tickets API**: ✅ Complete CRUD + status management + comments + assignments
-- **Organizations API**: ✅ Complete CRUD + hierarchical support + user/ticket relationships
-- **Categories API**: ✅ Complete CRUD + tree structure + parent-child validation
-- **Generated Code**: ✅ Up-to-date with complete OpenAPI specification
-
-### 🎯 Current Focus: PRODUCTION READINESS
-- ✅ Performance optimization and profiling tools
-- ✅ Security measures and validation
-- ✅ Comprehensive testing (unit + integration + e2e)
-- ✅ Production deployment preparation
-- ✅ Complete documentation
+Current snapshot:
+- `00-upgrade-go-1.26.md`: mostly complete, some validation checkboxes still open
+- `01-authentication-authorization.md`: complete
+- `02-request-validation.md`: complete (OpenAPI request validator enabled in HTTP server middleware)
+- `03-cors-rate-limiting.md`: complete
+- `04-health-check.md`: pending
+- `05-e2e-tests.md`: pending
+- `06-update-documentation.md`: in progress
 
 ## Test Organization
 
@@ -226,10 +219,19 @@ func CreateUser(email string, password string) (*User, error) {
 ## Configuration
 
 Uses environment variables (see `.env` file):
-- `APP_ENV`: Application environment (development/production)
-- `HTTP_SERVER_PORT`: Server port (default: 8080)
+- `ENV_TYPE`: Application environment (default: `testing`)
+- `SERVER_PORT`: Server port (default: `8080`)
+- `INTERRUPT_TIMEOUT`: Graceful shutdown timeout (default: `2s`)
+- `READ_HEADER_TIMEOUT`: HTTP read header timeout (default: `5s`)
+- `CORS_ALLOWED_ORIGINS`: Comma-separated allowed CORS origins (default: `*`)
+- `RATE_LIMIT_RPS`: Global HTTP rate limit in requests per second (default: `100`)
 - `MONGO_URI`: MongoDB connection string
 - `MONGO_DATABASE`: MongoDB database name
+- `JWT_SECRET`: JWT signing key (required when `ENV_TYPE=production`; generated at startup in non-production when unset)
+- `JWT_EXPIRATION`: Token lifetime in Go duration format (default: `24h`)
+- `BOOTSTRAP_ADMIN_NAME`: Optional startup bootstrap admin display name
+- `BOOTSTRAP_ADMIN_EMAIL`: Optional startup bootstrap admin email (requires password)
+- `BOOTSTRAP_ADMIN_PASSWORD`: Optional startup bootstrap admin password (requires email)
 
 ## Code Generation Dependencies
 

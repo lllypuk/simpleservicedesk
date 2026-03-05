@@ -18,11 +18,6 @@ func (h OrganizationHandlers) PostOrganizations(c echo.Context) error {
 		return err
 	}
 
-	// Validate required fields
-	if req.Name == "" {
-		msg := "name is required"
-		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
-	}
 	if req.Domain == nil || *req.Domain == "" {
 		msg := "domain is required"
 		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})

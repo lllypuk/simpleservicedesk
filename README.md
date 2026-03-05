@@ -17,6 +17,7 @@ organizations, and categories in a service desk environment.
     - [Code Generation](#code-generation)
     - [Running the Application](#running-the-application)
 - [Usage Examples](#usage-examples)
+- [Authentication](#authentication)
 - [API Documentation](#api-documentation)
 - [Testing](#testing)
 - [Performance Profiling](#performance-profiling)
@@ -33,7 +34,7 @@ and categorization systems through a clean RESTful API.
 ## Features
 
 ### Core Functionality ✅ FULLY IMPLEMENTED
-- **User Management**: Complete CRUD operations with role-based access control (Admin/Agent/User)
+- **User Management**: Complete CRUD operations with role-based access control (Admin/Agent/Customer)
 - **Ticket System**: Full ticket lifecycle management with status transitions and priority levels
 - **Organization Management**: Hierarchical organizational structures with user relationships  
 - **Category System**: Tree-structured categories for ticket classification
@@ -71,7 +72,7 @@ The project follows clean architecture principles and is organized into the foll
 
 ### Prerequisites
 
-- [Go](https://golang.org/dl/) (version 1.24 or higher)
+- [Go](https://golang.org/dl/) (version 1.26 or higher)
 - [Docker](https://www.docker.com/get-started)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [Make](https://www.gnu.org/software/make/)
@@ -94,14 +95,27 @@ The application is configured using environment variables. Create a `.env` file 
 
 ```bash
 # Application Environment
-APP_ENV=development
+ENV_TYPE=development
 
 # HTTP Server Configuration
-HTTP_SERVER_PORT=8080
+SERVER_PORT=8080
+INTERRUPT_TIMEOUT=2s
+READ_HEADER_TIMEOUT=5s
+CORS_ALLOWED_ORIGINS=*
+RATE_LIMIT_RPS=100
 
 # MongoDB Configuration
 MONGO_URI=mongodb://localhost:27017
 MONGO_DATABASE=servicedesk
+
+# Authentication (JWT)
+JWT_SECRET=change-me-in-production
+JWT_EXPIRATION=24h
+
+# Optional bootstrap admin (created only when DB has no users)
+BOOTSTRAP_ADMIN_NAME=Bootstrap Admin
+BOOTSTRAP_ADMIN_EMAIL=admin@example.com
+BOOTSTRAP_ADMIN_PASSWORD=change-me
 ```
 
 ### Code Generation
@@ -146,12 +160,61 @@ This will start:
 
 ## Usage Examples
 
+### Authentication
+
+Authentication is JWT-based:
+
+- `POST /login` is public and returns a signed JWT token.
+- All other API endpoints (except `GET /ping`) require `Authorization: Bearer <token>`.
+- There is no self-registration endpoint. Users are created by Admins.
+- Global rate limiting is controlled by `RATE_LIMIT_RPS` (default `100` req/s).
+- `POST /login` has an additional stricter limit of `5` requests/minute per client.
+- Exceeded limits return `429 Too Many Requests` and include `Retry-After`.
+
+#### Login and get token
+
+```bash
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "securepassword123"
+  }'
+```
+
+Response:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### Call protected endpoint with Bearer token
+
+```bash
+curl -X GET http://localhost:8080/users \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Role-based access rules
+
+- `admin`: full access, including user management and role changes
+- `agent`: can list users, update ticket status, and assign tickets
+- `customer` (end user): can create/view tickets, but can only access own tickets and comments
+- `GET /users/{id}` and `PUT /users/{id}`: only self or admin
+- Non-admin `PUT /users/{id}` updates are limited to profile fields (`name`, `email`)
+- Ticket comment author is always the authenticated user (request `author_id` is ignored)
+
 ### User Management
 
 #### Create a User
 
+Admin-only endpoint.
+
 ```bash
 curl -X POST http://localhost:8080/users \
+  -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -163,12 +226,17 @@ curl -X POST http://localhost:8080/users \
 #### Get User by ID
 
 ```bash
-curl -X GET http://localhost:8080/users/{userId}
+curl -X GET http://localhost:8080/users/{userId} \
+  -H "Authorization: Bearer <token>"
 ```
 
 ### Complete API Coverage
 
 **All major API endpoints are fully implemented and tested:**
+
+#### Auth/Public API ✅
+- POST `/login` - Authenticate and get JWT token (public)
+- GET `/ping` - Health check ping (public)
 
 #### Users API ✅
 - POST `/users` - Create user
@@ -176,7 +244,7 @@ curl -X GET http://localhost:8080/users/{userId}
 - GET `/users` - List users
 - PUT `/users/{id}` - Update user
 - DELETE `/users/{id}` - Delete user
-- PUT `/users/{id}/role` - Update user role
+- PATCH `/users/{id}/role` - Update user role
 - GET `/users/{id}/tickets` - Get user's tickets
 
 #### Tickets API ✅  
@@ -185,8 +253,8 @@ curl -X GET http://localhost:8080/users/{userId}
 - GET `/tickets` - List tickets  
 - PUT `/tickets/{id}` - Update ticket
 - DELETE `/tickets/{id}` - Delete ticket
-- PUT `/tickets/{id}/status` - Update ticket status
-- PUT `/tickets/{id}/assign` - Assign ticket to user
+- PATCH `/tickets/{id}/status` - Update ticket status
+- PATCH `/tickets/{id}/assign` - Assign ticket to user
 - POST `/tickets/{id}/comments` - Add comment
 - GET `/tickets/{id}/comments` - Get comments
 
@@ -313,11 +381,13 @@ This command will:
 │   └── openapi/           # Server interfaces, types, client
 ├── internal/               # Private application code
 │   ├── application/        # ✅ HTTP handlers, use cases
+│   │   ├── auth/          # JWT login and token validation
 │   │   ├── users/         # User management handlers
 │   │   ├── tickets/       # Ticket management handlers  
 │   │   ├── organizations/ # Organization handlers
 │   │   └── categories/    # Category handlers
 │   ├── domain/            # ✅ Business entities and logic
+│   │   ├── auth/          # JWT claims model
 │   │   ├── users/         # User domain model
 │   │   ├── tickets/       # Ticket domain model
 │   │   ├── organizations/ # Organization domain model
@@ -333,6 +403,7 @@ This command will:
 │   ├── e2e/              # End-to-end tests
 │   └── shared/           # Common test utilities
 ├── pkg/                   # Public packages (middleware, utilities)
+│   └── echomiddleware/    # Auth, role, logging middlewares
 └── profiles/              # Performance profiling data
 ```
 
@@ -340,10 +411,19 @@ This command will:
 
 | Variable           | Description               | Default                     |
 |--------------------|---------------------------|-----------------------------|
-| `APP_ENV`          | Application environment   | `development`               |
-| `HTTP_SERVER_PORT` | HTTP server port          | `8080`                      |
+| `ENV_TYPE`         | Application environment   | `testing`                   |
+| `SERVER_PORT`      | HTTP server port          | `8080`                      |
+| `INTERRUPT_TIMEOUT`| Graceful shutdown timeout | `2s`                        |
+| `READ_HEADER_TIMEOUT` | HTTP read header timeout | `5s`                    |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed CORS origins | `*`              |
+| `RATE_LIMIT_RPS`   | Global HTTP rate limit (requests per second) | `100`        |
 | `MONGO_URI`        | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE`   | MongoDB database name     | `servicedesk`               |
+| `JWT_SECRET`       | JWT signing secret (required when `ENV_TYPE=production`; generated in non-production if unset) | _generated (non-production)_ |
+| `JWT_EXPIRATION`   | JWT token lifetime        | `24h`                       |
+| `BOOTSTRAP_ADMIN_NAME` | Optional bootstrap admin display name | _(unset)_ |
+| `BOOTSTRAP_ADMIN_EMAIL` | Optional bootstrap admin email | _(unset)_ |
+| `BOOTSTRAP_ADMIN_PASSWORD` | Optional bootstrap admin password | _(unset)_ |
 
 ## Contributing
 

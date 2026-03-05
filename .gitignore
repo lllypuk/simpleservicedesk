@@ -21,3 +21,6 @@ profiles/
 /build/
 /.claude/
 main
+
+# ralphex progress logs
+.ralphex/progress/

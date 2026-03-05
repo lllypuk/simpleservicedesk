@@ -13,6 +13,10 @@ import (
 
 func (h TicketHandlers) GetTicketsID(c echo.Context, id openapi_types.UUID) error {
 	ctx := c.Request().Context()
+	authUserID, role, ok := authUser(c)
+	if !ok {
+		return nil
+	}
 
 	ticket, err := h.repo.GetTicket(ctx, id)
 	if err != nil {
@@ -21,6 +25,9 @@ func (h TicketHandlers) GetTicketsID(c echo.Context, id openapi_types.UUID) erro
 			return c.JSON(http.StatusNotFound, openapi.ErrorResponse{Message: &msg})
 		}
 		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
+	}
+	if !hasElevatedTicketAccess(role) && ticket.AuthorID() != authUserID {
+		return c.NoContent(http.StatusForbidden)
 	}
 
 	response := convertTicketToResponse(ticket)
