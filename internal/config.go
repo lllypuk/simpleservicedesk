@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"time"
@@ -11,12 +13,20 @@ import (
 type Config struct {
 	Server Server
 	Mongo  Mongo
+	Auth   Auth
 }
 
 type Mongo struct {
 	URI      string
 	Database string
 }
+
+type Auth struct {
+	JWTSigningKey string
+	JWTExpiration time.Duration
+}
+
+const generatedJWTSecretLength = 32
 
 func LoadConfig() (Config, error) {
 	var (
@@ -30,6 +40,11 @@ func LoadConfig() (Config, error) {
 	}
 
 	config.Mongo = LoadMongo()
+	config.Auth, err = LoadAuth()
+	if err != nil {
+		return config, fmt.Errorf("could not load auth config: %w", err)
+	}
+
 	return config, nil
 }
 
@@ -65,6 +80,37 @@ func LoadMongo() Mongo {
 	mongo.URI = GetEnv("MONGO_URI", "mongodb://localhost:27017")
 	mongo.Database = GetEnv("MONGO_DATABASE", "servicedesk")
 	return mongo
+}
+
+func LoadAuth() (Auth, error) {
+	var auth Auth
+
+	secret := GetEnv("JWT_SECRET", "")
+	if secret == "" {
+		generatedSecret, err := generateDefaultJWTSecret()
+		if err != nil {
+			return auth, fmt.Errorf("could not generate default jwt secret: %w", err)
+		}
+		secret = generatedSecret
+	}
+
+	expiration, err := time.ParseDuration(GetEnv("JWT_EXPIRATION", "24h"))
+	if err != nil {
+		return auth, fmt.Errorf("could not parse jwt expiration: %w", err)
+	}
+
+	auth.JWTSigningKey = secret
+	auth.JWTExpiration = expiration
+
+	return auth, nil
+}
+
+func generateDefaultJWTSecret() (string, error) {
+	secret := make([]byte, generatedJWTSecretLength)
+	if _, err := rand.Read(secret); err != nil {
+		return "", err
+	}
+	return base64.RawStdEncoding.EncodeToString(secret), nil
 }
 
 func GetEnv(key, fallback string) string {

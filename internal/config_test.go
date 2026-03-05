@@ -1,6 +1,7 @@
 package internal_test
 
 import (
+	"encoding/base64"
 	"os"
 	"testing"
 	"time"
@@ -22,6 +23,8 @@ func TestLoadConfig(t *testing.T) {
 		"READ_HEADER_TIMEOUT",
 		"MONGO_URI",
 		"MONGO_DATABASE",
+		"JWT_SECRET",
+		"JWT_EXPIRATION",
 	}
 
 	for _, key := range envVars {
@@ -54,6 +57,10 @@ func TestLoadConfig(t *testing.T) {
 		// Test mongo defaults
 		assert.Equal(t, "mongodb://localhost:27017", config.Mongo.URI)
 		assert.Equal(t, "servicedesk", config.Mongo.Database)
+
+		// Test auth defaults
+		assert.NotEmpty(t, config.Auth.JWTSigningKey)
+		assert.Equal(t, 24*time.Hour, config.Auth.JWTExpiration)
 	})
 
 	t.Run("custom configuration from environment", func(t *testing.T) {
@@ -64,6 +71,8 @@ func TestLoadConfig(t *testing.T) {
 		t.Setenv("READ_HEADER_TIMEOUT", "30s")
 		t.Setenv("MONGO_URI", "mongodb://custom-host:27017")
 		t.Setenv("MONGO_DATABASE", "custom_db")
+		t.Setenv("JWT_SECRET", "custom-jwt-secret")
+		t.Setenv("JWT_EXPIRATION", "12h")
 
 		config, err := internal.LoadConfig()
 		require.NoError(t, err)
@@ -77,6 +86,10 @@ func TestLoadConfig(t *testing.T) {
 		// Test mongo custom values
 		assert.Equal(t, "mongodb://custom-host:27017", config.Mongo.URI)
 		assert.Equal(t, "custom_db", config.Mongo.Database)
+
+		// Test auth custom values
+		assert.Equal(t, "custom-jwt-secret", config.Auth.JWTSigningKey)
+		assert.Equal(t, 12*time.Hour, config.Auth.JWTExpiration)
 	})
 
 	t.Run("invalid interrupt timeout", func(t *testing.T) {
@@ -95,6 +108,14 @@ func TestLoadConfig(t *testing.T) {
 		_, err := internal.LoadConfig()
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "could not parse read header timeout")
+	})
+
+	t.Run("invalid jwt expiration", func(t *testing.T) {
+		t.Setenv("JWT_EXPIRATION", "invalid-duration")
+
+		_, err := internal.LoadConfig()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "could not parse jwt expiration")
 	})
 }
 
@@ -317,6 +338,63 @@ func TestLoadMongo(t *testing.T) {
 	}
 }
 
+func TestLoadAuth(t *testing.T) {
+	originalEnv := make(map[string]string)
+	envVars := []string{"JWT_SECRET", "JWT_EXPIRATION"}
+
+	for _, key := range envVars {
+		if val, exists := os.LookupEnv(key); exists {
+			originalEnv[key] = val
+		}
+		os.Unsetenv(key)
+	}
+
+	defer func() {
+		for _, key := range envVars {
+			os.Unsetenv(key)
+		}
+		for key, val := range originalEnv {
+			t.Setenv(key, val)
+		}
+	}()
+
+	t.Run("default values", func(t *testing.T) {
+		auth, err := internal.LoadAuth()
+		require.NoError(t, err)
+		assert.NotEmpty(t, auth.JWTSigningKey)
+		assert.Equal(t, 24*time.Hour, auth.JWTExpiration)
+
+		_, decodeErr := base64.RawStdEncoding.DecodeString(auth.JWTSigningKey)
+		require.NoError(t, decodeErr)
+	})
+
+	t.Run("custom values", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "custom-secret")
+		t.Setenv("JWT_EXPIRATION", "6h")
+
+		auth, err := internal.LoadAuth()
+		require.NoError(t, err)
+		assert.Equal(t, "custom-secret", auth.JWTSigningKey)
+		assert.Equal(t, 6*time.Hour, auth.JWTExpiration)
+	})
+
+	t.Run("empty secret generates default", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "")
+
+		auth, err := internal.LoadAuth()
+		require.NoError(t, err)
+		assert.NotEmpty(t, auth.JWTSigningKey)
+	})
+
+	t.Run("invalid expiration", func(t *testing.T) {
+		t.Setenv("JWT_EXPIRATION", "bad-value")
+
+		_, err := internal.LoadAuth()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "could not parse jwt expiration")
+	})
+}
+
 func TestGetEnv(t *testing.T) {
 	testKey := "TEST_GET_ENV_KEY"
 
@@ -352,6 +430,8 @@ func TestConfigurationValidation(t *testing.T) {
 		"READ_HEADER_TIMEOUT",
 		"MONGO_URI",
 		"MONGO_DATABASE",
+		"JWT_SECRET",
+		"JWT_EXPIRATION",
 	}
 
 	for _, key := range envVars {
@@ -414,6 +494,8 @@ func testConfigurationValidation(t *testing.T, envVars map[string]string, expect
 		"READ_HEADER_TIMEOUT",
 		"MONGO_URI",
 		"MONGO_DATABASE",
+		"JWT_SECRET",
+		"JWT_EXPIRATION",
 	}
 
 	for _, key := range configEnvVars {
@@ -437,6 +519,8 @@ func testConfigurationValidation(t *testing.T, envVars map[string]string, expect
 		assert.NotEmpty(t, config.Server.Port)
 		assert.NotEmpty(t, config.Mongo.URI)
 		assert.NotEmpty(t, config.Mongo.Database)
+		assert.NotEmpty(t, config.Auth.JWTSigningKey)
+		assert.NotZero(t, config.Auth.JWTExpiration)
 	}
 }
 

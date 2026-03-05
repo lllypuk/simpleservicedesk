@@ -43,10 +43,10 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 2: Add auth configuration
-- [ ] Add `JWT_SECRET` and `JWT_EXPIRATION` to config (`internal/config.go`)
-- [ ] Add to `.env.example`
-- [ ] Generate a default secret for development
-- [ ] Mark completed
+- [x] Add `JWT_SECRET` and `JWT_EXPIRATION` to config (`internal/config.go`)
+- [x] Add to `.env.example`
+- [x] Generate a default secret for development
+- [x] Mark completed
 
 ### Task 3: Create auth domain types
 - [ ] Create `internal/domain/auth/` package
