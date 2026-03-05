@@ -56,12 +56,12 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 4: Create auth service
-- [ ] Create `internal/application/auth/` package
-- [ ] Implement `Login(email, password)` — validate credentials, return JWT
-- [ ] Implement `GenerateToken(user)` — create signed JWT
-- [ ] Implement `ValidateToken(tokenString)` — parse and validate JWT
-- [ ] Add unit tests with mocked user repository
-- [ ] Mark completed
+- [x] Create `internal/application/auth/` package
+- [x] Implement `Login(email, password)` — validate credentials, return JWT
+- [x] Implement `GenerateToken(user)` — create signed JWT
+- [x] Implement `ValidateToken(tokenString)` — parse and validate JWT
+- [x] Add unit tests with mocked user repository
+- [x] Mark completed
 
 ### Task 5: Create login endpoint
 - [ ] Add `POST /login` to `api/openapi.yaml` (LoginRequest, LoginResponse schemas)
