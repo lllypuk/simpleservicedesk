@@ -108,13 +108,13 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 11: Integration tests
-- [ ] Add auth helper to `test/integration/shared/` — login and get token
-- [ ] Add tests for `POST /login` (success, wrong password, nonexistent user)
-- [ ] Add tests for protected endpoint without token (expect 401)
-- [ ] Add tests for insufficient role (expect 403)
-- [ ] Add tests for User role seeing only own tickets
-- [ ] Update existing integration tests to include auth headers
-- [ ] Mark completed
+- [x] Add auth helper to `test/integration/shared/` — login and get token
+- [x] Add tests for `POST /login` (success, wrong password, nonexistent user)
+- [x] Add tests for protected endpoint without token (expect 401)
+- [x] Add tests for insufficient role (expect 403)
+- [x] Add tests for User role seeing only own tickets
+- [x] Update existing integration tests to include auth headers
+- [x] Mark completed
 
 ### Task 12: Documentation
 - [ ] Update `README.md` — add authentication section with usage examples

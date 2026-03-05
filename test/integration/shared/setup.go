@@ -5,21 +5,16 @@ package shared
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-	"strings"
 	"testing"
 	"time"
 
 	"simpleservicedesk/internal/application"
-	authdomain "simpleservicedesk/internal/domain/auth"
 	userdomain "simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/internal/infrastructure/categories"
 	"simpleservicedesk/internal/infrastructure/organizations"
 	"simpleservicedesk/internal/infrastructure/tickets"
 	userrepo "simpleservicedesk/internal/infrastructure/users"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -39,17 +34,13 @@ type IntegrationSuite struct {
 	MongoContainer    *mongodb.MongoDBContainer
 	MongoDB           *mongo.Database
 	MongoClient       *mongo.Client
+	defaultAdminToken string
 }
 
 // MongoIntegrationSuite extends IntegrationSuite with MongoDB setup
 type MongoIntegrationSuite struct {
 	IntegrationSuite
 }
-
-const (
-	testBypassHeaderKey = "X-Test-Bypass"
-	testAuthUserID      = "00000000-0000-0000-0000-000000000001"
-)
 
 // SetupMongoTest sets up MongoDB testcontainer for integration tests
 func SetupMongoTest(t *testing.T) (*mongo.Database, *mongo.Client, func()) {
@@ -105,7 +96,6 @@ func (s *IntegrationSuite) SetupSuite() {
 		"integration-test-jwt-signing-key",
 		time.Hour,
 	)
-	attachDefaultTestAuthHeader(s.HTTPServer, "integration-test-jwt-signing-key", userdomain.RoleAdmin)
 }
 
 // SetupTest runs before each test to ensure clean database state
@@ -129,7 +119,9 @@ func (s *IntegrationSuite) SetupTest() {
 		"integration-test-jwt-signing-key",
 		time.Hour,
 	)
-	attachDefaultTestAuthHeader(s.HTTPServer, "integration-test-jwt-signing-key", userdomain.RoleAdmin)
+
+	admin := s.MustCreateAndLoginTestUser(userdomain.RoleAdmin)
+	s.defaultAdminToken = admin.Token
 }
 
 // SetupSuite initializes the MongoDB integration test suite
@@ -142,41 +134,4 @@ func (s *MongoIntegrationSuite) SetupSuite() {
 func (s *MongoIntegrationSuite) SetupTest() {
 	// Call parent SetupTest which handles database cleanup
 	s.IntegrationSuite.SetupTest()
-}
-
-func attachDefaultTestAuthHeader(server *echo.Echo, signingKey string, role userdomain.Role) {
-	server.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			if strings.EqualFold(strings.TrimSpace(c.Request().Header.Get(testBypassHeaderKey)), "true") {
-				return next(c)
-			}
-
-			if strings.TrimSpace(c.Request().Header.Get(echo.HeaderAuthorization)) == "" {
-				token, err := createTestToken(signingKey, testAuthUserID, role)
-				if err != nil {
-					return echo.NewHTTPError(http.StatusInternalServerError, "failed to create test auth token")
-				}
-
-				c.Request().Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
-			}
-
-			return next(c)
-		}
-	})
-}
-
-func createTestToken(signingKey, userID string, role userdomain.Role) (string, error) {
-	issuedAt := time.Now().UTC()
-	claims := authdomain.Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   userID,
-			IssuedAt:  jwt.NewNumericDate(issuedAt),
-			ExpiresAt: jwt.NewNumericDate(issuedAt.Add(time.Hour)),
-		},
-		UserID: userID,
-		Role:   role,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(signingKey))
 }

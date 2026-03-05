@@ -36,7 +36,7 @@ func (s *CategoryAPITestSuite) TestCreateCategoryIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var orgResp openapi.CreateOrganizationResponse
@@ -125,7 +125,7 @@ func (s *CategoryAPITestSuite) TestCreateCategoryIntegration() {
 			req := httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -157,7 +157,7 @@ func (s *CategoryAPITestSuite) TestCreateChildCategoryIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var orgResp openapi.CreateOrganizationResponse
@@ -173,7 +173,7 @@ func (s *CategoryAPITestSuite) TestCreateChildCategoryIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(parentReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var parentResp openapi.CreateCategoryResponse
@@ -189,7 +189,7 @@ func (s *CategoryAPITestSuite) TestCreateChildCategoryIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(childReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 
 	s.Assert().Equal(http.StatusCreated, rec.Code)
 
@@ -209,7 +209,7 @@ func (s *CategoryAPITestSuite) TestListCategoriesIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var orgResp openapi.CreateOrganizationResponse
@@ -232,7 +232,7 @@ func (s *CategoryAPITestSuite) TestListCategoriesIntegration() {
 		req := httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(catReqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 		s.Require().Equal(http.StatusCreated, rec.Code)
 
 		var resp openapi.CreateCategoryResponse
@@ -289,7 +289,7 @@ func (s *CategoryAPITestSuite) TestListCategoriesIntegration() {
 		s.Run(tt.name, func() {
 			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -313,7 +313,7 @@ func (s *CategoryAPITestSuite) TestGetCategoryByIDIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var orgResp openapi.CreateOrganizationResponse
@@ -329,7 +329,7 @@ func (s *CategoryAPITestSuite) TestGetCategoryByIDIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(catReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var catResp openapi.CreateCategoryResponse
@@ -363,7 +363,7 @@ func (s *CategoryAPITestSuite) TestGetCategoryByIDIntegration() {
 		s.Run(tt.name, func() {
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/categories/%s", tt.categoryID), nil)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -394,7 +394,7 @@ func (s *CategoryAPITestSuite) TestUpdateCategoryIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var orgResp openapi.CreateOrganizationResponse
@@ -410,7 +410,7 @@ func (s *CategoryAPITestSuite) TestUpdateCategoryIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(catReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var catResp openapi.CreateCategoryResponse
@@ -426,7 +426,7 @@ func (s *CategoryAPITestSuite) TestUpdateCategoryIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(parentReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var parentResp openapi.CreateCategoryResponse
@@ -513,7 +513,7 @@ func (s *CategoryAPITestSuite) TestUpdateCategoryIntegration() {
 			req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/categories/%s", tt.categoryID), bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -542,7 +542,7 @@ func (s *CategoryAPITestSuite) TestDeleteCategoryIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var orgResp openapi.CreateOrganizationResponse
@@ -558,7 +558,7 @@ func (s *CategoryAPITestSuite) TestDeleteCategoryIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(catReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var catResp openapi.CreateCategoryResponse
@@ -592,7 +592,7 @@ func (s *CategoryAPITestSuite) TestDeleteCategoryIntegration() {
 		s.Run(tt.name, func() {
 			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/categories/%s", tt.categoryID), nil)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -616,7 +616,7 @@ func (s *CategoryAPITestSuite) TestGetCategoryTicketsIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var orgResp openapi.CreateOrganizationResponse
@@ -632,7 +632,7 @@ func (s *CategoryAPITestSuite) TestGetCategoryTicketsIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(userReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var userResp openapi.CreateUserResponse
@@ -648,7 +648,7 @@ func (s *CategoryAPITestSuite) TestGetCategoryTicketsIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(catReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var catResp openapi.CreateCategoryResponse
@@ -671,7 +671,7 @@ func (s *CategoryAPITestSuite) TestGetCategoryTicketsIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewBuffer(ticketReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	tests := []struct {
@@ -722,7 +722,7 @@ func (s *CategoryAPITestSuite) TestGetCategoryTicketsIntegration() {
 		s.Run(tt.name, func() {
 			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -752,7 +752,7 @@ func (s *CategoryAPITestSuite) TestCategoryHierarchyIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var orgResp openapi.CreateOrganizationResponse
@@ -768,7 +768,7 @@ func (s *CategoryAPITestSuite) TestCategoryHierarchyIntegration() {
 	req = httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(parentReqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec = httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var parentResp openapi.CreateCategoryResponse
@@ -789,7 +789,7 @@ func (s *CategoryAPITestSuite) TestCategoryHierarchyIntegration() {
 		req := httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(childReqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 		s.Require().Equal(http.StatusCreated, rec.Code)
 	}
 
@@ -797,7 +797,7 @@ func (s *CategoryAPITestSuite) TestCategoryHierarchyIntegration() {
 	s.Run("list categories with include_children=true", func() {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/categories?organization_id=%s&include_children=true", orgID.String()), nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Assert().Equal(http.StatusOK, rec.Code)
 
@@ -811,7 +811,7 @@ func (s *CategoryAPITestSuite) TestCategoryHierarchyIntegration() {
 	s.Run("list categories with include_children=false", func() {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/categories?organization_id=%s&include_children=false", orgID.String()), nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Assert().Equal(http.StatusOK, rec.Code)
 
@@ -825,7 +825,7 @@ func (s *CategoryAPITestSuite) TestCategoryHierarchyIntegration() {
 	s.Run("filter by parent_id", func() {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/categories?organization_id=%s&parent_id=%s", orgID.String(), parentID.String()), nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Assert().Equal(http.StatusOK, rec.Code)
 

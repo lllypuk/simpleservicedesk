@@ -125,7 +125,7 @@ func (s *UserAPITestSuite) TestCreateUserIntegration() {
 			req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -155,7 +155,7 @@ func (s *UserAPITestSuite) TestGetUserIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var createResp openapi.CreateUserResponse
@@ -193,7 +193,7 @@ func (s *UserAPITestSuite) TestGetUserIntegration() {
 			url := fmt.Sprintf("/users/%s", tt.userID)
 			testReq := httptest.NewRequest(http.MethodGet, url, nil)
 			testRec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(testRec, testReq)
+			s.ServeAuthenticatedHTTP(testRec, testReq)
 
 			s.Assert().Equal(tt.expectedStatus, testRec.Code, "Response: %s", testRec.Body.String())
 
@@ -221,7 +221,7 @@ func (s *UserAPITestSuite) TestGetUserIntegration() {
 func (s *UserAPITestSuite) TestPingEndpoint() {
 	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 
 	s.Assert().Equal(http.StatusOK, rec.Code)
 	s.Assert().Equal("pong", rec.Body.String())
@@ -260,7 +260,7 @@ func (s *UserAPITestSuite) TestContentTypeValidation() {
 				req.Header.Set(echo.HeaderContentType, tt.contentType)
 			}
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 		})
@@ -320,7 +320,7 @@ func (s *UserAPITestSuite) TestHTTPMethodValidation() {
 				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			}
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 		})
@@ -341,7 +341,7 @@ func (s *UserAPITestSuite) TestLargePayloadHandling() {
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 
 	// Should be accepted since domain only validates non-empty names
 	s.Assert().Equal(http.StatusCreated, rec.Code, "Response: %s", rec.Body.String())
@@ -402,7 +402,7 @@ func (s *UserAPITestSuite) TestSpecialCharactersInInput() {
 			req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expected, rec.Code, "Response: %s", rec.Body.String())
 		})

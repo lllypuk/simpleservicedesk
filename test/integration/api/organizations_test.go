@@ -99,7 +99,7 @@ func (s *OrganizationAPITestSuite) TestCreateOrganizationIntegration() {
 			req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -129,7 +129,7 @@ func (s *OrganizationAPITestSuite) TestCreateSubOrganizationIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var parentResp openapi.CreateOrganizationResponse
@@ -164,7 +164,7 @@ func (s *OrganizationAPITestSuite) TestCreateSubOrganizationIntegration() {
 			req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -186,7 +186,7 @@ func (s *OrganizationAPITestSuite) TestGetOrganizationIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var createResp openapi.CreateOrganizationResponse
@@ -224,7 +224,7 @@ func (s *OrganizationAPITestSuite) TestGetOrganizationIntegration() {
 			url := fmt.Sprintf("/organizations/%s", tt.orgID)
 			testReq := httptest.NewRequest(http.MethodGet, url, nil)
 			testRec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(testRec, testReq)
+			s.ServeAuthenticatedHTTP(testRec, testReq)
 
 			s.Assert().Equal(tt.expectedStatus, testRec.Code, "Response: %s", testRec.Body.String())
 
@@ -264,7 +264,7 @@ func (s *OrganizationAPITestSuite) TestListOrganizationsIntegration() {
 		req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 		s.Require().Equal(http.StatusCreated, rec.Code)
 
 		var createResp openapi.CreateOrganizationResponse
@@ -317,7 +317,7 @@ func (s *OrganizationAPITestSuite) TestListOrganizationsIntegration() {
 			url := "/organizations" + tt.queryParams
 			req := httptest.NewRequest(http.MethodGet, url, nil)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -341,7 +341,7 @@ func (s *OrganizationAPITestSuite) TestUpdateOrganizationIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var createResp openapi.CreateOrganizationResponse
@@ -415,7 +415,7 @@ func (s *OrganizationAPITestSuite) TestUpdateOrganizationIntegration() {
 			req := httptest.NewRequest(http.MethodPut, url, bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -443,7 +443,7 @@ func (s *OrganizationAPITestSuite) TestDeleteOrganizationIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var createResp openapi.CreateOrganizationResponse
@@ -484,7 +484,7 @@ func (s *OrganizationAPITestSuite) TestDeleteOrganizationIntegration() {
 			url := fmt.Sprintf("/organizations/%s", tt.orgID)
 			req := httptest.NewRequest(http.MethodDelete, url, nil)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -539,7 +539,7 @@ func (s *OrganizationAPITestSuite) TestSpecialCharactersInOrganization() {
 			req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expected, rec.Code, "Response: %s", rec.Body.String())
 		})
@@ -576,7 +576,7 @@ func (s *OrganizationAPITestSuite) TestLargePayloadHandling() {
 			req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 
@@ -597,7 +597,7 @@ func (s *OrganizationAPITestSuite) TestNotImplementedEndpoints() {
 	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var createResp openapi.CreateOrganizationResponse
@@ -635,7 +635,7 @@ func (s *OrganizationAPITestSuite) TestNotImplementedEndpoints() {
 		s.Run(tt.name, func() {
 			req := httptest.NewRequest(tt.method, tt.path, nil)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Assert().Equal(tt.expectedStatus, rec.Code, "Response: %s", rec.Body.String())
 		})

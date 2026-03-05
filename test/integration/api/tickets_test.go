@@ -111,7 +111,7 @@ func (s *TicketAPITestSuite) TestCreateTicketIntegration() {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 			s.Equal(tt.expectedStatus, rec.Code)
 
 			if tt.expectedStatus == http.StatusCreated && tt.validateID {
@@ -153,7 +153,7 @@ func (s *TicketAPITestSuite) TestGetTicketIntegration() {
 	req := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	s.HTTPServer.ServeHTTP(rec, req)
+	s.ServeAuthenticatedHTTP(rec, req)
 	s.Require().Equal(http.StatusCreated, rec.Code)
 
 	var createResp openapi.GetTicketResponse
@@ -166,7 +166,7 @@ func (s *TicketAPITestSuite) TestGetTicketIntegration() {
 	s.Run("get existing ticket", func() {
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/tickets/%s", ticketID.String()), nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusOK, rec.Code)
 
@@ -199,7 +199,7 @@ func (s *TicketAPITestSuite) TestGetTicketIntegration() {
 		nonExistentID := uuid.New()
 		req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/tickets/%s", nonExistentID.String()), nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusNotFound, rec.Code)
 	})
@@ -207,7 +207,7 @@ func (s *TicketAPITestSuite) TestGetTicketIntegration() {
 	s.Run("get ticket with invalid ID", func() {
 		req := httptest.NewRequest(http.MethodGet, "/tickets/invalid-uuid", nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusBadRequest, rec.Code)
 	})
@@ -250,14 +250,14 @@ func (s *TicketAPITestSuite) TestListTicketsIntegration() {
 		req := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewBuffer(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 		s.Require().Equal(http.StatusCreated, rec.Code)
 	}
 
 	s.Run("list tickets with default pagination", func() {
 		req := httptest.NewRequest(http.MethodGet, "/tickets", nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusOK, rec.Code)
 
@@ -273,7 +273,7 @@ func (s *TicketAPITestSuite) TestListTicketsIntegration() {
 	s.Run("list tickets with custom limit", func() {
 		req := httptest.NewRequest(http.MethodGet, "/tickets?limit=2", nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusOK, rec.Code)
 
@@ -290,7 +290,7 @@ func (s *TicketAPITestSuite) TestListTicketsIntegration() {
 	s.Run("list tickets with status filter", func() {
 		req := httptest.NewRequest(http.MethodGet, "/tickets?status=new", nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusOK, rec.Code)
 
@@ -310,7 +310,7 @@ func (s *TicketAPITestSuite) TestListTicketsIntegration() {
 		// Use organization filter to limit results to our test tickets
 		req := httptest.NewRequest(http.MethodGet, "/tickets?priority=high&organization_id="+orgID.String(), nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusOK, rec.Code)
 
@@ -330,7 +330,7 @@ func (s *TicketAPITestSuite) TestListTicketsIntegration() {
 	s.Run("list tickets with organization filter", func() {
 		req := httptest.NewRequest(http.MethodGet, "/tickets?organization_id="+orgID.String(), nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusOK, rec.Code)
 
@@ -349,7 +349,7 @@ func (s *TicketAPITestSuite) TestListTicketsIntegration() {
 	s.Run("invalid status filter", func() {
 		req := httptest.NewRequest(http.MethodGet, "/tickets?status=invalid", nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusBadRequest, rec.Code)
 	})
@@ -357,7 +357,7 @@ func (s *TicketAPITestSuite) TestListTicketsIntegration() {
 	s.Run("invalid priority filter", func() {
 		req := httptest.NewRequest(http.MethodGet, "/tickets?priority=invalid", nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusBadRequest, rec.Code)
 	})
@@ -366,19 +366,19 @@ func (s *TicketAPITestSuite) TestListTicketsIntegration() {
 		// Test invalid page
 		req := httptest.NewRequest(http.MethodGet, "/tickets?page=0", nil)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 		s.Equal(http.StatusBadRequest, rec.Code)
 
 		// Test invalid limit
 		req = httptest.NewRequest(http.MethodGet, "/tickets?limit=101", nil)
 		rec = httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 		s.Equal(http.StatusBadRequest, rec.Code)
 
 		// Test zero limit
 		req = httptest.NewRequest(http.MethodGet, "/tickets?limit=0", nil)
 		rec = httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 		s.Equal(http.StatusBadRequest, rec.Code)
 	})
 }
@@ -405,7 +405,7 @@ func (s *TicketAPITestSuite) TestTicketPriorityLevels() {
 			req := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewBuffer(reqBody))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Equal(http.StatusCreated, rec.Code)
 
@@ -417,7 +417,7 @@ func (s *TicketAPITestSuite) TestTicketPriorityLevels() {
 			// Verify by getting the ticket
 			req = httptest.NewRequest(http.MethodGet, fmt.Sprintf("/tickets/%s", createResp.Id.String()), nil)
 			rec = httptest.NewRecorder()
-			s.HTTPServer.ServeHTTP(rec, req)
+			s.ServeAuthenticatedHTTP(rec, req)
 
 			s.Equal(http.StatusOK, rec.Code)
 
@@ -450,7 +450,7 @@ func (s *TicketAPITestSuite) TestTicketValidationEdgeCases() {
 		req := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewBuffer(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusBadRequest, rec.Code)
 	})
@@ -470,7 +470,7 @@ func (s *TicketAPITestSuite) TestTicketValidationEdgeCases() {
 		req := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewBuffer(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
-		s.HTTPServer.ServeHTTP(rec, req)
+		s.ServeAuthenticatedHTTP(rec, req)
 
 		s.Equal(http.StatusCreated, rec.Code)
 	})
