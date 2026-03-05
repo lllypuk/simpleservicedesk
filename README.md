@@ -101,6 +101,8 @@ ENV_TYPE=development
 SERVER_PORT=8080
 INTERRUPT_TIMEOUT=2s
 READ_HEADER_TIMEOUT=5s
+CORS_ALLOWED_ORIGINS=*
+RATE_LIMIT_RPS=100
 
 # MongoDB Configuration
 MONGO_URI=mongodb://localhost:27017
@@ -407,6 +409,8 @@ This command will:
 | `SERVER_PORT`      | HTTP server port          | `8080`                      |
 | `INTERRUPT_TIMEOUT`| Graceful shutdown timeout | `2s`                        |
 | `READ_HEADER_TIMEOUT` | HTTP read header timeout | `5s`                    |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed CORS origins | `*`              |
+| `RATE_LIMIT_RPS`   | Global HTTP rate limit (requests per second) | `100`        |
 | `MONGO_URI`        | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE`   | MongoDB database name     | `servicedesk`               |
 | `JWT_SECRET`       | JWT signing secret (generated at startup if unset) | _generated_ |

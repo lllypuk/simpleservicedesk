@@ -34,6 +34,6 @@ Add rate limiting to protect against abuse.
 - [x] Mark completed
 
 ### Task 4: Update configuration docs
-- [ ] Add new env variables to `.env.example`
-- [ ] Update `README.md` environment variables table
-- [ ] Mark completed
+- [x] Add new env variables to `.env.example`
+- [x] Update `README.md` environment variables table
+- [x] Mark completed
