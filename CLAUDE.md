@@ -56,11 +56,22 @@ Auto-generated from OpenAPI specs using oapi-codegen:
 - Type definitions
 - OpenAPI specifications
 
+### Authentication & Authorization
+
+JWT authentication and role-based authorization are part of the standard request flow:
+- Login endpoint: `POST /login` (public) exchanges email/password for a JWT
+- Auth service: `internal/application/auth/service.go` handles login, token generation, and token validation
+- JWT claims model: `internal/domain/auth` defines login DTOs and token claims (`user_id`, `role`, registered claims)
+- Authentication middleware: `pkg/echomiddleware/auth.go` validates Bearer tokens and injects claims into request context
+- Authorization middleware: `pkg/echomiddleware/authorize.go` enforces role checks and owner-or-role access patterns
+- Protected routes are wired in `internal/application/http_server.go` by access level (public, authenticated, agent+, admin)
+
 ## Key Technologies
 
 - **Web Framework**: Echo v4 for HTTP routing and middleware
 - **Storage**: MongoDB (primary)
 - **Code Generation**: oapi-codegen from OpenAPI 3.0 specs
+- **Authentication**: JWT via `github.com/golang-jwt/jwt/v5`
 - **Testing**: testcontainers-go for integration tests with real MongoDB
 - **Logging**: Structured logging using Go's slog package
 
@@ -230,6 +241,8 @@ Uses environment variables (see `.env` file):
 - `HTTP_SERVER_PORT`: Server port (default: 8080)
 - `MONGO_URI`: MongoDB connection string
 - `MONGO_DATABASE`: MongoDB database name
+- `JWT_SECRET`: JWT signing key (default for development in `.env.example`)
+- `JWT_EXPIRATION`: Token lifetime in Go duration format (default: `24h`)
 
 ## Code Generation Dependencies
 

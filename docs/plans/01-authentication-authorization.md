@@ -117,7 +117,7 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 12: Documentation
-- [ ] Update `README.md` — add authentication section with usage examples
-- [ ] Update `CLAUDE.md` — mention auth architecture
-- [ ] Update `docs/tech_stack.md` — add JWT dependency
-- [ ] Mark completed
+- [x] Update `README.md` — add authentication section with usage examples
+- [x] Update `CLAUDE.md` — mention auth architecture
+- [x] Update `docs/tech_stack.md` — add JWT dependency
+- [x] Mark completed

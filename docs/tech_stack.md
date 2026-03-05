@@ -22,6 +22,7 @@
 
 ### Security & Auth
 - **bcrypt** - хеширование паролей
+- **golang-jwt/jwt/v5** - подпись и валидация JWT токенов
 - **Role-based Access Control** - Admin/Agent/User
 
 ## 🧪 Тестирование
@@ -65,6 +66,7 @@ github.com/labstack/echo/v4           // HTTP framework
 go.mongodb.org/mongo-driver           // MongoDB driver
 github.com/google/uuid                // UUID generation
 golang.org/x/crypto                   // Password hashing
+github.com/golang-jwt/jwt/v5          // JWT signing and validation
 
 // Code generation
 github.com/getkin/kin-openapi         // OpenAPI support
@@ -102,6 +104,8 @@ simpleservicedesk/
 | `HTTP_SERVER_PORT` | Server port | `8080` |
 | `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE` | Database name | `servicedesk` |
+| `JWT_SECRET` | JWT signing key | `change-me-in-production` |
+| `JWT_EXPIRATION` | JWT lifetime (Go duration) | `24h` |
 
 ## 🔄 Code Generation Workflow
 

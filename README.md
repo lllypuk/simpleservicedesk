@@ -17,6 +17,7 @@ organizations, and categories in a service desk environment.
     - [Code Generation](#code-generation)
     - [Running the Application](#running-the-application)
 - [Usage Examples](#usage-examples)
+- [Authentication](#authentication)
 - [API Documentation](#api-documentation)
 - [Testing](#testing)
 - [Performance Profiling](#performance-profiling)
@@ -102,6 +103,10 @@ HTTP_SERVER_PORT=8080
 # MongoDB Configuration
 MONGO_URI=mongodb://localhost:27017
 MONGO_DATABASE=servicedesk
+
+# Authentication (JWT)
+JWT_SECRET=change-me-in-production
+JWT_EXPIRATION=24h
 ```
 
 ### Code Generation
@@ -145,6 +150,46 @@ This will start:
 - Persistent volume for MongoDB data
 
 ## Usage Examples
+
+### Authentication
+
+Authentication is JWT-based:
+
+- `POST /login` is public and returns a signed JWT token.
+- All other API endpoints (except `GET /ping`) require `Authorization: Bearer <token>`.
+- There is no self-registration endpoint. Users are created by Admins.
+
+#### Login and get token
+
+```bash
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "securepassword123"
+  }'
+```
+
+Response:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### Call protected endpoint with Bearer token
+
+```bash
+curl -X GET http://localhost:8080/users \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Role-based access rules
+
+- Admin: full access, including user management and role changes
+- Agent: can list users, update ticket status, and assign tickets
+- User: can create/view tickets, but can only view own tickets in `GET /tickets`
 
 ### User Management
 
@@ -344,6 +389,8 @@ This command will:
 | `HTTP_SERVER_PORT` | HTTP server port          | `8080`                      |
 | `MONGO_URI`        | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE`   | MongoDB database name     | `servicedesk`               |
+| `JWT_SECRET`       | JWT signing secret        | `change-me-in-production`   |
+| `JWT_EXPIRATION`   | JWT token lifetime        | `24h`                       |
 
 ## Contributing
 
