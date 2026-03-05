@@ -38,7 +38,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(createResp.Id)
 
 		ticketID := *createResp.Id
@@ -70,7 +70,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 
 		var resp openapi.ErrorResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Message)
 	})
 
@@ -107,7 +107,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Add a comment to the ticket
@@ -179,7 +179,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Assign the ticket
@@ -241,7 +241,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 
 			var createResp openapi.GetTicketResponse
 			err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-			s.NoError(err)
+			s.Require().NoError(err)
 			ticketID := *createResp.Id
 
 			// Change status if not "open" (default status)
@@ -268,7 +268,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 			rec := httptest.NewRecorder()
 
 			s.HTTPServer.ServeHTTP(rec, req)
-			s.Equal(http.StatusNoContent, rec.Code, fmt.Sprintf("Failed to delete ticket with status %s", status))
+			s.Equal(http.StatusNoContent, rec.Code, "Failed to delete ticket with status %s", status)
 
 			// Verify ticket is deleted
 			getReq := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/tickets/%s", ticketID.String()), nil)
@@ -278,7 +278,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 			s.Equal(
 				http.StatusNotFound,
 				getRec.Code,
-				fmt.Sprintf("Ticket with status %s was not properly deleted", status),
+				"Ticket with status %s was not properly deleted", status,
 			)
 		}
 	})
@@ -307,7 +307,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// First deletion should succeed
@@ -326,7 +326,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 
 		var resp openapi.ErrorResponse
 		err = json.Unmarshal(rec2.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Message)
 	})
 }

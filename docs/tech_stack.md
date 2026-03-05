@@ -10,7 +10,7 @@
 ## 🔧 Основной стек
 
 ### Backend
-- **Go 1.24** - основной язык разработки
+- **Go 1.26** - основной язык разработки
 - **Echo v4** - HTTP router и middleware
 - **MongoDB** - основная база данных
 - **In-Memory Storage** - fallback для тестирования

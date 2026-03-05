@@ -2,6 +2,7 @@ package tickets
 
 import (
 	"errors"
+	"slices"
 	"strings"
 )
 
@@ -38,12 +39,7 @@ func (s Status) String() string {
 
 // IsValid проверяет, является ли статус валидным
 func (s Status) IsValid() bool {
-	for _, status := range AllStatuses() {
-		if s == status {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(AllStatuses(), s)
 }
 
 // CanTransitionTo проверяет, возможен ли переход из текущего статуса в новый
@@ -83,13 +79,7 @@ func (s Status) CanTransitionTo(newStatus Status) bool {
 		return false
 	}
 
-	for _, allowed := range allowedStatuses {
-		if allowed == newStatus {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(allowedStatuses, newStatus)
 }
 
 // ParseStatus преобразует строку в статус

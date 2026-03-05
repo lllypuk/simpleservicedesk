@@ -2,6 +2,7 @@ package users
 
 import (
 	"errors"
+	"slices"
 	"strings"
 )
 
@@ -41,12 +42,7 @@ func (r Role) String() string {
 
 // IsValid проверяет, является ли роль валидной
 func (r Role) IsValid() bool {
-	for _, role := range AllRoles() {
-		if r == role {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(AllRoles(), r)
 }
 
 // ParseRole преобразует строку в роль

@@ -53,6 +53,6 @@ func (s *UsersSuite) TestGetUserNotFound() {
 		s.HTTPServer.ServeHTTP(rec, req)
 
 		s.Require().Equal(http.StatusNotFound, rec.Code, rec.Body.String())
-		s.Require().Equal(`{"message":"user not found"}`+"\n", rec.Body.String())
+		s.Require().JSONEq(`{"message":"user not found"}`, rec.Body.String())
 	})
 }

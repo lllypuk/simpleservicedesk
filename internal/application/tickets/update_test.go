@@ -38,7 +38,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(createResp.Id)
 
 		ticketID := *createResp.Id
@@ -63,7 +63,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Title)
 		s.Equal("Updated Title", *resp.Title)
 		// Verify other properties unchanged
@@ -95,7 +95,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Update the ticket description
@@ -118,7 +118,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Description)
 		s.Equal("Updated description with more details", *resp.Description)
 		// Verify other properties unchanged
@@ -149,7 +149,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Update the ticket priority
@@ -172,7 +172,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Priority)
 		s.Equal(openapi.TicketPriority("high"), *resp.Priority)
 	})
@@ -201,7 +201,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Update the ticket category
@@ -224,7 +224,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.CategoryId)
 		s.Equal(categoryID, *resp.CategoryId)
 	})
@@ -253,7 +253,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Update multiple fields
@@ -283,7 +283,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Equal("Updated Title", *resp.Title)
 		s.Equal("Updated description", *resp.Description)
 		s.Equal(openapi.TicketPriority("critical"), *resp.Priority)
@@ -314,7 +314,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Try to update with empty title
@@ -337,7 +337,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.ErrorResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Message)
 	})
 
@@ -365,7 +365,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Try to update with invalid priority
@@ -388,7 +388,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.ErrorResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Message)
 	})
 
@@ -414,7 +414,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.ErrorResponse
 		err := json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(resp.Message)
 	})
 
@@ -456,7 +456,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Try to update with invalid JSON
@@ -496,7 +496,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Update with empty request (no fields specified)
@@ -516,7 +516,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		// Verify no changes were made
 		s.Equal("Original Title", *resp.Title)
 		s.Equal("Original description", *resp.Description)
@@ -547,7 +547,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var createResp openapi.GetTicketResponse
 		err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-		s.NoError(err)
+		s.Require().NoError(err)
 		ticketID := *createResp.Id
 
 		// Update with empty description (should be valid)
@@ -570,8 +570,8 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 		var resp openapi.GetTicketResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
-		s.NoError(err)
-		s.Equal("", *resp.Description)
+		s.Require().NoError(err)
+		s.Empty(*resp.Description)
 	})
 
 	s.Run("Update ticket priority to all valid values", func() {
@@ -601,7 +601,7 @@ func (s *TicketsSuite) TestUpdateTicket() {
 
 			var createResp openapi.GetTicketResponse
 			err := json.Unmarshal(createRec.Body.Bytes(), &createResp)
-			s.NoError(err)
+			s.Require().NoError(err)
 			ticketID := *createResp.Id
 
 			// Update priority
@@ -619,12 +619,12 @@ func (s *TicketsSuite) TestUpdateTicket() {
 			rec := httptest.NewRecorder()
 
 			s.HTTPServer.ServeHTTP(rec, req)
-			s.Equal(http.StatusOK, rec.Code, fmt.Sprintf("Failed to update priority to %s", priority))
+			s.Equal(http.StatusOK, rec.Code, "Failed to update priority to %s", priority)
 
 			var resp openapi.GetTicketResponse
 			err = json.Unmarshal(rec.Body.Bytes(), &resp)
-			s.NoError(err)
-			s.Equal(priority, *resp.Priority, fmt.Sprintf("Priority not updated to %s", priority))
+			s.Require().NoError(err)
+			s.Equal(priority, *resp.Priority, "Priority not updated to %s", priority)
 		}
 	})
 }

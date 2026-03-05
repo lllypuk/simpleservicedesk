@@ -71,7 +71,7 @@ The project follows clean architecture principles and is organized into the foll
 
 ### Prerequisites
 
-- [Go](https://golang.org/dl/) (version 1.24 or higher)
+- [Go](https://golang.org/dl/) (version 1.26 or higher)
 - [Docker](https://www.docker.com/get-started)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [Make](https://www.gnu.org/software/make/)
