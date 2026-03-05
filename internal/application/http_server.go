@@ -38,12 +38,30 @@ func SetupHTTPServer(
 	categoryRepo CategoryRepository,
 	jwtSigningKey string,
 	jwtExpiration time.Duration,
+	corsAllowedOrigins []string,
 ) (*echo.Echo, error) {
 	e := echo.New()
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(appmiddleware.SlogLoggerMiddleware(slog.Default()))
 	e.Use(appmiddleware.PutRequestIDContext)
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: corsAllowedOrigins,
+		AllowMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowHeaders: []string{
+			echo.HeaderContentType,
+			echo.HeaderAuthorization,
+		},
+		ExposeHeaders: []string{
+			echo.HeaderXRequestID,
+		},
+	}))
 	e.Use(middleware.Recover())
 
 	swagger, err := openapi.GetSwagger()

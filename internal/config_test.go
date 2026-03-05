@@ -21,6 +21,7 @@ func TestLoadConfig(t *testing.T) {
 		"SERVER_PORT",
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
+		"CORS_ALLOWED_ORIGINS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
 		"JWT_SECRET",
@@ -56,6 +57,7 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, "8080", config.Server.Port)
 		assert.Equal(t, 2*time.Second, config.Server.InterruptTimeout)
 		assert.Equal(t, 5*time.Second, config.Server.ReadHeaderTimeout)
+		assert.Equal(t, []string{"*"}, config.Server.CORSAllowedOrigins)
 
 		// Test mongo defaults
 		assert.Equal(t, "mongodb://localhost:27017", config.Mongo.URI)
@@ -81,6 +83,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Setenv("SERVER_PORT", "9090")
 		t.Setenv("INTERRUPT_TIMEOUT", "10s")
 		t.Setenv("READ_HEADER_TIMEOUT", "30s")
+		t.Setenv("CORS_ALLOWED_ORIGINS", "https://app.example.com,https://admin.example.com")
 		t.Setenv("MONGO_URI", "mongodb://custom-host:27017")
 		t.Setenv("MONGO_DATABASE", "custom_db")
 		t.Setenv("JWT_SECRET", "custom-jwt-secret")
@@ -97,6 +100,11 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, "9090", config.Server.Port)
 		assert.Equal(t, 10*time.Second, config.Server.InterruptTimeout)
 		assert.Equal(t, 30*time.Second, config.Server.ReadHeaderTimeout)
+		assert.Equal(
+			t,
+			[]string{"https://app.example.com", "https://admin.example.com"},
+			config.Server.CORSAllowedOrigins,
+		)
 
 		// Test mongo custom values
 		assert.Equal(t, "mongodb://custom-host:27017", config.Mongo.URI)
@@ -145,6 +153,7 @@ func TestLoadServer(t *testing.T) {
 		"SERVER_PORT",
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
+		"CORS_ALLOWED_ORIGINS",
 	}
 
 	for _, key := range envVars {
@@ -174,10 +183,11 @@ func TestLoadServer(t *testing.T) {
 			name:    "default values",
 			envVars: map[string]string{},
 			expected: internal.Server{
-				Environment:       environment.Testing,
-				Port:              "8080",
-				InterruptTimeout:  2 * time.Second,
-				ReadHeaderTimeout: 5 * time.Second,
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
 			},
 		},
 		{
@@ -186,10 +196,11 @@ func TestLoadServer(t *testing.T) {
 				"ENV_TYPE": "production",
 			},
 			expected: internal.Server{
-				Environment:       environment.Production,
-				Port:              "8080",
-				InterruptTimeout:  2 * time.Second,
-				ReadHeaderTimeout: 5 * time.Second,
+				Environment:        environment.Production,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
 			},
 		},
 		{
@@ -198,10 +209,11 @@ func TestLoadServer(t *testing.T) {
 				"SERVER_PORT": "3000",
 			},
 			expected: internal.Server{
-				Environment:       environment.Testing,
-				Port:              "3000",
-				InterruptTimeout:  2 * time.Second,
-				ReadHeaderTimeout: 5 * time.Second,
+				Environment:        environment.Testing,
+				Port:               "3000",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
 			},
 		},
 		{
@@ -211,10 +223,37 @@ func TestLoadServer(t *testing.T) {
 				"READ_HEADER_TIMEOUT": "60s",
 			},
 			expected: internal.Server{
-				Environment:       environment.Testing,
-				Port:              "8080",
-				InterruptTimeout:  30 * time.Second,
-				ReadHeaderTimeout: 60 * time.Second,
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   30 * time.Second,
+				ReadHeaderTimeout:  60 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
+			},
+		},
+		{
+			name: "custom cors origins",
+			envVars: map[string]string{
+				"CORS_ALLOWED_ORIGINS": "https://app.example.com, https://admin.example.com",
+			},
+			expected: internal.Server{
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"https://app.example.com", "https://admin.example.com"},
+			},
+		},
+		{
+			name: "empty cors origins uses default wildcard",
+			envVars: map[string]string{
+				"CORS_ALLOWED_ORIGINS": "",
+			},
+			expected: internal.Server{
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
 			},
 		},
 		{
@@ -482,6 +521,7 @@ func TestConfigurationValidation(t *testing.T) {
 		"SERVER_PORT",
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
+		"CORS_ALLOWED_ORIGINS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
 		"JWT_SECRET",
@@ -549,6 +589,7 @@ func testConfigurationValidation(t *testing.T, envVars map[string]string, expect
 		"SERVER_PORT",
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
+		"CORS_ALLOWED_ORIGINS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
 		"JWT_SECRET",

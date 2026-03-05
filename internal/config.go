@@ -54,11 +54,12 @@ func LoadConfig() (Config, error) {
 }
 
 type Server struct {
-	Environment       environment.Type
-	Port              string
-	InterruptTimeout  time.Duration
-	ReadHeaderTimeout time.Duration
-	PprofPort         string
+	Environment        environment.Type
+	Port               string
+	InterruptTimeout   time.Duration
+	ReadHeaderTimeout  time.Duration
+	PprofPort          string
+	CORSAllowedOrigins []string
 }
 
 func LoadServer() (Server, error) {
@@ -76,8 +77,32 @@ func LoadServer() (Server, error) {
 		return server, fmt.Errorf("could not parse read header timeout: %w", err)
 	}
 	server.ReadHeaderTimeout = readHeaderTimeout
+	server.CORSAllowedOrigins = loadCORSAllowedOrigins()
 
 	return server, nil
+}
+
+func loadCORSAllowedOrigins() []string {
+	rawOrigins := strings.TrimSpace(GetEnv("CORS_ALLOWED_ORIGINS", "*"))
+	if rawOrigins == "" {
+		return []string{"*"}
+	}
+
+	parts := strings.Split(rawOrigins, ",")
+	origins := make([]string, 0, len(parts))
+	for _, part := range parts {
+		origin := strings.TrimSpace(part)
+		if origin == "" {
+			continue
+		}
+		origins = append(origins, origin)
+	}
+
+	if len(origins) == 0 {
+		return []string{"*"}
+	}
+
+	return origins
 }
 
 func LoadMongo() Mongo {

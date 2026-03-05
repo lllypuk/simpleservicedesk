@@ -511,6 +511,7 @@ func (s *ServerSuite) SetupTest() {
 		s.CategoriesRepo,
 		"test-jwt-signing-key",
 		time.Hour,
+		[]string{"*"},
 	)
 	s.Require().NoError(err)
 	s.HTTPServer = server

@@ -95,6 +95,7 @@ func (s *IntegrationSuite) SetupSuite() {
 		s.CategoriesRepo,
 		"integration-test-jwt-signing-key",
 		time.Hour,
+		[]string{"*"},
 	)
 	s.Require().NoError(err)
 	s.HTTPServer = server
@@ -120,6 +121,7 @@ func (s *IntegrationSuite) SetupTest() {
 		s.CategoriesRepo,
 		"integration-test-jwt-signing-key",
 		time.Hour,
+		[]string{"*"},
 	)
 	s.Require().NoError(err)
 	s.HTTPServer = server
