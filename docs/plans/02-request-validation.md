@@ -32,10 +32,10 @@ reaching handlers, reducing boilerplate validation in handlers.
 - [x] Mark completed
 
 ### Task 4: Add tests
-- [ ] Add unit test for validation middleware error responses
-- [ ] Add integration tests: missing required fields, wrong types, invalid enums
-- [ ] Verify existing tests still pass
-- [ ] Mark completed
+- [x] Add unit test for validation middleware error responses
+- [x] Add integration tests: missing required fields, wrong types, invalid enums
+- [x] Verify existing tests still pass
+- [x] Mark completed
 
 ### Task 5: Fix the TODO
 - [ ] Fix `internal/application/organizations/list.go:41` — add proper pagination response

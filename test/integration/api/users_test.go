@@ -148,6 +148,74 @@ func (s *UserAPITestSuite) TestCreateUserIntegration() {
 	}
 }
 
+func (s *UserAPITestSuite) TestRequestValidationIntegration() {
+	tests := []struct {
+		name    string
+		method  string
+		path    string
+		request any
+	}{
+		{
+			name:   "missing required field",
+			method: http.MethodPost,
+			path:   "/users",
+			request: map[string]any{
+				"name":  "Missing Password User",
+				"email": "missing.password@example.com",
+			},
+		},
+		{
+			name:   "wrong type",
+			method: http.MethodPost,
+			path:   "/users",
+			request: map[string]any{
+				"name":     "Wrong Type User",
+				"email":    "wrong.type@example.com",
+				"password": 123456,
+			},
+		},
+		{
+			name:    "invalid enum",
+			method:  http.MethodPatch,
+			path:    fmt.Sprintf("/users/%s/role", uuid.New().String()),
+			request: map[string]any{"role": "superadmin"},
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			var reqBody []byte
+			var err error
+
+			switch request := tt.request.(type) {
+			case nil:
+				reqBody = nil
+			case string:
+				reqBody = []byte(request)
+			default:
+				reqBody, err = json.Marshal(request)
+				s.Require().NoError(err)
+			}
+
+			req := httptest.NewRequest(tt.method, tt.path, bytes.NewBuffer(reqBody))
+			if tt.request != nil {
+				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			}
+
+			rec := httptest.NewRecorder()
+			s.ServeAuthenticatedHTTP(rec, req)
+
+			s.Require().Equal(http.StatusBadRequest, rec.Code, "Response: %s", rec.Body.String())
+
+			var errorResp openapi.ErrorResponse
+			err = json.Unmarshal(rec.Body.Bytes(), &errorResp)
+			s.Require().NoError(err)
+			s.Require().NotNil(errorResp.Message)
+			s.Require().NotEmpty(strings.TrimSpace(*errorResp.Message))
+		})
+	}
+}
+
 func (s *UserAPITestSuite) TestGetUserIntegration() {
 	// First create a user to test getting
 	createReq := shared.TestUser2.CreateUserRequest()

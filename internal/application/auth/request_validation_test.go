@@ -97,3 +97,27 @@ func (s *AuthSuite) TestRequestValidationMiddleware() {
 		s.Require().NotEmpty(strings.TrimSpace(*errorResp.Message))
 	})
 }
+
+func (s *AuthSuite) TestValidationMiddlewareErrorResponseFormat() {
+	body, err := json.Marshal(map[string]string{
+		"name":  "Missing Password User",
+		"email": "missing.password@example.com",
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(testBypassHeaderKey, "true")
+	rec := httptest.NewRecorder()
+
+	s.HTTPServer.ServeHTTP(rec, req)
+
+	s.Require().Equal(http.StatusBadRequest, rec.Code)
+	s.Require().Contains(rec.Header().Get(echo.HeaderContentType), echo.MIMEApplicationJSON)
+
+	var errorResp openapi.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errorResp)
+	s.Require().NoError(err)
+	s.Require().NotNil(errorResp.Message)
+	s.Require().NotEmpty(strings.TrimSpace(*errorResp.Message))
+}
