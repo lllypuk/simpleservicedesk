@@ -322,6 +322,13 @@ func (m *mockOrganizationRepository) ListOrganizations(
 	return result, nil
 }
 
+func (m *mockOrganizationRepository) CountOrganizations(
+	_ context.Context,
+	_ queries.OrganizationFilter,
+) (int64, error) {
+	return int64(len(m.orgs)), nil
+}
+
 func (m *mockOrganizationRepository) DeleteOrganization(_ context.Context, id uuid.UUID) error {
 	_, exists := m.orgs[id]
 	if !exists {

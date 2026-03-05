@@ -186,24 +186,7 @@ func (r *MongoRepo) ListOrganizations(
 	ctx context.Context,
 	filter queries.OrganizationFilter,
 ) ([]*domain.Organization, error) {
-	query := bson.M{}
-
-	// Apply filters
-	if filter.ParentID != nil {
-		query["parent_id"] = *filter.ParentID
-	}
-	if filter.IsActive != nil {
-		query["is_active"] = *filter.IsActive
-	}
-	if filter.Name != nil {
-		query["name"] = bson.M{"$regex": *filter.Name, "$options": "i"}
-	}
-	if filter.Domain != nil {
-		query["domain"] = bson.M{"$regex": *filter.Domain, "$options": "i"}
-	}
-	if filter.IsRootOnly {
-		query["parent_id"] = bson.M{"$exists": false}
-	}
+	query := buildOrganizationQuery(filter)
 
 	// Set up options
 	opts := options.Find()
@@ -262,6 +245,33 @@ func (r *MongoRepo) ListOrganizations(
 	}
 
 	return organizations, nil
+}
+
+func (r *MongoRepo) CountOrganizations(ctx context.Context, filter queries.OrganizationFilter) (int64, error) {
+	query := buildOrganizationQuery(filter)
+	return r.collection.CountDocuments(ctx, query)
+}
+
+func buildOrganizationQuery(filter queries.OrganizationFilter) bson.M {
+	query := bson.M{}
+
+	if filter.ParentID != nil {
+		query["parent_id"] = *filter.ParentID
+	}
+	if filter.IsActive != nil {
+		query["is_active"] = *filter.IsActive
+	}
+	if filter.Name != nil {
+		query["name"] = bson.M{"$regex": *filter.Name, "$options": "i"}
+	}
+	if filter.Domain != nil {
+		query["domain"] = bson.M{"$regex": *filter.Domain, "$options": "i"}
+	}
+	if filter.IsRootOnly {
+		query["parent_id"] = bson.M{"$exists": false}
+	}
+
+	return query
 }
 
 func (r *MongoRepo) GetOrganizationHierarchy(

@@ -38,6 +38,6 @@ reaching handlers, reducing boilerplate validation in handlers.
 - [x] Mark completed
 
 ### Task 5: Fix the TODO
-- [ ] Fix `internal/application/organizations/list.go:41` — add proper pagination response
-- [ ] Add test for pagination response
-- [ ] Mark completed
+- [x] Fix `internal/application/organizations/list.go:41` — add proper pagination response
+- [x] Add test for pagination response
+- [x] Mark completed

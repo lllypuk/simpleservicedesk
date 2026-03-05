@@ -49,6 +49,15 @@ func (s *OrganizationsSuite) TestListOrganizations() {
 		s.Require().NoError(err)
 		s.Require().NotNil(listResp.Organizations)
 		s.Require().Len(*listResp.Organizations, 2)
+		s.Require().NotNil(listResp.Pagination)
+		s.Require().NotNil(listResp.Pagination.Total)
+		s.Require().Equal(2, *listResp.Pagination.Total)
+		s.Require().NotNil(listResp.Pagination.Page)
+		s.Require().Equal(1, *listResp.Pagination.Page)
+		s.Require().NotNil(listResp.Pagination.Limit)
+		s.Require().Equal(20, *listResp.Pagination.Limit)
+		s.Require().NotNil(listResp.Pagination.HasNext)
+		s.Require().False(*listResp.Pagination.HasNext)
 	})
 
 	s.Run("List organizations with custom limit", func() {
@@ -61,11 +70,12 @@ func (s *OrganizationsSuite) TestListOrganizations() {
 		err := json.Unmarshal(rec.Body.Bytes(), &listResp)
 		s.Require().NoError(err)
 		s.Require().NotNil(listResp.Organizations)
+		s.Require().NotNil(listResp.Pagination)
+		s.Require().NotNil(listResp.Pagination.Limit)
+		s.Require().Equal(1, *listResp.Pagination.Limit)
 	})
 
 	s.Run("List organizations with pagination", func() {
-		page := 1
-		limit := 10
 		req := httptest.NewRequest(http.MethodGet, "/organizations?page=1&limit=10", nil)
 		rec := httptest.NewRecorder()
 		s.HTTPServer.ServeHTTP(rec, req)
@@ -75,9 +85,11 @@ func (s *OrganizationsSuite) TestListOrganizations() {
 		err := json.Unmarshal(rec.Body.Bytes(), &listResp)
 		s.Require().NoError(err)
 		s.Require().NotNil(listResp.Organizations)
-
-		_ = page
-		_ = limit
+		s.Require().NotNil(listResp.Pagination)
+		s.Require().NotNil(listResp.Pagination.Page)
+		s.Require().Equal(1, *listResp.Pagination.Page)
+		s.Require().NotNil(listResp.Pagination.Limit)
+		s.Require().Equal(10, *listResp.Pagination.Limit)
 	})
 
 	s.Run("List organizations with large limit should cap to 100", func() {

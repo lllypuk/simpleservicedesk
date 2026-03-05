@@ -32,14 +32,40 @@ func (h OrganizationHandlers) GetOrganizations(c echo.Context, params openapi.Ge
 		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
 	}
 
+	total, err := h.repo.CountOrganizations(ctx, filter)
+	if err != nil {
+		msg := err.Error()
+		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
+	}
+
 	var orgResponses []openapi.GetOrganizationResponse
 	for _, org := range orgs {
 		response := h.buildOrganizationResponse(org)
 		orgResponses = append(orgResponses, response)
 	}
 
-	// TODO: Add proper pagination response
+	page := 1
+	if params.Page != nil {
+		page = *params.Page
+	}
+
+	limit := filter.Limit
+	totalInt := int(total)
+	totalPages := 0
+	if limit > 0 {
+		totalPages = (totalInt + limit - 1) / limit
+	}
+	hasNext := page < totalPages
+
+	pagination := openapi.PaginationResponse{
+		Total:   &totalInt,
+		Page:    &page,
+		Limit:   &limit,
+		HasNext: &hasNext,
+	}
+
 	return c.JSON(http.StatusOK, openapi.ListOrganizationsResponse{
 		Organizations: &orgResponses,
+		Pagination:    &pagination,
 	})
 }

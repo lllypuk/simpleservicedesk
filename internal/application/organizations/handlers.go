@@ -23,6 +23,7 @@ type Repository interface {
 	) (*organizations.Organization, error)
 	GetOrganization(ctx context.Context, id uuid.UUID) (*organizations.Organization, error)
 	ListOrganizations(ctx context.Context, filter queries.OrganizationFilter) ([]*organizations.Organization, error)
+	CountOrganizations(ctx context.Context, filter queries.OrganizationFilter) (int64, error)
 	DeleteOrganization(ctx context.Context, id uuid.UUID) error
 }
 
