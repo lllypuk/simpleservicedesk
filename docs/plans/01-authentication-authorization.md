@@ -80,11 +80,11 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 7: Create authorization middleware
-- [ ] Create `pkg/echomiddleware/authorize.go`
-- [ ] Implement role-checking middleware: `RequireRole(minRole Role)`
-- [ ] Implement ownership check helper: `IsOwnerOrRole(userID, minRole)`
-- [ ] Add unit tests
-- [ ] Mark completed
+- [x] Create `pkg/echomiddleware/authorize.go`
+- [x] Implement role-checking middleware: `RequireRole(minRole Role)`
+- [x] Implement ownership check helper: `IsOwnerOrRole(userID, minRole)`
+- [x] Add unit tests
+- [x] Mark completed
 
 ### Task 8: Apply middleware to routes
 - [ ] Update `http_server.go` — group routes by access level
