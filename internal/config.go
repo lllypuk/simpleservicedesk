@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -60,6 +61,7 @@ type Server struct {
 	ReadHeaderTimeout  time.Duration
 	PprofPort          string
 	CORSAllowedOrigins []string
+	RateLimitRPS       int
 }
 
 func LoadServer() (Server, error) {
@@ -78,8 +80,30 @@ func LoadServer() (Server, error) {
 	}
 	server.ReadHeaderTimeout = readHeaderTimeout
 	server.CORSAllowedOrigins = loadCORSAllowedOrigins()
+	rateLimitRPS, err := loadRateLimitRPS()
+	if err != nil {
+		return server, err
+	}
+	server.RateLimitRPS = rateLimitRPS
 
 	return server, nil
+}
+
+func loadRateLimitRPS() (int, error) {
+	rawRate := strings.TrimSpace(GetEnv("RATE_LIMIT_RPS", "100"))
+	if rawRate == "" {
+		rawRate = "100"
+	}
+
+	rateLimitRPS, err := strconv.Atoi(rawRate)
+	if err != nil {
+		return 0, fmt.Errorf("could not parse rate limit rps: %w", err)
+	}
+	if rateLimitRPS <= 0 {
+		return 0, errors.New("rate limit rps must be greater than zero")
+	}
+
+	return rateLimitRPS, nil
 }
 
 func loadCORSAllowedOrigins() []string {

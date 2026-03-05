@@ -20,12 +20,12 @@ Add rate limiting to protect against abuse.
 - [x] Mark completed
 
 ### Task 2: Add rate limiting
-- [ ] Use Echo's built-in rate limiter middleware or `golang.org/x/time/rate`
-- [ ] Configure global rate limit (configurable via env `RATE_LIMIT_RPS`, default 100)
-- [ ] Apply stricter limit to `POST /login` (e.g., 5 req/min per IP) to prevent brute force
-- [ ] Return `429 Too Many Requests` with `Retry-After` header
-- [ ] Add config fields to `internal/config.go`
-- [ ] Mark completed
+- [x] Use Echo's built-in rate limiter middleware or `golang.org/x/time/rate`
+- [x] Configure global rate limit (configurable via env `RATE_LIMIT_RPS`, default 100)
+- [x] Apply stricter limit to `POST /login` (e.g., 5 req/min per IP) to prevent brute force
+- [x] Return `429 Too Many Requests` with `Retry-After` header
+- [x] Add config fields to `internal/config.go`
+- [x] Mark completed
 
 ### Task 3: Add tests
 - [ ] Test CORS preflight requests return correct headers

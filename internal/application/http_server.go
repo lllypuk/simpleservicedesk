@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,6 +23,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	oapimiddleware "github.com/oapi-codegen/echo-middleware"
+	"golang.org/x/time/rate"
 )
 
 type httpServer struct {
@@ -39,6 +42,7 @@ func SetupHTTPServer(
 	jwtSigningKey string,
 	jwtExpiration time.Duration,
 	corsAllowedOrigins []string,
+	rateLimitRPS int,
 ) (*echo.Echo, error) {
 	e := echo.New()
 
@@ -62,6 +66,11 @@ func SetupHTTPServer(
 			echo.HeaderXRequestID,
 		},
 	}))
+	e.Use(newRateLimiterMiddleware(
+		rate.Limit(rateLimitRPS),
+		rateLimitRPS,
+		rateLimitRetryAfter(rate.Limit(rateLimitRPS)),
+	))
 	e.Use(middleware.Recover())
 
 	swagger, err := openapi.GetSwagger()
@@ -101,13 +110,18 @@ func SetupHTTPServer(
 
 func registerRoutes(e *echo.Echo, server httpServer, tokenValidator appmiddleware.TokenValidator) {
 	wrapper := openapi.ServerInterfaceWrapper{Handler: server}
+	loginRateLimit := newRateLimiterMiddleware(
+		loginRateLimitPerSecond,
+		loginRateLimitBurst,
+		rateLimitRetryAfter(loginRateLimitPerSecond),
+	)
 
 	authMiddleware := appmiddleware.Auth(tokenValidator)
 	requireAgent := appmiddleware.RequireRole(userdomain.RoleAgent)
 	requireAdmin := appmiddleware.RequireRole(userdomain.RoleAdmin)
 
 	// Public endpoints.
-	e.POST("/login", wrapper.PostLogin)
+	e.POST("/login", wrapper.PostLogin, loginRateLimit)
 
 	// Authenticated endpoints (customer and above).
 	e.GET("/categories", wrapper.GetCategories, authMiddleware)
@@ -146,6 +160,43 @@ func registerRoutes(e *echo.Echo, server httpServer, tokenValidator appmiddlewar
 	e.POST("/users", wrapper.PostUsers, authMiddleware, requireAdmin)
 	e.DELETE("/users/:id", wrapper.DeleteUsersID, authMiddleware, requireAdmin)
 	e.PATCH("/users/:id/role", wrapper.PatchUsersIDRole, authMiddleware, requireAdmin)
+}
+
+const loginRateLimitPerSecond = rate.Limit(5.0 / 60.0)
+const loginRateLimitBurst = 5
+const rateLimiterVisitorExpiresIn = 3 * time.Minute
+
+func newRateLimiterMiddleware(requestsPerSecond rate.Limit, burst int, retryAfterSeconds int) echo.MiddlewareFunc {
+	if burst <= 0 {
+		burst = int(math.Ceil(float64(requestsPerSecond)))
+	}
+	if burst <= 0 {
+		burst = 1
+	}
+
+	return middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
+		Store: middleware.NewRateLimiterMemoryStoreWithConfig(middleware.RateLimiterMemoryStoreConfig{
+			Rate:      requestsPerSecond,
+			Burst:     burst,
+			ExpiresIn: rateLimiterVisitorExpiresIn,
+		}),
+		DenyHandler: func(c echo.Context, _ string, _ error) error {
+			c.Response().Header().Set(echo.HeaderRetryAfter, strconv.Itoa(retryAfterSeconds))
+
+			message := "rate limit exceeded"
+			return c.JSON(http.StatusTooManyRequests, openapi.ErrorResponse{
+				Message: &message,
+			})
+		},
+	})
+}
+
+func rateLimitRetryAfter(requestsPerSecond rate.Limit) int {
+	if requestsPerSecond <= 0 {
+		return 1
+	}
+
+	return int(math.Max(1, math.Ceil(1/float64(requestsPerSecond))))
 }
 
 func shouldSkipOpenAPIValidation(c echo.Context) bool {

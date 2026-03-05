@@ -37,6 +37,8 @@ type IntegrationSuite struct {
 	defaultAdminToken string
 }
 
+const testRateLimitRPS = 1000
+
 // MongoIntegrationSuite extends IntegrationSuite with MongoDB setup
 type MongoIntegrationSuite struct {
 	IntegrationSuite
@@ -96,6 +98,7 @@ func (s *IntegrationSuite) SetupSuite() {
 		"integration-test-jwt-signing-key",
 		time.Hour,
 		[]string{"*"},
+		testRateLimitRPS,
 	)
 	s.Require().NoError(err)
 	s.HTTPServer = server
@@ -122,6 +125,7 @@ func (s *IntegrationSuite) SetupTest() {
 		"integration-test-jwt-signing-key",
 		time.Hour,
 		[]string{"*"},
+		testRateLimitRPS,
 	)
 	s.Require().NoError(err)
 	s.HTTPServer = server

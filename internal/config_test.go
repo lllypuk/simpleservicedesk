@@ -22,6 +22,7 @@ func TestLoadConfig(t *testing.T) {
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
 		"CORS_ALLOWED_ORIGINS",
+		"RATE_LIMIT_RPS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
 		"JWT_SECRET",
@@ -58,6 +59,7 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, 2*time.Second, config.Server.InterruptTimeout)
 		assert.Equal(t, 5*time.Second, config.Server.ReadHeaderTimeout)
 		assert.Equal(t, []string{"*"}, config.Server.CORSAllowedOrigins)
+		assert.Equal(t, 100, config.Server.RateLimitRPS)
 
 		// Test mongo defaults
 		assert.Equal(t, "mongodb://localhost:27017", config.Mongo.URI)
@@ -84,6 +86,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Setenv("INTERRUPT_TIMEOUT", "10s")
 		t.Setenv("READ_HEADER_TIMEOUT", "30s")
 		t.Setenv("CORS_ALLOWED_ORIGINS", "https://app.example.com,https://admin.example.com")
+		t.Setenv("RATE_LIMIT_RPS", "150")
 		t.Setenv("MONGO_URI", "mongodb://custom-host:27017")
 		t.Setenv("MONGO_DATABASE", "custom_db")
 		t.Setenv("JWT_SECRET", "custom-jwt-secret")
@@ -105,6 +108,7 @@ func TestLoadConfig(t *testing.T) {
 			[]string{"https://app.example.com", "https://admin.example.com"},
 			config.Server.CORSAllowedOrigins,
 		)
+		assert.Equal(t, 150, config.Server.RateLimitRPS)
 
 		// Test mongo custom values
 		assert.Equal(t, "mongodb://custom-host:27017", config.Mongo.URI)
@@ -154,6 +158,7 @@ func TestLoadServer(t *testing.T) {
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
 		"CORS_ALLOWED_ORIGINS",
+		"RATE_LIMIT_RPS",
 	}
 
 	for _, key := range envVars {
@@ -188,6 +193,7 @@ func TestLoadServer(t *testing.T) {
 				InterruptTimeout:   2 * time.Second,
 				ReadHeaderTimeout:  5 * time.Second,
 				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
 			},
 		},
 		{
@@ -201,6 +207,7 @@ func TestLoadServer(t *testing.T) {
 				InterruptTimeout:   2 * time.Second,
 				ReadHeaderTimeout:  5 * time.Second,
 				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
 			},
 		},
 		{
@@ -214,6 +221,7 @@ func TestLoadServer(t *testing.T) {
 				InterruptTimeout:   2 * time.Second,
 				ReadHeaderTimeout:  5 * time.Second,
 				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
 			},
 		},
 		{
@@ -228,6 +236,7 @@ func TestLoadServer(t *testing.T) {
 				InterruptTimeout:   30 * time.Second,
 				ReadHeaderTimeout:  60 * time.Second,
 				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
 			},
 		},
 		{
@@ -241,6 +250,7 @@ func TestLoadServer(t *testing.T) {
 				InterruptTimeout:   2 * time.Second,
 				ReadHeaderTimeout:  5 * time.Second,
 				CORSAllowedOrigins: []string{"https://app.example.com", "https://admin.example.com"},
+				RateLimitRPS:       100,
 			},
 		},
 		{
@@ -254,6 +264,21 @@ func TestLoadServer(t *testing.T) {
 				InterruptTimeout:   2 * time.Second,
 				ReadHeaderTimeout:  5 * time.Second,
 				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       100,
+			},
+		},
+		{
+			name: "custom rate limit rps",
+			envVars: map[string]string{
+				"RATE_LIMIT_RPS": "250",
+			},
+			expected: internal.Server{
+				Environment:        environment.Testing,
+				Port:               "8080",
+				InterruptTimeout:   2 * time.Second,
+				ReadHeaderTimeout:  5 * time.Second,
+				CORSAllowedOrigins: []string{"*"},
+				RateLimitRPS:       250,
 			},
 		},
 		{
@@ -267,6 +292,20 @@ func TestLoadServer(t *testing.T) {
 			name: "invalid read header timeout",
 			envVars: map[string]string{
 				"READ_HEADER_TIMEOUT": "not-a-duration",
+			},
+			expectedError: true,
+		},
+		{
+			name: "invalid rate limit rps",
+			envVars: map[string]string{
+				"RATE_LIMIT_RPS": "invalid",
+			},
+			expectedError: true,
+		},
+		{
+			name: "non-positive rate limit rps",
+			envVars: map[string]string{
+				"RATE_LIMIT_RPS": "0",
 			},
 			expectedError: true,
 		},
@@ -522,6 +561,7 @@ func TestConfigurationValidation(t *testing.T) {
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
 		"CORS_ALLOWED_ORIGINS",
+		"RATE_LIMIT_RPS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
 		"JWT_SECRET",
@@ -590,6 +630,7 @@ func testConfigurationValidation(t *testing.T, envVars map[string]string, expect
 		"INTERRUPT_TIMEOUT",
 		"READ_HEADER_TIMEOUT",
 		"CORS_ALLOWED_ORIGINS",
+		"RATE_LIMIT_RPS",
 		"MONGO_URI",
 		"MONGO_DATABASE",
 		"JWT_SECRET",

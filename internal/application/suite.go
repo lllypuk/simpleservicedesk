@@ -35,6 +35,7 @@ type ServerSuite struct {
 const (
 	testBypassHeaderKey = "X-Test-Bypass"
 	testAuthUserID      = "00000000-0000-0000-0000-000000000001"
+	testRateLimitRPS    = 1000
 )
 
 // mockUserRepository is a simple mock for testing
@@ -512,6 +513,7 @@ func (s *ServerSuite) SetupTest() {
 		"test-jwt-signing-key",
 		time.Hour,
 		[]string{"*"},
+		testRateLimitRPS,
 	)
 	s.Require().NoError(err)
 	s.HTTPServer = server

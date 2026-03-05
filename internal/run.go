@@ -80,6 +80,7 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 		cfg.Auth.JWTSigningKey,
 		cfg.Auth.JWTExpiration,
 		cfg.Server.CORSAllowedOrigins,
+		cfg.Server.RateLimitRPS,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to set up http server: %w", err)
