@@ -89,7 +89,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Setenv("RATE_LIMIT_RPS", "150")
 		t.Setenv("MONGO_URI", "mongodb://custom-host:27017")
 		t.Setenv("MONGO_DATABASE", "custom_db")
-		t.Setenv("JWT_SECRET", "custom-jwt-secret")
+		t.Setenv("JWT_SECRET", "custom-jwt-secret-with-sufficient-length-123")
 		t.Setenv("JWT_EXPIRATION", "12h")
 		t.Setenv("BOOTSTRAP_ADMIN_NAME", "Bootstrap Root")
 		t.Setenv("BOOTSTRAP_ADMIN_EMAIL", "root@example.com")
@@ -115,7 +115,7 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, "custom_db", config.Mongo.Database)
 
 		// Test auth custom values
-		assert.Equal(t, "custom-jwt-secret", config.Auth.JWTSigningKey)
+		assert.Equal(t, "custom-jwt-secret-with-sufficient-length-123", config.Auth.JWTSigningKey)
 		assert.Equal(t, 12*time.Hour, config.Auth.JWTExpiration)
 		assert.Equal(t, "Bootstrap Root", config.Auth.BootstrapAdminName)
 		assert.Equal(t, "root@example.com", config.Auth.BootstrapAdminEmail)
@@ -471,7 +471,7 @@ func TestLoadAuth(t *testing.T) {
 	})
 
 	t.Run("custom values", func(t *testing.T) {
-		t.Setenv("JWT_SECRET", "custom-secret")
+		t.Setenv("JWT_SECRET", "custom-secret-with-sufficient-length-123")
 		t.Setenv("JWT_EXPIRATION", "6h")
 		t.Setenv("BOOTSTRAP_ADMIN_NAME", "Bootstrap Root")
 		t.Setenv("BOOTSTRAP_ADMIN_EMAIL", "root@example.com")
@@ -479,7 +479,7 @@ func TestLoadAuth(t *testing.T) {
 
 		auth, err := internal.LoadAuth(environment.Production)
 		require.NoError(t, err)
-		assert.Equal(t, "custom-secret", auth.JWTSigningKey)
+		assert.Equal(t, "custom-secret-with-sufficient-length-123", auth.JWTSigningKey)
 		assert.Equal(t, 6*time.Hour, auth.JWTExpiration)
 		assert.Equal(t, "Bootstrap Root", auth.BootstrapAdminName)
 		assert.Equal(t, "root@example.com", auth.BootstrapAdminEmail)
@@ -500,6 +500,22 @@ func TestLoadAuth(t *testing.T) {
 		_, err := internal.LoadAuth(environment.Production)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "jwt secret is required in production environment")
+	})
+
+	t.Run("production rejects weak secret length", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "short-secret")
+
+		_, err := internal.LoadAuth(environment.Production)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt secret must be at least")
+	})
+
+	t.Run("production rejects insecure default secret", func(t *testing.T) {
+		t.Setenv("JWT_SECRET", "change-me-in-production")
+
+		_, err := internal.LoadAuth(environment.Production)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt secret uses an insecure default value")
 	})
 
 	t.Run("invalid expiration", func(t *testing.T) {
@@ -697,9 +713,9 @@ func TestEnvironmentTypeHandling(t *testing.T) {
 			expected: environment.Type("staging"),
 		},
 		{
-			name:     "case sensitive",
+			name:     "normalizes env value case",
 			envValue: "PRODUCTION",
-			expected: environment.Type("PRODUCTION"),
+			expected: environment.Production,
 		},
 	}
 

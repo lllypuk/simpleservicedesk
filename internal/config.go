@@ -33,6 +33,8 @@ type Auth struct {
 }
 
 const generatedJWTSecretLength = 32
+const minProductionJWTSecretLength = 32
+const insecureDefaultJWTSecret = "change-me-in-production"
 
 func LoadConfig() (Config, error) {
 	var (
@@ -67,7 +69,9 @@ type Server struct {
 func LoadServer() (Server, error) {
 	var server Server
 
-	server.Environment = environment.Type(GetEnv("ENV_TYPE", string(environment.Testing)))
+	serverEnvironment := strings.TrimSpace(GetEnv("ENV_TYPE", string(environment.Testing)))
+	serverEnvironment = strings.ToLower(serverEnvironment)
+	server.Environment = environment.Type(serverEnvironment)
 	server.Port = GetEnv("SERVER_PORT", "8080")
 	interruptTimeout, err := time.ParseDuration(GetEnv("INTERRUPT_TIMEOUT", "2s"))
 	if err != nil {
@@ -151,6 +155,11 @@ func LoadAuth(envType environment.Type) (Auth, error) {
 		}
 		secret = generatedSecret
 	}
+	if envType == environment.Production {
+		if err := validateProductionJWTSecret(secret); err != nil {
+			return auth, err
+		}
+	}
 
 	expiration, err := time.ParseDuration(GetEnv("JWT_EXPIRATION", "24h"))
 	if err != nil {
@@ -175,6 +184,21 @@ func generateDefaultJWTSecret() (string, error) {
 		return "", err
 	}
 	return base64.RawStdEncoding.EncodeToString(secret), nil
+}
+
+func validateProductionJWTSecret(secret string) error {
+	normalizedSecret := strings.TrimSpace(secret)
+	if strings.EqualFold(normalizedSecret, insecureDefaultJWTSecret) {
+		return errors.New("jwt secret uses an insecure default value in production environment")
+	}
+	if len(normalizedSecret) < minProductionJWTSecretLength {
+		return fmt.Errorf(
+			"jwt secret must be at least %d characters in production environment",
+			minProductionJWTSecretLength,
+		)
+	}
+
+	return nil
 }
 
 func GetEnv(key, fallback string) string {
