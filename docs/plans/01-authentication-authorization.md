@@ -49,11 +49,11 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 3: Create auth domain types
-- [ ] Create `internal/domain/auth/` package
-- [ ] Define `Claims` struct (UserID, Role, standard JWT claims)
-- [ ] Define `LoginRequest` / `LoginResponse` types
-- [ ] Add unit tests
-- [ ] Mark completed
+- [x] Create `internal/domain/auth/` package
+- [x] Define `Claims` struct (UserID, Role, standard JWT claims)
+- [x] Define `LoginRequest` / `LoginResponse` types
+- [x] Add unit tests
+- [x] Mark completed
 
 ### Task 4: Create auth service
 - [ ] Create `internal/application/auth/` package
