@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -20,7 +22,11 @@ var (
 	ErrInvalidToken       = errors.New("invalid token")
 )
 
-const emailLookupLimit = 100
+const (
+	emailLookupLimit = 1
+	//nolint:gosec // Static bcrypt hash is intentionally used only to equalize credential-check timing on auth failures.
+	dummyPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
+)
 
 type UserRepository interface {
 	ListUsers(ctx context.Context, filter queries.UserFilter) ([]*users.User, error)
@@ -58,9 +64,10 @@ func (s *Service) Login(ctx context.Context, email, password string) (string, er
 		return "", ErrInvalidCredentials
 	}
 
+	emailPattern := "^" + regexp.QuoteMeta(normalizedEmail) + "$"
 	usersByEmail, err := s.userRepo.ListUsers(ctx, queries.UserFilter{
 		BaseFilter: queries.BaseFilter{Limit: emailLookupLimit},
-		Email:      &normalizedEmail,
+		Email:      &emailPattern,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to find user by email: %w", err)
@@ -68,10 +75,14 @@ func (s *Service) Login(ctx context.Context, email, password string) (string, er
 
 	user, err := findExactEmailUser(usersByEmail, normalizedEmail)
 	if err != nil {
+		if errors.Is(err, ErrInvalidCredentials) {
+			consumePasswordTiming(password)
+		}
 		return "", err
 	}
 
-	if !user.IsActive() || !user.CheckPassword(password) {
+	passwordMatches := user.CheckPassword(password)
+	if !passwordMatches || !user.IsActive() {
 		return "", ErrInvalidCredentials
 	}
 
@@ -154,4 +165,8 @@ func findExactEmailUser(usersByEmail []*users.User, email string) (*users.User, 
 	}
 
 	return nil, ErrInvalidCredentials
+}
+
+func consumePasswordTiming(password string) {
+	_ = bcrypt.CompareHashAndPassword([]byte(dummyPasswordHash), []byte(password))
 }

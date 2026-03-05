@@ -101,4 +101,16 @@ func (s *AuthSuite) TestLogin() {
 
 		s.Require().Equal(http.StatusBadRequest, rec.Code)
 	})
+
+	s.Run("Missing fields returns 400", func() {
+		loginBody, err := json.Marshal(map[string]string{"email": "  "})
+		s.Require().NoError(err)
+
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(loginBody))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		s.HTTPServer.ServeHTTP(rec, req)
+
+		s.Require().Equal(http.StatusBadRequest, rec.Code)
+	})
 }

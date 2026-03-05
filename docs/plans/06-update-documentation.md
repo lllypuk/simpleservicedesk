@@ -14,21 +14,21 @@ Fix outdated references, add new sections, and ensure consistency across
 ---
 
 ### Task 1: Update CLAUDE.md
-- [ ] Update Go version reference to 1.26
-- [ ] Add authentication architecture section
+- [x] Update Go version reference to 1.26
+- [x] Add authentication architecture section
 - [ ] Add new environment variables (JWT_SECRET, CORS, rate limiting)
-- [ ] Update development status section
-- [ ] Remove outdated "all completed" markers, replace with actual current status
+- [x] Update development status section
+- [x] Remove outdated "all completed" markers, replace with actual current status
 - [ ] Add auth-related make commands if any
 - [ ] Mark completed
 
 ### Task 2: Update README.md
-- [ ] Update prerequisites — Go 1.26
-- [ ] Add "Authentication" section with login flow and curl examples
-- [ ] Add Authorization header examples to all curl commands
-- [ ] Update environment variables table with new vars
+- [x] Update prerequisites — Go 1.26
+- [x] Add "Authentication" section with login flow and curl examples
+- [x] Add Authorization header examples to all curl commands
+- [x] Update environment variables table with new vars
 - [ ] Add health check endpoints to API documentation section
-- [ ] Update project structure if new packages were added
+- [x] Update project structure if new packages were added
 - [ ] Remove excessive "FULLY IMPLEMENTED" / "PRODUCTION READY" markers
 - [ ] Mark completed
 
@@ -51,7 +51,8 @@ Fix outdated references, add new sections, and ensure consistency across
 - [ ] Mark completed
 
 ### Task 6: Update docs/testing_assessment_and_plan.md
-- [ ] Add categories API tests to the list (already implemented)
+- [ ] Moved/deleted: old file is no longer present after docs migration
+- [ ] Add categories API tests to the active docs set
 - [ ] Add E2E tests section
 - [ ] Add auth-related tests section
 - [ ] Mark completed
@@ -62,6 +63,6 @@ Fix outdated references, add new sections, and ensure consistency across
 - [ ] Mark completed
 
 ### Task 8: Create docs/plans/README.md
-- [ ] Create index file listing all plans with status
-- [ ] Include execution order and dependencies between plans
+- [x] Create index file listing all plans with status
+- [x] Include execution order and dependencies between plans
 - [ ] Mark completed

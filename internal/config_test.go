@@ -393,6 +393,22 @@ func TestLoadAuth(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "could not parse jwt expiration")
 	})
+
+	t.Run("zero expiration is invalid", func(t *testing.T) {
+		t.Setenv("JWT_EXPIRATION", "0s")
+
+		_, err := internal.LoadAuth()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt expiration must be greater than zero")
+	})
+
+	t.Run("negative expiration is invalid", func(t *testing.T) {
+		t.Setenv("JWT_EXPIRATION", "-1s")
+
+		_, err := internal.LoadAuth()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "jwt expiration must be greater than zero")
+	})
 }
 
 func TestGetEnv(t *testing.T) {

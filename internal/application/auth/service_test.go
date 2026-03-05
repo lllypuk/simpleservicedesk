@@ -3,7 +3,8 @@ package auth_test
 import (
 	"context"
 	"errors"
-	"strings"
+	"fmt"
+	"regexp"
 	"testing"
 	"time"
 
@@ -31,10 +32,14 @@ func (m mockUserRepository) ListUsers(_ context.Context, filter queries.UserFilt
 		return m.users, nil
 	}
 
-	needle := strings.ToLower(*filter.Email)
+	matcher, err := regexp.Compile("(?i)" + *filter.Email)
+	if err != nil {
+		return nil, fmt.Errorf("invalid email matcher: %w", err)
+	}
+
 	matched := make([]*users.User, 0, len(m.users))
 	for _, user := range m.users {
-		if strings.Contains(strings.ToLower(user.Email()), needle) {
+		if matcher.MatchString(user.Email()) {
 			matched = append(matched, user)
 		}
 	}
@@ -198,6 +203,16 @@ func TestServiceValidateTokenInvalidToken(t *testing.T) {
 	require.Nil(t, claims)
 }
 
+func TestServiceValidateTokenEmptyToken(t *testing.T) {
+	t.Parallel()
+
+	service := createTestService(t, mockUserRepository{})
+
+	claims, err := service.ValidateToken("")
+	require.ErrorIs(t, err, appauth.ErrInvalidToken)
+	require.Nil(t, claims)
+}
+
 func TestServiceValidateTokenWrongSigningKey(t *testing.T) {
 	t.Parallel()
 
@@ -223,6 +238,44 @@ func TestServiceValidateTokenInvalidRole(t *testing.T) {
 		userID,
 		users.Role("invalid-role"),
 		time.Now().Add(time.Hour),
+		[]byte("signing-key-a"),
+	)
+	require.NoError(t, err)
+
+	claims, err := service.ValidateToken(tokenString)
+	require.ErrorIs(t, err, appauth.ErrInvalidToken)
+	require.Nil(t, claims)
+}
+
+func TestServiceValidateTokenInvalidUserIDClaim(t *testing.T) {
+	t.Parallel()
+
+	service := createTestServiceWithKey(t, mockUserRepository{}, "signing-key-a")
+
+	tokenString, err := signCustomClaimsWithUserID(
+		"not-a-uuid",
+		users.RoleAdmin,
+		time.Now().Add(time.Hour),
+		jwt.SigningMethodHS256,
+		[]byte("signing-key-a"),
+	)
+	require.NoError(t, err)
+
+	claims, err := service.ValidateToken(tokenString)
+	require.ErrorIs(t, err, appauth.ErrInvalidToken)
+	require.Nil(t, claims)
+}
+
+func TestServiceValidateTokenUnexpectedSigningAlgorithm(t *testing.T) {
+	t.Parallel()
+
+	service := createTestServiceWithKey(t, mockUserRepository{}, "signing-key-a")
+
+	tokenString, err := signCustomClaimsWithUserID(
+		uuid.NewString(),
+		users.RoleAgent,
+		time.Now().Add(time.Hour),
+		jwt.SigningMethodHS384,
 		[]byte("signing-key-a"),
 	)
 	require.NoError(t, err)
@@ -294,16 +347,26 @@ func createTestUser(
 }
 
 func signCustomClaims(userID uuid.UUID, role users.Role, expiresAt time.Time, signingKey []byte) (string, error) {
+	return signCustomClaimsWithUserID(userID.String(), role, expiresAt, jwt.SigningMethodHS256, signingKey)
+}
+
+func signCustomClaimsWithUserID(
+	userID string,
+	role users.Role,
+	expiresAt time.Time,
+	method jwt.SigningMethod,
+	signingKey []byte,
+) (string, error) {
 	claims := authdomain.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   userID.String(),
+			Subject:   userID,
 			IssuedAt:  jwt.NewNumericDate(time.Now().Add(-time.Minute)),
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 		},
-		UserID: userID.String(),
+		UserID: userID,
 		Role:   role,
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(method, claims)
 	return token.SignedString(signingKey)
 }

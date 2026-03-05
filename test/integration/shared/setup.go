@@ -88,7 +88,7 @@ func (s *IntegrationSuite) SetupSuite() {
 	s.CategoriesRepo = categories.NewMongoRepo(s.MongoDB)
 
 	// Initialize HTTP server with real repositories
-	s.HTTPServer = application.SetupHTTPServer(
+	server, err := application.SetupHTTPServer(
 		s.UsersRepo,
 		s.TicketsRepo,
 		s.OrganizationsRepo,
@@ -96,6 +96,8 @@ func (s *IntegrationSuite) SetupSuite() {
 		"integration-test-jwt-signing-key",
 		time.Hour,
 	)
+	s.Require().NoError(err)
+	s.HTTPServer = server
 }
 
 // SetupTest runs before each test to ensure clean database state
@@ -111,7 +113,7 @@ func (s *IntegrationSuite) SetupTest() {
 	}
 
 	// Re-initialize HTTP server to ensure clean state
-	s.HTTPServer = application.SetupHTTPServer(
+	server, err := application.SetupHTTPServer(
 		s.UsersRepo,
 		s.TicketsRepo,
 		s.OrganizationsRepo,
@@ -119,6 +121,8 @@ func (s *IntegrationSuite) SetupTest() {
 		"integration-test-jwt-signing-key",
 		time.Hour,
 	)
+	s.Require().NoError(err)
+	s.HTTPServer = server
 
 	admin := s.MustCreateAndLoginTestUser(userdomain.RoleAdmin)
 	s.defaultAdminToken = admin.Token

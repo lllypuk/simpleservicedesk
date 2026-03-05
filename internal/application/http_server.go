@@ -33,7 +33,7 @@ func SetupHTTPServer(
 	categoryRepo CategoryRepository,
 	jwtSigningKey string,
 	jwtExpiration time.Duration,
-) *echo.Echo {
+) (*echo.Echo, error) {
 	e := echo.New()
 
 	e.Pre(middleware.RemoveTrailingSlash())
@@ -47,9 +47,10 @@ func SetupHTTPServer(
 
 	server := httpServer{}
 	authService, err := auth.NewService(userRepo, jwtSigningKey, jwtExpiration)
-	if err == nil {
-		server.Handlers = auth.SetupHandlers(authService)
+	if err != nil {
+		return nil, err
 	}
+	server.Handlers = auth.SetupHandlers(authService)
 
 	server.UserHandlers = users.SetupHandlers(userRepo)
 	server.TicketHandlers = tickets.SetupHandlers(ticketRepo)
@@ -58,7 +59,7 @@ func SetupHTTPServer(
 
 	registerRoutes(e, server, authService)
 
-	return e
+	return e, nil
 }
 
 func registerRoutes(e *echo.Echo, server httpServer, tokenValidator echomiddleware.TokenValidator) {

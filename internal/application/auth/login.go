@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"simpleservicedesk/generated/openapi"
 
@@ -10,14 +11,13 @@ import (
 )
 
 func (h Handlers) PostLogin(c echo.Context) error {
-	if h.service == nil {
-		msg := "internal server error"
-		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
-	}
-
 	var req openapi.LoginRequest
 	if err := c.Bind(&req); err != nil {
 		return err
+	}
+	if strings.TrimSpace(string(req.Email)) == "" || strings.TrimSpace(req.Password) == "" {
+		msg := "email and password are required"
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
 
 	token, err := h.service.Login(c.Request().Context(), string(req.Email), req.Password)

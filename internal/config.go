@@ -3,8 +3,10 @@ package internal
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"simpleservicedesk/pkg/environment"
@@ -85,7 +87,7 @@ func LoadMongo() Mongo {
 func LoadAuth() (Auth, error) {
 	var auth Auth
 
-	secret := GetEnv("JWT_SECRET", "")
+	secret := strings.TrimSpace(GetEnv("JWT_SECRET", ""))
 	if secret == "" {
 		generatedSecret, err := generateDefaultJWTSecret()
 		if err != nil {
@@ -97,6 +99,9 @@ func LoadAuth() (Auth, error) {
 	expiration, err := time.ParseDuration(GetEnv("JWT_EXPIRATION", "24h"))
 	if err != nil {
 		return auth, fmt.Errorf("could not parse jwt expiration: %w", err)
+	}
+	if expiration <= 0 {
+		return auth, errors.New("jwt expiration must be greater than zero")
 	}
 
 	auth.JWTSigningKey = secret

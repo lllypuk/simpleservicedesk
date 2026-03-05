@@ -1,7 +1,6 @@
 package auth_test
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 
@@ -40,20 +39,4 @@ func TestClaimsContainsCustomAndRegisteredFields(t *testing.T) {
 	require.Equal(t, now, claims.IssuedAt.Time)
 	require.Equal(t, now, claims.NotBefore.Time)
 	require.Equal(t, expiresAt, claims.ExpiresAt.Time)
-}
-
-func TestLoginTypesJSONTags(t *testing.T) {
-	request := authdomain.LoginRequest{
-		Email:      "admin@example.com",
-		Passphrase: "secure-password",
-	}
-
-	requestPayload, err := json.Marshal(request)
-	require.NoError(t, err)
-	require.JSONEq(t, `{"email":"admin@example.com","password":"secure-password"}`, string(requestPayload))
-
-	response := authdomain.LoginResponse{Token: "jwt-token-value"}
-	responsePayload, err := json.Marshal(response)
-	require.NoError(t, err)
-	require.JSONEq(t, `{"token":"jwt-token-value"}`, string(responsePayload))
 }

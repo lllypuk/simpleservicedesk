@@ -11,10 +11,6 @@ import (
 )
 
 func (h UserHandlers) PatchUsersIDRole(c echo.Context, id openapi_types.UUID) error {
-	if !requireAdmin(c) {
-		return nil
-	}
-
 	ctx := c.Request().Context()
 
 	var req openapi.UpdateUserRoleRequest

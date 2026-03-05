@@ -109,6 +109,66 @@ func (s *AuthAPITestSuite) TestProtectedEndpointWithInsufficientRole() {
 	s.Equal(http.StatusForbidden, rec.Code)
 }
 
+func (s *AuthAPITestSuite) TestRoleProtectedEndpoints() {
+	customer := s.MustCreateAndLoginTestUser(userdomain.RoleCustomer)
+	agent := s.MustCreateAndLoginTestUser(userdomain.RoleAgent)
+	targetUserID := uuid.New()
+	targetTicketID := uuid.New()
+
+	statusBody, err := json.Marshal(openapi.UpdateTicketStatusRequest{Status: openapi.InProgress})
+	s.Require().NoError(err)
+	roleBody, err := json.Marshal(openapi.UpdateUserRoleRequest{Role: openapi.Agent})
+	s.Require().NoError(err)
+
+	tests := []struct {
+		name           string
+		method         string
+		path           string
+		body           []byte
+		token          string
+		expectedStatus int
+	}{
+		{
+			name:           "customer cannot update ticket status",
+			method:         http.MethodPatch,
+			path:           "/tickets/" + targetTicketID.String() + "/status",
+			body:           statusBody,
+			token:          customer.Token,
+			expectedStatus: http.StatusForbidden,
+		},
+		{
+			name:           "agent cannot change user role",
+			method:         http.MethodPatch,
+			path:           "/users/" + targetUserID.String() + "/role",
+			body:           roleBody,
+			token:          agent.Token,
+			expectedStatus: http.StatusForbidden,
+		},
+		{
+			name:           "missing token on admin endpoint returns unauthorized",
+			method:         http.MethodDelete,
+			path:           "/users/" + targetUserID.String(),
+			expectedStatus: http.StatusUnauthorized,
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			req := httptest.NewRequest(tt.method, tt.path, bytes.NewReader(tt.body))
+			if len(tt.body) > 0 {
+				req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			}
+			if tt.token != "" {
+				req.Header.Set(echo.HeaderAuthorization, "Bearer "+tt.token)
+			}
+			rec := httptest.NewRecorder()
+
+			s.HTTPServer.ServeHTTP(rec, req)
+			s.Equal(tt.expectedStatus, rec.Code, "response: %s", rec.Body.String())
+		})
+	}
+}
+
 func (s *AuthAPITestSuite) TestCustomerSeesOnlyOwnTickets() {
 	customerA := s.MustCreateAndLoginTestUser(userdomain.RoleCustomer)
 	customerB := s.MustCreateAndLoginTestUser(userdomain.RoleCustomer)

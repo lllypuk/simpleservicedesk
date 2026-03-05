@@ -487,7 +487,7 @@ func (s *ServerSuite) SetupTest() {
 	s.CategoriesRepo = newMockCategoryRepository()
 
 	// Initialize HTTP server with mock repositories
-	s.HTTPServer = SetupHTTPServer(
+	server, err := SetupHTTPServer(
 		s.UsersRepo,
 		s.TicketsRepo,
 		s.OrganizationsRepo,
@@ -495,6 +495,8 @@ func (s *ServerSuite) SetupTest() {
 		"test-jwt-signing-key",
 		time.Hour,
 	)
+	s.Require().NoError(err)
+	s.HTTPServer = server
 	attachDefaultTestAuthHeader(s.HTTPServer, "test-jwt-signing-key", users.RoleAdmin)
 }
 

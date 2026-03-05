@@ -187,16 +187,19 @@ curl -X GET http://localhost:8080/users \
 
 #### Role-based access rules
 
-- Admin: full access, including user management and role changes
-- Agent: can list users, update ticket status, and assign tickets
-- User: can create/view tickets, but can only view own tickets in `GET /tickets`
+- `admin`: full access, including user management and role changes
+- `agent`: can list users, update ticket status, and assign tickets
+- `customer` (end user): can create/view tickets, but can only view own tickets in `GET /tickets`
 
 ### User Management
 
 #### Create a User
 
+Admin-only endpoint.
+
 ```bash
 curl -X POST http://localhost:8080/users \
+  -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -208,7 +211,8 @@ curl -X POST http://localhost:8080/users \
 #### Get User by ID
 
 ```bash
-curl -X GET http://localhost:8080/users/{userId}
+curl -X GET http://localhost:8080/users/{userId} \
+  -H "Authorization: Bearer <token>"
 ```
 
 ### Complete API Coverage
@@ -221,7 +225,7 @@ curl -X GET http://localhost:8080/users/{userId}
 - GET `/users` - List users
 - PUT `/users/{id}` - Update user
 - DELETE `/users/{id}` - Delete user
-- PUT `/users/{id}/role` - Update user role
+- PATCH `/users/{id}/role` - Update user role
 - GET `/users/{id}/tickets` - Get user's tickets
 
 #### Tickets API ✅  
@@ -230,8 +234,8 @@ curl -X GET http://localhost:8080/users/{userId}
 - GET `/tickets` - List tickets  
 - PUT `/tickets/{id}` - Update ticket
 - DELETE `/tickets/{id}` - Delete ticket
-- PUT `/tickets/{id}/status` - Update ticket status
-- PUT `/tickets/{id}/assign` - Assign ticket to user
+- PATCH `/tickets/{id}/status` - Update ticket status
+- PATCH `/tickets/{id}/assign` - Assign ticket to user
 - POST `/tickets/{id}/comments` - Add comment
 - GET `/tickets/{id}/comments` - Get comments
 
@@ -358,11 +362,13 @@ This command will:
 │   └── openapi/           # Server interfaces, types, client
 ├── internal/               # Private application code
 │   ├── application/        # ✅ HTTP handlers, use cases
+│   │   ├── auth/          # JWT login and token validation
 │   │   ├── users/         # User management handlers
 │   │   ├── tickets/       # Ticket management handlers  
 │   │   ├── organizations/ # Organization handlers
 │   │   └── categories/    # Category handlers
 │   ├── domain/            # ✅ Business entities and logic
+│   │   ├── auth/          # JWT claims model
 │   │   ├── users/         # User domain model
 │   │   ├── tickets/       # Ticket domain model
 │   │   ├── organizations/ # Organization domain model
@@ -378,6 +384,7 @@ This command will:
 │   ├── e2e/              # End-to-end tests
 │   └── shared/           # Common test utilities
 ├── pkg/                   # Public packages (middleware, utilities)
+│   └── echomiddleware/    # Auth, role, logging middlewares
 └── profiles/              # Performance profiling data
 ```
 
@@ -389,7 +396,7 @@ This command will:
 | `HTTP_SERVER_PORT` | HTTP server port          | `8080`                      |
 | `MONGO_URI`        | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE`   | MongoDB database name     | `servicedesk`               |
-| `JWT_SECRET`       | JWT signing secret        | `change-me-in-production`   |
+| `JWT_SECRET`       | JWT signing secret (generated at startup if unset) | _generated_ |
 | `JWT_EXPIRATION`   | JWT token lifetime        | `24h`                       |
 
 ## Contributing

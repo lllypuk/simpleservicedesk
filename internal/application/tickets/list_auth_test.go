@@ -2,6 +2,7 @@ package tickets_test
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,6 +23,7 @@ import (
 type ticketRepoSpy struct {
 	listCalled bool
 	listFilter queries.TicketFilter
+	listErr    error
 }
 
 func (r *ticketRepoSpy) CreateTicket(
@@ -46,6 +48,9 @@ func (r *ticketRepoSpy) GetTicket(_ context.Context, _ uuid.UUID) (*ticketdomain
 func (r *ticketRepoSpy) ListTickets(_ context.Context, filter queries.TicketFilter) ([]*ticketdomain.Ticket, error) {
 	r.listCalled = true
 	r.listFilter = filter
+	if r.listErr != nil {
+		return nil, r.listErr
+	}
 	return []*ticketdomain.Ticket{}, nil
 }
 
@@ -110,6 +115,36 @@ func TestGetTicketsUsesAuthContext(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusUnauthorized, rec.Code)
 		require.False(t, repo.listCalled)
+	})
+
+	t.Run("customer with invalid user id claim returns unauthorized", func(t *testing.T) {
+		repo := &ticketRepoSpy{}
+		handlers := apptickets.SetupHandlers(repo)
+
+		c, rec := newTicketContextWithClaims(&authdomain.Claims{
+			UserID: "not-a-uuid",
+			Role:   userdomain.RoleCustomer,
+		})
+
+		err := handlers.GetTickets(c, openapi.GetTicketsParams{})
+		require.NoError(t, err)
+		require.Equal(t, http.StatusUnauthorized, rec.Code)
+		require.False(t, repo.listCalled)
+	})
+
+	t.Run("repository error returns internal server error", func(t *testing.T) {
+		repo := &ticketRepoSpy{listErr: errors.New("db unavailable")}
+		handlers := apptickets.SetupHandlers(repo)
+
+		c, rec := newTicketContextWithClaims(&authdomain.Claims{
+			UserID: uuid.NewString(),
+			Role:   userdomain.RoleAgent,
+		})
+
+		err := handlers.GetTickets(c, openapi.GetTicketsParams{})
+		require.NoError(t, err)
+		require.Equal(t, http.StatusInternalServerError, rec.Code)
+		require.True(t, repo.listCalled)
 	})
 }
 

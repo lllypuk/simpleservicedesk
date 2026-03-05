@@ -221,7 +221,7 @@ func (s *UserAPITestSuite) TestGetUserIntegration() {
 func (s *UserAPITestSuite) TestPingEndpoint() {
 	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
 	rec := httptest.NewRecorder()
-	s.ServeAuthenticatedHTTP(rec, req)
+	s.HTTPServer.ServeHTTP(rec, req)
 
 	s.Assert().Equal(http.StatusOK, rec.Code)
 	s.Assert().Equal("pong", rec.Body.String())

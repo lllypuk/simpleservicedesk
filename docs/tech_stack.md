@@ -23,7 +23,7 @@
 ### Security & Auth
 - **bcrypt** - хеширование паролей
 - **golang-jwt/jwt/v5** - подпись и валидация JWT токенов
-- **Role-based Access Control** - Admin/Agent/User
+- **Role-based Access Control** - admin/agent/customer
 
 ## 🧪 Тестирование
 
@@ -34,7 +34,7 @@
 
 ### Test Strategy
 - **Unit tests** - `internal/...` (бизнес-логика)
-- **Integration tests** - `integration_test/...` (с БД)
+- **Integration tests** - `test/integration/...` (с БД)
 - **Coverage reporting** - HTML отчеты
 
 ## 🛠️ Development Tools
@@ -91,7 +91,7 @@ simpleservicedesk/
 │   ├── application/        # Use cases, HTTP handlers
 │   ├── domain/            # Business entities and logic
 │   └── infrastructure/    # Database repositories
-├── integration_test/       # Integration tests
+├── test/integration/       # Integration tests
 └── pkg/                   # Public packages (middleware, etc.)
 ```
 
@@ -104,7 +104,7 @@ simpleservicedesk/
 | `HTTP_SERVER_PORT` | Server port | `8080` |
 | `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE` | Database name | `servicedesk` |
-| `JWT_SECRET` | JWT signing key | `change-me-in-production` |
+| `JWT_SECRET` | JWT signing key (if unset, generated at startup) | _generated_ |
 | `JWT_EXPIRATION` | JWT lifetime (Go duration) | `24h` |
 
 ## 🔄 Code Generation Workflow

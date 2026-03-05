@@ -48,7 +48,9 @@ func Run(cfg Config) error {
 
 	db := mongoClient.Database(cfg.Mongo.Database)
 
-	startServer(ctx, g, cfg, db)
+	if err = startServer(ctx, g, cfg, db); err != nil {
+		return err
+	}
 
 	if err = g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return fmt.Errorf("server exited with error: %w", err)
@@ -56,13 +58,13 @@ func Run(cfg Config) error {
 	return nil
 }
 
-func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.Database) {
+func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.Database) error {
 	userRepo := usersInfra.NewMongoRepo(db)
 	ticketRepo := ticketsInfra.NewMongoRepo(db)
 	organizationRepo := organizationsInfra.NewMongoRepo(db)
 	categoryRepo := categoriesInfra.NewMongoRepo(db)
 
-	httpServer := application.SetupHTTPServer(
+	httpServer, err := application.SetupHTTPServer(
 		userRepo,
 		ticketRepo,
 		organizationRepo,
@@ -70,6 +72,9 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 		cfg.Auth.JWTSigningKey,
 		cfg.Auth.JWTExpiration,
 	)
+	if err != nil {
+		return fmt.Errorf("failed to set up http server: %w", err)
+	}
 
 	address := "0.0.0.0:" + cfg.Server.Port
 	server := &http.Server{
@@ -82,8 +87,8 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 
 	g.Go(func() error {
 		slog.InfoContext(ctx, "Starting server http server at "+address)
-		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			return err
+		if listenErr := server.ListenAndServe(); listenErr != nil && !errors.Is(listenErr, http.ErrServerClosed) {
+			return listenErr
 		}
 		slog.InfoContext(ctx, "Http server shut down gracefully")
 		return nil
@@ -92,10 +97,11 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 		<-ctx.Done()
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Server.InterruptTimeout)
 		defer cancel()
-		err := server.Shutdown(shutdownCtx)
-		if err != nil {
-			return err
+		if shutdownErr := server.Shutdown(shutdownCtx); shutdownErr != nil {
+			return shutdownErr
 		}
 		return nil
 	})
+
+	return nil
 }

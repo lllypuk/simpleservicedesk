@@ -10,10 +10,6 @@ import (
 )
 
 func (h UserHandlers) DeleteUsersID(c echo.Context, id openapi_types.UUID) error {
-	if !requireAdmin(c) {
-		return nil
-	}
-
 	ctx := c.Request().Context()
 
 	// Сначала проверим, существует ли пользователь

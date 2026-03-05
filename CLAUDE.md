@@ -86,34 +86,16 @@ JWT authentication and role-based authorization are part of the standard request
 
 ## Current Development Status
 
-✅ **ALL CORE DEVELOPMENT COMPLETED - READY FOR PRODUCTION**
+Status is tracked by plan files in `docs/plans/`.
 
-### 🎯 Project Status: CORE APIs FULLY IMPLEMENTED
-
-**Last Updated**: August 24, 2025
-
-All major development phases have been successfully completed. The service is now feature-complete with comprehensive API coverage and robust testing infrastructure.
-
-### ✅ Completed Phases - ALL DONE
-- ✅ **Phase 1**: Complete OpenAPI specification with all endpoints
-- ✅ **Phase 2**: Tickets API - Full CRUD + status transitions + comments + assignments
-- ✅ **Phase 3**: Organizations API - Complete hierarchical organization management
-- ✅ **Phase 4**: Categories API - Full tree-structured category management 
-- ✅ **Phase 5**: Extended Users API - Complete user management with role controls
-
-### ✅ Final API Implementation Status
-- **Users API**: ✅ Full CRUD + role management + user tickets + extended operations
-- **Tickets API**: ✅ Complete CRUD + status management + comments + assignments
-- **Organizations API**: ✅ Complete CRUD + hierarchical support + user/ticket relationships
-- **Categories API**: ✅ Complete CRUD + tree structure + parent-child validation
-- **Generated Code**: ✅ Up-to-date with complete OpenAPI specification
-
-### 🎯 Current Focus: PRODUCTION READINESS
-- ✅ Performance optimization and profiling tools
-- ✅ Security measures and validation
-- ✅ Comprehensive testing (unit + integration + e2e)
-- ✅ Production deployment preparation
-- ✅ Complete documentation
+Current snapshot:
+- `00-upgrade-go-1.26.md`: mostly complete, some validation checkboxes still open
+- `01-authentication-authorization.md`: complete
+- `02-request-validation.md`: pending
+- `03-cors-rate-limiting.md`: pending
+- `04-health-check.md`: pending
+- `05-e2e-tests.md`: pending
+- `06-update-documentation.md`: in progress
 
 ## Test Organization
 
@@ -241,7 +223,7 @@ Uses environment variables (see `.env` file):
 - `HTTP_SERVER_PORT`: Server port (default: 8080)
 - `MONGO_URI`: MongoDB connection string
 - `MONGO_DATABASE`: MongoDB database name
-- `JWT_SECRET`: JWT signing key (default for development in `.env.example`)
+- `JWT_SECRET`: JWT signing key (if unset, generated at startup; set explicitly in persistent environments)
 - `JWT_EXPIRATION`: Token lifetime in Go duration format (default: `24h`)
 
 ## Code Generation Dependencies
