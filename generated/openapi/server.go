@@ -115,6 +115,8 @@ type ServerInterfaceWrapper struct {
 func (w *ServerInterfaceWrapper) GetCategories(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetCategoriesParams
 	// ------------- Optional query parameter "organization_id" -------------
@@ -154,6 +156,8 @@ func (w *ServerInterfaceWrapper) GetCategories(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostCategories(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostCategories(ctx)
 	return err
@@ -169,6 +173,8 @@ func (w *ServerInterfaceWrapper) DeleteCategoriesID(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.DeleteCategoriesID(ctx, id)
@@ -186,6 +192,8 @@ func (w *ServerInterfaceWrapper) GetCategoriesID(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetCategoriesID(ctx, id)
 	return err
@@ -202,6 +210,8 @@ func (w *ServerInterfaceWrapper) PutCategoriesID(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PutCategoriesID(ctx, id)
 	return err
@@ -217,6 +227,8 @@ func (w *ServerInterfaceWrapper) GetCategoriesIDTickets(ctx echo.Context) error 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetCategoriesIDTicketsParams
@@ -273,6 +285,8 @@ func (w *ServerInterfaceWrapper) PostLogin(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) GetOrganizations(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetOrganizationsParams
 	// ------------- Optional query parameter "name" -------------
@@ -326,6 +340,8 @@ func (w *ServerInterfaceWrapper) GetOrganizations(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostOrganizations(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostOrganizations(ctx)
 	return err
@@ -341,6 +357,8 @@ func (w *ServerInterfaceWrapper) DeleteOrganizationsID(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.DeleteOrganizationsID(ctx, id)
@@ -358,6 +376,8 @@ func (w *ServerInterfaceWrapper) GetOrganizationsID(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetOrganizationsID(ctx, id)
 	return err
@@ -374,6 +394,8 @@ func (w *ServerInterfaceWrapper) PutOrganizationsID(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PutOrganizationsID(ctx, id)
 	return err
@@ -389,6 +411,8 @@ func (w *ServerInterfaceWrapper) GetOrganizationsIDTickets(ctx echo.Context) err
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetOrganizationsIDTicketsParams
@@ -436,6 +460,8 @@ func (w *ServerInterfaceWrapper) GetOrganizationsIDUsers(ctx echo.Context) error
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetOrganizationsIDUsersParams
 	// ------------- Optional query parameter "page" -------------
@@ -460,6 +486,8 @@ func (w *ServerInterfaceWrapper) GetOrganizationsIDUsers(ctx echo.Context) error
 // GetTickets converts echo context to params.
 func (w *ServerInterfaceWrapper) GetTickets(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetTicketsParams
@@ -528,6 +556,8 @@ func (w *ServerInterfaceWrapper) GetTickets(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostTickets(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostTickets(ctx)
 	return err
@@ -543,6 +573,8 @@ func (w *ServerInterfaceWrapper) DeleteTicketsID(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.DeleteTicketsID(ctx, id)
@@ -560,6 +592,8 @@ func (w *ServerInterfaceWrapper) GetTicketsID(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetTicketsID(ctx, id)
 	return err
@@ -575,6 +609,8 @@ func (w *ServerInterfaceWrapper) PutTicketsID(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PutTicketsID(ctx, id)
@@ -592,6 +628,8 @@ func (w *ServerInterfaceWrapper) PatchTicketsIDAssign(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PatchTicketsIDAssign(ctx, id)
 	return err
@@ -607,6 +645,8 @@ func (w *ServerInterfaceWrapper) GetTicketsIDComments(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetTicketsIDCommentsParams
@@ -633,6 +673,8 @@ func (w *ServerInterfaceWrapper) PostTicketsIDComments(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostTicketsIDComments(ctx, id)
 	return err
@@ -649,6 +691,8 @@ func (w *ServerInterfaceWrapper) PatchTicketsIDStatus(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PatchTicketsIDStatus(ctx, id)
 	return err
@@ -657,6 +701,8 @@ func (w *ServerInterfaceWrapper) PatchTicketsIDStatus(ctx echo.Context) error {
 // GetUsers converts echo context to params.
 func (w *ServerInterfaceWrapper) GetUsers(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersParams
@@ -718,6 +764,8 @@ func (w *ServerInterfaceWrapper) GetUsers(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostUsers(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostUsers(ctx)
 	return err
@@ -733,6 +781,8 @@ func (w *ServerInterfaceWrapper) DeleteUsersID(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.DeleteUsersID(ctx, id)
@@ -750,6 +800,8 @@ func (w *ServerInterfaceWrapper) GetUsersID(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetUsersID(ctx, id)
 	return err
@@ -765,6 +817,8 @@ func (w *ServerInterfaceWrapper) PutUsersID(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PutUsersID(ctx, id)
@@ -782,6 +836,8 @@ func (w *ServerInterfaceWrapper) PatchUsersIDRole(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PatchUsersIDRole(ctx, id)
 	return err
@@ -797,6 +853,8 @@ func (w *ServerInterfaceWrapper) GetUsersIDTickets(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersIDTicketsParams

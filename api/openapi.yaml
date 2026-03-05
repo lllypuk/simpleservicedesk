@@ -2,6 +2,8 @@ openapi: 3.1.1
 info:
   title: SimpleServiceDesk API
   version: 0.0.1
+security:
+  - bearerAuth: []
 paths:
   /login:
     post:
@@ -10,6 +12,7 @@ paths:
       description: Validates user credentials and returns signed JWT token
       tags:
         - auth
+      security: []
       requestBody:
         required: true
         content:
@@ -1438,6 +1441,11 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     LoginRequest:
       type: object

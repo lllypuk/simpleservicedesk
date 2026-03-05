@@ -102,10 +102,10 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 10: Update OpenAPI specification
-- [ ] Add `securitySchemes` (bearerAuth) to `api/openapi.yaml`
-- [ ] Add `security` requirements to protected endpoints
-- [ ] Run `make generate`
-- [ ] Mark completed
+- [x] Add `securitySchemes` (bearerAuth) to `api/openapi.yaml`
+- [x] Add `security` requirements to protected endpoints
+- [x] Run `make generate`
+- [x] Mark completed
 
 ### Task 11: Integration tests
 - [ ] Add auth helper to `test/integration/shared/` — login and get token
