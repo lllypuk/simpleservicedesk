@@ -2,15 +2,19 @@ package application
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
+	authdomain "simpleservicedesk/internal/domain/auth"
 	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/organizations"
 	"simpleservicedesk/internal/domain/tickets"
 	"simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/internal/queries"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -25,6 +29,11 @@ type ServerSuite struct {
 	OrganizationsRepo OrganizationRepository // Interface for organization repository
 	CategoriesRepo    CategoryRepository     // Interface for category repository
 }
+
+const (
+	testBypassHeaderKey = "X-Test-Bypass"
+	testAuthUserID      = "00000000-0000-0000-0000-000000000001"
+)
 
 // mockUserRepository is a simple mock for testing
 type mockUserRepository struct {
@@ -486,4 +495,42 @@ func (s *ServerSuite) SetupTest() {
 		"test-jwt-signing-key",
 		time.Hour,
 	)
+	attachDefaultTestAuthHeader(s.HTTPServer, "test-jwt-signing-key", users.RoleAdmin)
+}
+
+func attachDefaultTestAuthHeader(server *echo.Echo, signingKey string, role users.Role) {
+	server.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if strings.EqualFold(strings.TrimSpace(c.Request().Header.Get(testBypassHeaderKey)), "true") {
+				return next(c)
+			}
+
+			if strings.TrimSpace(c.Request().Header.Get(echo.HeaderAuthorization)) == "" {
+				token, err := createTestToken(signingKey, testAuthUserID, role)
+				if err != nil {
+					return echo.NewHTTPError(http.StatusInternalServerError, "failed to create test auth token")
+				}
+
+				c.Request().Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
+			}
+
+			return next(c)
+		}
+	})
+}
+
+func createTestToken(signingKey, userID string, role users.Role) (string, error) {
+	issuedAt := time.Now().UTC()
+	claims := authdomain.Claims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   userID,
+			IssuedAt:  jwt.NewNumericDate(issuedAt),
+			ExpiresAt: jwt.NewNumericDate(issuedAt.Add(time.Hour)),
+		},
+		UserID: userID,
+		Role:   role,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(signingKey))
 }

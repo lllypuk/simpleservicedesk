@@ -87,13 +87,13 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 8: Apply middleware to routes
-- [ ] Update `http_server.go` — group routes by access level
-- [ ] Public routes: `POST /login`, `GET /ping`
-- [ ] Authenticated routes: wrap with auth middleware
-- [ ] Admin-only routes: wrap with `RequireRole(Admin)`
-- [ ] Agent+ routes: wrap with `RequireRole(Agent)`
-- [ ] Ensure `POST /users` requires Admin role
-- [ ] Mark completed
+- [x] Update `http_server.go` — group routes by access level
+- [x] Public routes: `POST /login`, `GET /ping`
+- [x] Authenticated routes: wrap with auth middleware
+- [x] Admin-only routes: wrap with `RequireRole(Admin)`
+- [x] Agent+ routes: wrap with `RequireRole(Agent)`
+- [x] Ensure `POST /users` requires Admin role
+- [x] Mark completed
 
 ### Task 9: Update existing handlers for auth context
 - [ ] Update ticket handlers — filter by user's own tickets for User role
