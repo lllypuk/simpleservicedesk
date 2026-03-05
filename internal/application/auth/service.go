@@ -24,8 +24,8 @@ var (
 
 const (
 	emailLookupLimit = 2
-	//nolint:gosec // Static bcrypt hash is intentionally used only to equalize credential-check timing on auth failures.
-	dummyPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
+	// Static bcrypt hash is intentionally used only to equalize credential-check timing on auth failures.
+	dummyPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" // #nosec G101 -- not a real credential, used only for timing equalization
 )
 
 type UserRepository interface {
