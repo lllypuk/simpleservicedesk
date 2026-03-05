@@ -5,8 +5,11 @@ import (
 
 	"simpleservicedesk/generated/openapi"
 	"simpleservicedesk/internal/domain/tickets"
+	userdomain "simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/internal/queries"
+	"simpleservicedesk/pkg/echomiddleware"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,6 +21,21 @@ func (h TicketHandlers) GetTickets(c echo.Context, params openapi.GetTicketsPara
 	if err != nil {
 		msg := err.Error()
 		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
+	}
+
+	claims, ok := echomiddleware.GetAuthClaimsFromContext(ctx)
+	if !ok || claims == nil {
+		msg := "unauthorized"
+		return c.JSON(http.StatusUnauthorized, openapi.ErrorResponse{Message: &msg})
+	}
+
+	if claims.Role == userdomain.RoleCustomer {
+		authorID, parseErr := uuid.Parse(claims.UserID)
+		if parseErr != nil {
+			msg := "unauthorized"
+			return c.JSON(http.StatusUnauthorized, openapi.ErrorResponse{Message: &msg})
+		}
+		filter.AuthorID = &authorID
 	}
 
 	// Validate filter with business rules

@@ -96,10 +96,10 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 9: Update existing handlers for auth context
-- [ ] Update ticket handlers — filter by user's own tickets for User role
-- [ ] Update user handlers — restrict `DELETE`, `PUT /role` to Admin
-- [ ] Extract current user from context in handlers that need it
-- [ ] Mark completed
+- [x] Update ticket handlers — filter by user's own tickets for User role
+- [x] Update user handlers — restrict `DELETE`, `PUT /role` to Admin
+- [x] Extract current user from context in handlers that need it
+- [x] Mark completed
 
 ### Task 10: Update OpenAPI specification
 - [ ] Add `securitySchemes` (bearerAuth) to `api/openapi.yaml`
