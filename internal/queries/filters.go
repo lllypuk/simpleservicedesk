@@ -35,6 +35,7 @@ type TicketFilter struct {
 	AuthorID       *uuid.UUID        `json:"author_id,omitempty"`
 	OrganizationID *uuid.UUID        `json:"organization_id,omitempty"`
 	CategoryID     *uuid.UUID        `json:"category_id,omitempty"`
+	CategoryIDs    []uuid.UUID       `json:"category_ids,omitempty"`
 	IsOverdue      *bool             `json:"is_overdue,omitempty"`
 }
 

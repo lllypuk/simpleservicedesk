@@ -20,8 +20,9 @@ import (
 )
 
 type mockUserRepository struct {
-	users []*users.User
-	err   error
+	users      []*users.User
+	err        error
+	getUserErr error
 }
 
 func (m mockUserRepository) ListUsers(_ context.Context, filter queries.UserFilter) ([]*users.User, error) {
@@ -45,6 +46,20 @@ func (m mockUserRepository) ListUsers(_ context.Context, filter queries.UserFilt
 	}
 
 	return matched, nil
+}
+
+func (m mockUserRepository) GetUser(_ context.Context, userID uuid.UUID) (*users.User, error) {
+	if m.getUserErr != nil {
+		return nil, m.getUserErr
+	}
+
+	for _, user := range m.users {
+		if user.ID() == userID {
+			return user, nil
+		}
+	}
+
+	return nil, users.ErrUserNotFound
 }
 
 func TestNewService(t *testing.T) {
@@ -145,6 +160,19 @@ func TestServiceLoginWrongPassword(t *testing.T) {
 	require.Empty(t, token)
 }
 
+func TestServiceLoginDuplicateEmailMatches(t *testing.T) {
+	t.Parallel()
+
+	userA := createTestUser(t, "alice@example.com", users.RoleCustomer, true)
+	userB := createTestUser(t, "alice@example.com", users.RoleAgent, true)
+	repo := mockUserRepository{users: []*users.User{userA, userB}}
+	service := createTestService(t, repo)
+
+	token, err := service.Login(context.Background(), "alice@example.com", "correct-password")
+	require.ErrorIs(t, err, appauth.ErrInvalidCredentials)
+	require.Empty(t, token)
+}
+
 func TestServiceLoginInactiveUser(t *testing.T) {
 	t.Parallel()
 
@@ -182,7 +210,7 @@ func TestServiceValidateToken(t *testing.T) {
 	t.Parallel()
 
 	user := createTestUser(t, "alice@example.com", users.RoleAdmin, true)
-	service := createTestService(t, mockUserRepository{})
+	service := createTestService(t, mockUserRepository{users: []*users.User{user}})
 
 	token, err := service.GenerateToken(user)
 	require.NoError(t, err)
@@ -191,6 +219,49 @@ func TestServiceValidateToken(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, user.ID().String(), claims.UserID)
 	require.Equal(t, user.Role(), claims.Role)
+}
+
+func TestServiceValidateTokenInactiveUser(t *testing.T) {
+	t.Parallel()
+
+	user := createTestUser(t, "inactive@example.com", users.RoleCustomer, false)
+	service := createTestService(t, mockUserRepository{users: []*users.User{user}})
+
+	token, err := service.GenerateToken(user)
+	require.NoError(t, err)
+
+	claims, err := service.ValidateToken(token)
+	require.ErrorIs(t, err, appauth.ErrInvalidToken)
+	require.Nil(t, claims)
+}
+
+func TestServiceValidateTokenRoleMismatch(t *testing.T) {
+	t.Parallel()
+
+	userID := uuid.New()
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte("correct-password"), bcrypt.DefaultCost)
+	require.NoError(t, err)
+
+	repoUser, err := users.NewUserWithDetails(
+		userID,
+		"Role Changed",
+		"role.changed@example.com",
+		passwordHash,
+		users.RoleCustomer,
+		nil,
+		true,
+		time.Now(),
+		time.Now(),
+	)
+	require.NoError(t, err)
+
+	service := createTestServiceWithKey(t, mockUserRepository{users: []*users.User{repoUser}}, "signing-key-a")
+	tokenString, err := signCustomClaims(userID, users.RoleAdmin, time.Now().Add(time.Hour), []byte("signing-key-a"))
+	require.NoError(t, err)
+
+	claims, err := service.ValidateToken(tokenString)
+	require.ErrorIs(t, err, appauth.ErrInvalidToken)
+	require.Nil(t, claims)
 }
 
 func TestServiceValidateTokenInvalidToken(t *testing.T) {

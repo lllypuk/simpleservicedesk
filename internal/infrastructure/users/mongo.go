@@ -34,8 +34,18 @@ type MongoRepo struct {
 }
 
 func NewMongoRepo(db *mongo.Database) *MongoRepo {
+	collection := db.Collection("users")
+	ctx := context.Background()
+	indexes := []mongo.IndexModel{
+		{Keys: bson.D{{Key: "user_id", Value: 1}}, Options: options.Index().SetUnique(true)},
+		{Keys: bson.D{{Key: "email", Value: 1}}, Options: options.Index().SetUnique(true)},
+		{Keys: bson.D{{Key: "created_at", Value: -1}}},
+	}
+
+	_, _ = collection.Indexes().CreateMany(ctx, indexes)
+
 	return &MongoRepo{
-		collection: db.Collection("users"),
+		collection: collection,
 	}
 }
 
@@ -73,6 +83,9 @@ func (r *MongoRepo) CreateUser(
 	}
 	_, err = r.collection.InsertOne(ctx, mu)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return nil, domain.ErrUserAlreadyExist
+		}
 		return nil, err
 	}
 
@@ -137,9 +150,23 @@ func (r *MongoRepo) UpdateUser(ctx context.Context,
 		return entity, nil
 	}
 
+	normalizedEmail := normalizeEmail(entity.Email())
+	if normalizedEmail != normalizeEmail(mu.Email) {
+		duplicateCount, countErr := r.collection.CountDocuments(ctx, bson.M{
+			"email":   normalizedEmail,
+			"user_id": bson.M{"$ne": userID},
+		})
+		if countErr != nil {
+			return nil, countErr
+		}
+		if duplicateCount > 0 {
+			return nil, domain.ErrUserAlreadyExist
+		}
+	}
+
 	update := bson.M{"$set": bson.M{
 		"name":            entity.Name(),
-		"email":           entity.Email(),
+		"email":           normalizedEmail,
 		"role":            string(entity.Role()),
 		"organization_id": entity.OrganizationID(),
 		"is_active":       entity.IsActive(),
@@ -147,6 +174,9 @@ func (r *MongoRepo) UpdateUser(ctx context.Context,
 	}}
 	_, err = r.collection.UpdateOne(ctx, bson.M{"user_id": userID}, update)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return nil, domain.ErrUserAlreadyExist
+		}
 		return nil, err
 	}
 	return entity, nil

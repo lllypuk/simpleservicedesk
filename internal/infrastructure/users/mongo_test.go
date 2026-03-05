@@ -256,6 +256,31 @@ func (s *MongoRepoSuite) TestUpdateUser_NameAndEmailUpdate() {
 	s.Equal(newEmail, fetchedUser.Email())
 }
 
+func (s *MongoRepoSuite) TestUpdateUser_DuplicateEmail() {
+	ctx := context.Background()
+	passwordHash := []byte("hashedpassword")
+
+	userA, err := s.repo.CreateUser(ctx, "first@example.com", passwordHash, func() (*domain.User, error) {
+		return domain.CreateUser("First User", "first@example.com", passwordHash)
+	})
+	s.Require().NoError(err)
+
+	_, err = s.repo.CreateUser(ctx, "second@example.com", passwordHash, func() (*domain.User, error) {
+		return domain.CreateUser("Second User", "second@example.com", passwordHash)
+	})
+	s.Require().NoError(err)
+
+	_, err = s.repo.UpdateUser(ctx, userA.ID(), func(u *domain.User) (bool, error) {
+		changeErr := u.ChangeEmail("second@example.com")
+		if changeErr != nil {
+			return false, changeErr
+		}
+		return true, nil
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, domain.ErrUserAlreadyExist)
+}
+
 func (s *MongoRepoSuite) TestUpdateUser_InvalidEmailUpdate() {
 	ctx := context.Background()
 	email := "update@example.com"

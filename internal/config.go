@@ -45,7 +45,7 @@ func LoadConfig() (Config, error) {
 	}
 
 	config.Mongo = LoadMongo()
-	config.Auth, err = LoadAuth()
+	config.Auth, err = LoadAuth(config.Server.Environment)
 	if err != nil {
 		return config, fmt.Errorf("could not load auth config: %w", err)
 	}
@@ -87,11 +87,15 @@ func LoadMongo() Mongo {
 	return mongo
 }
 
-func LoadAuth() (Auth, error) {
+func LoadAuth(envType environment.Type) (Auth, error) {
 	var auth Auth
 
 	secret := strings.TrimSpace(GetEnv("JWT_SECRET", ""))
 	if secret == "" {
+		if envType == environment.Production {
+			return auth, errors.New("jwt secret is required in production environment")
+		}
+
 		generatedSecret, err := generateDefaultJWTSecret()
 		if err != nil {
 			return auth, fmt.Errorf("could not generate default jwt secret: %w", err)

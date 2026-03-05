@@ -19,6 +19,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type ServerSuite struct {
@@ -498,6 +499,10 @@ func (s *ServerSuite) SetupTest() {
 	s.OrganizationsRepo = newMockOrganizationRepository()
 	s.CategoriesRepo = newMockCategoryRepository()
 
+	mockUsersRepo, ok := s.UsersRepo.(*mockUserRepository)
+	s.Require().True(ok)
+	s.Require().NoError(seedDefaultAuthUser(mockUsersRepo, users.RoleAdmin))
+
 	// Initialize HTTP server with mock repositories
 	server, err := SetupHTTPServer(
 		s.UsersRepo,
@@ -510,6 +515,39 @@ func (s *ServerSuite) SetupTest() {
 	s.Require().NoError(err)
 	s.HTTPServer = server
 	attachDefaultTestAuthHeader(s.HTTPServer, "test-jwt-signing-key", users.RoleAdmin)
+}
+
+func seedDefaultAuthUser(repo *mockUserRepository, role users.Role) error {
+	testUserID, err := uuid.Parse(testAuthUserID)
+	if err != nil {
+		return err
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	email := fmt.Sprintf("test-auth-%s@example.com", role.String())
+	now := time.Now().UTC()
+	user, err := users.NewUserWithDetails(
+		testUserID,
+		"Test Auth User",
+		email,
+		passwordHash,
+		role,
+		nil,
+		true,
+		now,
+		now,
+	)
+	if err != nil {
+		return err
+	}
+
+	repo.users[user.ID()] = user
+	repo.createdEmails[email] = true
+	return nil
 }
 
 func attachDefaultTestAuthHeader(server *echo.Echo, signingKey string, role users.Role) {

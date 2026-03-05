@@ -1,12 +1,16 @@
 package categories
 
 import (
+	"context"
 	"net/http"
 
 	"simpleservicedesk/generated/openapi"
 	ticketdomain "simpleservicedesk/internal/domain/tickets"
+	userdomain "simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/internal/queries"
+	"simpleservicedesk/pkg/echomiddleware"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -32,7 +36,32 @@ func (h CategoryHandlers) GetCategoriesIDTickets(
 		msg := err.Error()
 		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 	}
-	filter.CategoryID = &id
+
+	claims, ok := echomiddleware.GetAuthClaimsFromContext(ctx)
+	if !ok || claims == nil {
+		msg := "unauthorized"
+		return c.JSON(http.StatusUnauthorized, openapi.ErrorResponse{Message: &msg})
+	}
+	if claims.Role == userdomain.RoleCustomer {
+		authorID, parseErr := uuid.Parse(claims.UserID)
+		if parseErr != nil {
+			msg := "unauthorized"
+			return c.JSON(http.StatusUnauthorized, openapi.ErrorResponse{Message: &msg})
+		}
+		filter.AuthorID = &authorID
+	}
+
+	categoryIDs, idsErr := h.getRequestedCategoryIDs(ctx, id, params)
+	if idsErr != nil {
+		msg := idsErr.Error()
+		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
+	}
+	if len(categoryIDs) == 1 {
+		filter.CategoryID = &categoryIDs[0]
+	} else {
+		filter.CategoryID = nil
+		filter.CategoryIDs = categoryIDs
+	}
 
 	ticketList, err := h.ticketRepo.ListTickets(ctx, filter)
 	if err != nil {
@@ -62,6 +91,43 @@ func (h CategoryHandlers) GetCategoriesIDTickets(
 			HasNext: &hasNext,
 		},
 	})
+}
+
+func (h CategoryHandlers) getRequestedCategoryIDs(
+	ctx context.Context,
+	rootID uuid.UUID,
+	params openapi.GetCategoriesIDTicketsParams,
+) ([]uuid.UUID, error) {
+	if params.IncludeSubcategories == nil || !*params.IncludeSubcategories {
+		return []uuid.UUID{rootID}, nil
+	}
+
+	ids := []uuid.UUID{rootID}
+	visited := map[uuid.UUID]struct{}{rootID: {}}
+	queue := []uuid.UUID{rootID}
+
+	for len(queue) > 0 {
+		currentID := queue[0]
+		queue = queue[1:]
+
+		childFilter := queries.CategoryFilter{ParentID: &currentID}
+		children, err := h.repo.ListCategories(ctx, childFilter)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, child := range children {
+			childID := child.ID()
+			if _, seen := visited[childID]; seen {
+				continue
+			}
+			visited[childID] = struct{}{}
+			ids = append(ids, childID)
+			queue = append(queue, childID)
+		}
+	}
+
+	return ids, nil
 }
 
 func categoryTicketToResponse(ticket *ticketdomain.Ticket) openapi.GetTicketResponse {

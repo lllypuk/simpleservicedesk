@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"simpleservicedesk/generated/openapi"
+	userdomain "simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/test/integration/shared"
 
 	"github.com/google/uuid"
@@ -754,6 +755,192 @@ func (s *CategoryAPITestSuite) TestGetCategoryTicketsIntegration() {
 			}
 		})
 	}
+}
+
+func (s *CategoryAPITestSuite) TestGetCategoryTicketsIncludeSubcategoriesIntegration() {
+	orgReqBody, err := json.Marshal(shared.TestOrg1.CreateOrganizationRequest())
+	s.Require().NoError(err)
+
+	orgReq := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
+	orgReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	orgRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(orgRec, orgReq)
+	s.Require().Equal(http.StatusCreated, orgRec.Code)
+
+	var orgResp openapi.CreateOrganizationResponse
+	err = json.Unmarshal(orgRec.Body.Bytes(), &orgResp)
+	s.Require().NoError(err)
+	orgID := *orgResp.Id
+
+	userReqBody, err := json.Marshal(shared.TestUser1.CreateUserRequest())
+	s.Require().NoError(err)
+
+	userReq := httptest.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(userReqBody))
+	userReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	userRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(userRec, userReq)
+	s.Require().Equal(http.StatusCreated, userRec.Code)
+
+	var userResp openapi.CreateUserResponse
+	err = json.Unmarshal(userRec.Body.Bytes(), &userResp)
+	s.Require().NoError(err)
+	userID := *userResp.Id
+
+	rootCategoryReqBody, err := json.Marshal(
+		shared.NewTestCategory("Parent", "Parent category", orgID, nil, true).CreateCategoryRequest(),
+	)
+	s.Require().NoError(err)
+
+	rootCategoryReq := httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(rootCategoryReqBody))
+	rootCategoryReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rootCategoryRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rootCategoryRec, rootCategoryReq)
+	s.Require().Equal(http.StatusCreated, rootCategoryRec.Code)
+
+	var rootCategoryResp openapi.CreateCategoryResponse
+	err = json.Unmarshal(rootCategoryRec.Body.Bytes(), &rootCategoryResp)
+	s.Require().NoError(err)
+	rootCategoryID := *rootCategoryResp.Id
+
+	childCategoryReqBody, err := json.Marshal(
+		shared.NewTestCategory("Child", "Child category", orgID, &rootCategoryID, true).CreateCategoryRequest(),
+	)
+	s.Require().NoError(err)
+
+	childCategoryReq := httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(childCategoryReqBody))
+	childCategoryReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	childCategoryRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(childCategoryRec, childCategoryReq)
+	s.Require().Equal(http.StatusCreated, childCategoryRec.Code)
+
+	var childCategoryResp openapi.CreateCategoryResponse
+	err = json.Unmarshal(childCategoryRec.Body.Bytes(), &childCategoryResp)
+	s.Require().NoError(err)
+	childCategoryID := *childCategoryResp.Id
+
+	createTicket := func(title string, categoryID *uuid.UUID) {
+		reqBody, marshalErr := json.Marshal(openapi.CreateTicketRequest{
+			Title:          title,
+			Description:    "Ticket for include_subcategories coverage",
+			Priority:       openapi.Normal,
+			OrganizationId: orgID,
+			AuthorId:       userID,
+			CategoryId:     categoryID,
+		})
+		s.Require().NoError(marshalErr)
+
+		req := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewBuffer(reqBody))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		s.ServeAuthenticatedHTTP(rec, req)
+		s.Require().Equal(http.StatusCreated, rec.Code, "response: %s", rec.Body.String())
+	}
+
+	createTicket("Root ticket", &rootCategoryID)
+	createTicket("Child ticket", &childCategoryID)
+
+	tests := []struct {
+		name          string
+		url           string
+		expectedCount int
+	}{
+		{
+			name:          "include_subcategories=false",
+			url:           fmt.Sprintf("/categories/%s/tickets?include_subcategories=false", rootCategoryID.String()),
+			expectedCount: 1,
+		},
+		{
+			name:          "include_subcategories=true",
+			url:           fmt.Sprintf("/categories/%s/tickets?include_subcategories=true", rootCategoryID.String()),
+			expectedCount: 2,
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
+			rec := httptest.NewRecorder()
+			s.ServeAuthenticatedHTTP(rec, req)
+			s.Require().Equal(http.StatusOK, rec.Code, "response: %s", rec.Body.String())
+
+			var resp openapi.ListTicketsResponse
+			err = json.Unmarshal(rec.Body.Bytes(), &resp)
+			s.Require().NoError(err)
+			s.Require().NotNil(resp.Tickets)
+			s.Len(*resp.Tickets, tt.expectedCount)
+		})
+	}
+}
+
+func (s *CategoryAPITestSuite) TestGetCategoryTicketsCustomerIsolationIntegration() {
+	orgReqBody, err := json.Marshal(shared.TestOrg1.CreateOrganizationRequest())
+	s.Require().NoError(err)
+
+	orgReq := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewBuffer(orgReqBody))
+	orgReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	orgRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(orgRec, orgReq)
+	s.Require().Equal(http.StatusCreated, orgRec.Code)
+
+	var orgResp openapi.CreateOrganizationResponse
+	err = json.Unmarshal(orgRec.Body.Bytes(), &orgResp)
+	s.Require().NoError(err)
+	orgID := *orgResp.Id
+
+	categoryReqBody, err := json.Marshal(
+		shared.NewTestCategory("Isolation", "Isolation category", orgID, nil, true).CreateCategoryRequest(),
+	)
+	s.Require().NoError(err)
+
+	categoryReq := httptest.NewRequest(http.MethodPost, "/categories", bytes.NewBuffer(categoryReqBody))
+	categoryReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	categoryRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(categoryRec, categoryReq)
+	s.Require().Equal(http.StatusCreated, categoryRec.Code)
+
+	var categoryResp openapi.CreateCategoryResponse
+	err = json.Unmarshal(categoryRec.Body.Bytes(), &categoryResp)
+	s.Require().NoError(err)
+	categoryID := *categoryResp.Id
+
+	customerA := s.MustCreateAndLoginTestUser(userdomain.RoleCustomer)
+	customerB := s.MustCreateAndLoginTestUser(userdomain.RoleCustomer)
+
+	createTicketAsCustomer := func(token string, authorID uuid.UUID, title string) {
+		reqBody, marshalErr := json.Marshal(openapi.CreateTicketRequest{
+			Title:          title,
+			Description:    "Customer-owned ticket",
+			Priority:       openapi.Normal,
+			OrganizationId: orgID,
+			AuthorId:       authorID,
+			CategoryId:     &categoryID,
+		})
+		s.Require().NoError(marshalErr)
+
+		req := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewBuffer(reqBody))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
+		rec := httptest.NewRecorder()
+		s.ServeAuthenticatedHTTP(rec, req)
+		s.Require().Equal(http.StatusCreated, rec.Code, "response: %s", rec.Body.String())
+	}
+
+	createTicketAsCustomer(customerA.Token, customerA.UserID, "Ticket A")
+	createTicketAsCustomer(customerB.Token, customerB.UserID, "Ticket B")
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/categories/%s/tickets", categoryID.String()), nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", customerA.Token))
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "response: %s", rec.Body.String())
+
+	var resp openapi.ListTicketsResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &resp)
+	s.Require().NoError(err)
+	s.Require().NotNil(resp.Tickets)
+	s.Len(*resp.Tickets, 1)
+	s.NotNil((*resp.Tickets)[0].AuthorId)
+	s.Equal(customerA.UserID, *(*resp.Tickets)[0].AuthorId)
 }
 
 func (s *CategoryAPITestSuite) TestCategoryHierarchyIntegration() {

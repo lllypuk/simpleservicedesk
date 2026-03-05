@@ -23,13 +23,14 @@ var (
 )
 
 const (
-	emailLookupLimit = 1
+	emailLookupLimit = 2
 	//nolint:gosec // Static bcrypt hash is intentionally used only to equalize credential-check timing on auth failures.
 	dummyPasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
 )
 
 type UserRepository interface {
 	ListUsers(ctx context.Context, filter queries.UserFilter) ([]*users.User, error)
+	GetUser(ctx context.Context, userID uuid.UUID) (*users.User, error)
 }
 
 type Service struct {
@@ -139,11 +140,23 @@ func (s *Service) ValidateToken(tokenString string) (*authdomain.Claims, error) 
 		return nil, ErrInvalidToken
 	}
 
-	if _, parseErr := uuid.Parse(claims.UserID); parseErr != nil {
+	userID, parseErr := uuid.Parse(claims.UserID)
+	if parseErr != nil {
 		return nil, fmt.Errorf("%w: invalid user id", ErrInvalidToken)
 	}
 	if !claims.Role.IsValid() {
 		return nil, fmt.Errorf("%w: invalid role", ErrInvalidToken)
+	}
+
+	user, userErr := s.userRepo.GetUser(context.Background(), userID)
+	if userErr != nil {
+		return nil, fmt.Errorf("%w: user not found", ErrInvalidToken)
+	}
+	if !user.IsActive() {
+		return nil, fmt.Errorf("%w: user is inactive", ErrInvalidToken)
+	}
+	if user.Role() != claims.Role {
+		return nil, fmt.Errorf("%w: stale role claim", ErrInvalidToken)
 	}
 
 	return claims, nil
@@ -158,13 +171,23 @@ func (s *Service) validateSigningMethod(token *jwt.Token) (any, error) {
 }
 
 func findExactEmailUser(usersByEmail []*users.User, email string) (*users.User, error) {
+	var matchedUser *users.User
+
 	for _, user := range usersByEmail {
-		if strings.EqualFold(user.Email(), email) {
-			return user, nil
+		if !strings.EqualFold(user.Email(), email) {
+			continue
 		}
+		if matchedUser != nil {
+			return nil, ErrInvalidCredentials
+		}
+		matchedUser = user
 	}
 
-	return nil, ErrInvalidCredentials
+	if matchedUser == nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	return matchedUser, nil
 }
 
 func consumePasswordTiming(password string) {
