@@ -28,10 +28,10 @@ Add rate limiting to protect against abuse.
 - [x] Mark completed
 
 ### Task 3: Add tests
-- [ ] Test CORS preflight requests return correct headers
-- [ ] Test rate limiter returns 429 when exceeded
-- [ ] Test login endpoint has stricter rate limit
-- [ ] Mark completed
+- [x] Test CORS preflight requests return correct headers
+- [x] Test rate limiter returns 429 when exceeded
+- [x] Test login endpoint has stricter rate limit
+- [x] Mark completed
 
 ### Task 4: Update configuration docs
 - [ ] Add new env variables to `.env.example`
