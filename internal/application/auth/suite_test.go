@@ -9,7 +9,6 @@ import (
 )
 
 type AuthSuite struct {
-	suite.Suite
 	application.ServerSuite
 }
 

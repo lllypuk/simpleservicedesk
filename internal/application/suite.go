@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -128,9 +129,11 @@ func (m *mockUserRepository) userMatchesFilter(user *users.User, filter queries.
 		!strings.Contains(strings.ToLower(user.Name()), strings.ToLower(*filter.Name)) {
 		return false
 	}
-	if filter.Email != nil && *filter.Email != "" &&
-		!strings.Contains(strings.ToLower(user.Email()), strings.ToLower(*filter.Email)) {
-		return false
+	if filter.Email != nil && *filter.Email != "" {
+		re, err := regexp.Compile("(?i)" + *filter.Email)
+		if err != nil || !re.MatchString(user.Email()) {
+			return false
+		}
 	}
 	if filter.Role != nil && *filter.Role != "" && string(user.Role()) != *filter.Role {
 		return false
