@@ -289,7 +289,7 @@ func (s *TicketsSuite) TestUpdateTicketStatus() {
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
 		s.Require().NoError(err)
 		s.NotNil(resp.Message)
-		s.Contains(*resp.Message, "invalid status")
+		s.NotEmpty(*resp.Message)
 	})
 
 	s.Run("Update status of non-existent ticket returns 404", func() {

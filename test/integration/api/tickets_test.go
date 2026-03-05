@@ -74,7 +74,7 @@ func (s *TicketAPITestSuite) TestCreateTicketIntegration() {
 				AuthorId:       authorID,
 			},
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  func() *string { s := "title too short"; return &s }(),
+			expectedError:  func() *string { s := "minimum string length is 3"; return &s }(),
 		},
 		{
 			name: "invalid priority",
@@ -86,7 +86,7 @@ func (s *TicketAPITestSuite) TestCreateTicketIntegration() {
 				AuthorId:       authorID,
 			},
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  func() *string { s := "invalid priority"; return &s }(),
+			expectedError:  func() *string { s := "allowed values"; return &s }(),
 		},
 		{
 			name: "empty description is valid",

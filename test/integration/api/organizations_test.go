@@ -301,13 +301,13 @@ func (s *OrganizationAPITestSuite) TestListOrganizationsIntegration() {
 		{
 			name:           "list with large limit",
 			queryParams:    "?limit=200",
-			expectedStatus: http.StatusOK,
+			expectedStatus: http.StatusBadRequest,
 			minResults:     0,
 		},
 		{
 			name:           "list with zero page",
 			queryParams:    "?page=0",
-			expectedStatus: http.StatusOK,
+			expectedStatus: http.StatusBadRequest,
 			minResults:     0,
 		},
 	}

@@ -19,11 +19,11 @@ reaching handlers, reducing boilerplate validation in handlers.
 - [x] Mark completed
 
 ### Task 2: Integrate validation middleware
-- [ ] Load OpenAPI spec using `generated/openapi/spec.go` (GetSwagger)
-- [ ] Create validation middleware in `http_server.go`
-- [ ] Configure to skip validation for non-API routes (`/ping`, `/login`)
-- [ ] Return structured error responses (consistent with existing error format)
-- [ ] Mark completed
+- [x] Load OpenAPI spec using `generated/openapi/spec.go` (GetSwagger)
+- [x] Create validation middleware in `http_server.go`
+- [x] Configure to skip validation for non-API routes (`/ping`, `/login`)
+- [x] Return structured error responses (consistent with existing error format)
+- [x] Mark completed
 
 ### Task 3: Clean up handler validation
 - [ ] Review handlers for redundant validation now covered by middleware

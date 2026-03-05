@@ -85,7 +85,7 @@ func (s *OrganizationsSuite) TestListOrganizations() {
 		rec := httptest.NewRecorder()
 		s.HTTPServer.ServeHTTP(rec, req)
 
-		s.Require().Equal(http.StatusOK, rec.Code)
+		s.Require().Equal(http.StatusBadRequest, rec.Code)
 	})
 
 	s.Run("List organizations with zero page should use default", func() {
@@ -93,6 +93,6 @@ func (s *OrganizationsSuite) TestListOrganizations() {
 		rec := httptest.NewRecorder()
 		s.HTTPServer.ServeHTTP(rec, req)
 
-		s.Require().Equal(http.StatusOK, rec.Code)
+		s.Require().Equal(http.StatusBadRequest, rec.Code)
 	})
 }

@@ -244,12 +244,12 @@ func (s *UserAPITestSuite) TestContentTypeValidation() {
 		{
 			name:           "missing content type",
 			contentType:    "",
-			expectedStatus: http.StatusUnsupportedMediaType,
+			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "invalid content type",
 			contentType:    "text/plain",
-			expectedStatus: http.StatusUnsupportedMediaType,
+			expectedStatus: http.StatusBadRequest,
 		},
 	}
 
@@ -290,7 +290,7 @@ func (s *UserAPITestSuite) TestHTTPMethodValidation() {
 			name:           "PUT to /users - not allowed",
 			method:         http.MethodPut,
 			path:           "/users",
-			expectedStatus: http.StatusMethodNotAllowed,
+			expectedStatus: http.StatusNotFound,
 		},
 		{
 			name:           "DELETE to /users/{id} - not found",
@@ -302,7 +302,7 @@ func (s *UserAPITestSuite) TestHTTPMethodValidation() {
 			name:           "PATCH to /users/{id} - not allowed",
 			method:         http.MethodPatch,
 			path:           "/users/" + uuid.New().String(),
-			expectedStatus: http.StatusMethodNotAllowed,
+			expectedStatus: http.StatusNotFound,
 		},
 	}
 

@@ -1,8 +1,11 @@
 package application
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"simpleservicedesk/generated/openapi"
@@ -12,10 +15,12 @@ import (
 	"simpleservicedesk/internal/application/tickets"
 	"simpleservicedesk/internal/application/users"
 	userdomain "simpleservicedesk/internal/domain/users"
-	"simpleservicedesk/pkg/echomiddleware"
+	appmiddleware "simpleservicedesk/pkg/echomiddleware"
 
+	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	oapimiddleware "github.com/oapi-codegen/echo-middleware"
 )
 
 type httpServer struct {
@@ -37,9 +42,23 @@ func SetupHTTPServer(
 	e := echo.New()
 
 	e.Pre(middleware.RemoveTrailingSlash())
-	e.Use(echomiddleware.SlogLoggerMiddleware(slog.Default()))
-	e.Use(echomiddleware.PutRequestIDContext)
+	e.Use(appmiddleware.SlogLoggerMiddleware(slog.Default()))
+	e.Use(appmiddleware.PutRequestIDContext)
 	e.Use(middleware.Recover())
+
+	swagger, err := openapi.GetSwagger()
+	if err != nil {
+		return nil, err
+	}
+	e.Use(oapimiddleware.OapiRequestValidatorWithOptions(swagger, &oapimiddleware.Options{
+		Skipper:      shouldSkipOpenAPIValidation,
+		ErrorHandler: openAPIValidationErrorHandler,
+		Options: openapi3filter.Options{
+			AuthenticationFunc: func(_ context.Context, _ *openapi3filter.AuthenticationInput) error {
+				return nil
+			},
+		},
+	}))
 
 	e.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
@@ -62,12 +81,12 @@ func SetupHTTPServer(
 	return e, nil
 }
 
-func registerRoutes(e *echo.Echo, server httpServer, tokenValidator echomiddleware.TokenValidator) {
+func registerRoutes(e *echo.Echo, server httpServer, tokenValidator appmiddleware.TokenValidator) {
 	wrapper := openapi.ServerInterfaceWrapper{Handler: server}
 
-	authMiddleware := echomiddleware.Auth(tokenValidator)
-	requireAgent := echomiddleware.RequireRole(userdomain.RoleAgent)
-	requireAdmin := echomiddleware.RequireRole(userdomain.RoleAdmin)
+	authMiddleware := appmiddleware.Auth(tokenValidator)
+	requireAgent := appmiddleware.RequireRole(userdomain.RoleAgent)
+	requireAdmin := appmiddleware.RequireRole(userdomain.RoleAdmin)
 
 	// Public endpoints.
 	e.POST("/login", wrapper.PostLogin)
@@ -109,4 +128,56 @@ func registerRoutes(e *echo.Echo, server httpServer, tokenValidator echomiddlewa
 	e.POST("/users", wrapper.PostUsers, authMiddleware, requireAdmin)
 	e.DELETE("/users/:id", wrapper.DeleteUsersID, authMiddleware, requireAdmin)
 	e.PATCH("/users/:id/role", wrapper.PatchUsersIDRole, authMiddleware, requireAdmin)
+}
+
+func shouldSkipOpenAPIValidation(c echo.Context) bool {
+	path := strings.TrimSpace(c.Request().URL.Path)
+	path = strings.TrimSuffix(path, "/")
+	if path == "" {
+		path = "/"
+	}
+
+	return path == "/ping" || path == "/login"
+}
+
+func openAPIValidationErrorHandler(c echo.Context, err *echo.HTTPError) error {
+	statusCode := http.StatusBadRequest
+	if err != nil && err.Code > 0 {
+		statusCode = err.Code
+	}
+
+	message := extractErrorMessage(err)
+
+	return c.JSON(statusCode, openapi.ErrorResponse{Message: &message})
+}
+
+func extractErrorMessage(err *echo.HTTPError) string {
+	if err == nil {
+		return "request validation failed"
+	}
+
+	switch msg := err.Message.(type) {
+	case string:
+		if trimmed := strings.TrimSpace(msg); trimmed != "" {
+			return trimmed
+		}
+	case error:
+		if trimmed := strings.TrimSpace(msg.Error()); trimmed != "" {
+			return trimmed
+		}
+	default:
+		if msg != nil {
+			if trimmed := strings.TrimSpace(fmt.Sprint(msg)); trimmed != "" {
+				return trimmed
+			}
+		}
+	}
+
+	if err.Internal != nil {
+		if trimmed := strings.TrimSpace(err.Internal.Error()); trimmed != "" {
+			return trimmed
+		}
+	}
+
+	return "request validation failed"
 }
