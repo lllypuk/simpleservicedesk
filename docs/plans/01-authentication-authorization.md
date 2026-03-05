@@ -38,9 +38,9 @@ Authorization middleware checks user roles against endpoint requirements.
 ---
 
 ### Task 1: Add JWT dependency
-- [ ] Add `github.com/golang-jwt/jwt/v5` to `go.mod`
-- [ ] Run `go mod tidy`
-- [ ] Mark completed
+- [x] Add `github.com/golang-jwt/jwt/v5` to `go.mod`
+- [x] Run `go mod tidy`
+- [x] Mark completed
 
 ### Task 2: Add auth configuration
 - [ ] Add `JWT_SECRET` and `JWT_EXPIRATION` to config (`internal/config.go`)
