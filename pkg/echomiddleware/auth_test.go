@@ -21,12 +21,14 @@ type stubTokenValidator struct {
 	claims     *authdomain.Claims
 	err        error
 	calls      int
+	lastCtx    context.Context
 	lastToken  string
 	returnsNil bool
 }
 
-func (s *stubTokenValidator) ValidateToken(tokenString string) (*authdomain.Claims, error) {
+func (s *stubTokenValidator) ValidateToken(ctx context.Context, tokenString string) (*authdomain.Claims, error) {
 	s.calls++
+	s.lastCtx = ctx
 	s.lastToken = tokenString
 	if s.returnsNil {
 		return nil, s.err
@@ -126,6 +128,7 @@ func TestAuth(t *testing.T) {
 
 		assert.Equal(t, http.StatusNoContent, rec.Code)
 		assert.Equal(t, 1, validator.calls)
+		require.NotNil(t, validator.lastCtx)
 		assert.Equal(t, "token-123", validator.lastToken)
 	})
 

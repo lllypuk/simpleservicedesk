@@ -47,7 +47,12 @@ func (r Role) IsValid() bool {
 
 // ParseRole преобразует строку в роль
 func ParseRole(s string) (Role, error) {
-	role := Role(strings.ToLower(strings.TrimSpace(s)))
+	normalized := strings.ToLower(strings.TrimSpace(s))
+	if normalized == "user" {
+		normalized = string(RoleCustomer)
+	}
+
+	role := Role(normalized)
 	if !role.IsValid() {
 		return "", ErrInvalidRole
 	}

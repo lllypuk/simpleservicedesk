@@ -167,6 +167,9 @@ Authentication is JWT-based:
 - `POST /login` is public and returns a signed JWT token.
 - All other API endpoints (except `GET /ping`) require `Authorization: Bearer <token>`.
 - There is no self-registration endpoint. Users are created by Admins.
+- Global rate limiting is controlled by `RATE_LIMIT_RPS` (default `100` req/s).
+- `POST /login` has an additional stricter limit of `5` requests/minute per client.
+- Exceeded limits return `429 Too Many Requests` and include `Retry-After`.
 
 #### Login and get token
 
@@ -198,7 +201,10 @@ curl -X GET http://localhost:8080/users \
 
 - `admin`: full access, including user management and role changes
 - `agent`: can list users, update ticket status, and assign tickets
-- `customer` (end user): can create/view tickets, but can only view own tickets in `GET /tickets`
+- `customer` (end user): can create/view tickets, but can only access own tickets and comments
+- `GET /users/{id}` and `PUT /users/{id}`: only self or admin
+- Non-admin `PUT /users/{id}` updates are limited to profile fields (`name`, `email`)
+- Ticket comment author is always the authenticated user (request `author_id` is ignored)
 
 ### User Management
 
@@ -413,7 +419,7 @@ This command will:
 | `RATE_LIMIT_RPS`   | Global HTTP rate limit (requests per second) | `100`        |
 | `MONGO_URI`        | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE`   | MongoDB database name     | `servicedesk`               |
-| `JWT_SECRET`       | JWT signing secret (generated at startup if unset) | _generated_ |
+| `JWT_SECRET`       | JWT signing secret (required when `ENV_TYPE=production`; generated in non-production if unset) | _generated (non-production)_ |
 | `JWT_EXPIRATION`   | JWT token lifetime        | `24h`                       |
 | `BOOTSTRAP_ADMIN_NAME` | Optional bootstrap admin display name | _(unset)_ |
 | `BOOTSTRAP_ADMIN_EMAIL` | Optional bootstrap admin email | _(unset)_ |

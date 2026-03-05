@@ -129,7 +129,7 @@ func TestServiceLoginSuccess(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
-	claims, err := service.ValidateToken(token)
+	claims, err := service.ValidateToken(context.Background(), token)
 	require.NoError(t, err)
 	require.Equal(t, user.ID().String(), claims.UserID)
 	require.Equal(t, user.Role(), claims.Role)
@@ -215,7 +215,7 @@ func TestServiceValidateToken(t *testing.T) {
 	token, err := service.GenerateToken(user)
 	require.NoError(t, err)
 
-	claims, err := service.ValidateToken(token)
+	claims, err := service.ValidateToken(context.Background(), token)
 	require.NoError(t, err)
 	require.Equal(t, user.ID().String(), claims.UserID)
 	require.Equal(t, user.Role(), claims.Role)
@@ -230,9 +230,28 @@ func TestServiceValidateTokenInactiveUser(t *testing.T) {
 	token, err := service.GenerateToken(user)
 	require.NoError(t, err)
 
-	claims, err := service.ValidateToken(token)
+	claims, err := service.ValidateToken(context.Background(), token)
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
+}
+
+func TestServiceValidateTokenRepositoryError(t *testing.T) {
+	t.Parallel()
+
+	user := createTestUser(t, "alice@example.com", users.RoleCustomer, true)
+	repo := mockUserRepository{
+		users:      []*users.User{user},
+		getUserErr: errors.New("db unavailable"),
+	}
+	service := createTestService(t, repo)
+
+	token, err := service.GenerateToken(user)
+	require.NoError(t, err)
+
+	claims, err := service.ValidateToken(context.Background(), token)
+	require.ErrorIs(t, err, appauth.ErrInvalidToken)
+	require.Nil(t, claims)
+	require.ErrorContains(t, err, "user not found")
 }
 
 func TestServiceValidateTokenRoleMismatch(t *testing.T) {
@@ -259,7 +278,7 @@ func TestServiceValidateTokenRoleMismatch(t *testing.T) {
 	tokenString, err := signCustomClaims(userID, users.RoleAdmin, time.Now().Add(time.Hour), []byte("signing-key-a"))
 	require.NoError(t, err)
 
-	claims, err := service.ValidateToken(tokenString)
+	claims, err := service.ValidateToken(context.Background(), tokenString)
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
 }
@@ -269,7 +288,7 @@ func TestServiceValidateTokenInvalidToken(t *testing.T) {
 
 	service := createTestService(t, mockUserRepository{})
 
-	claims, err := service.ValidateToken("not-a-jwt")
+	claims, err := service.ValidateToken(context.Background(), "not-a-jwt")
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
 }
@@ -279,7 +298,7 @@ func TestServiceValidateTokenEmptyToken(t *testing.T) {
 
 	service := createTestService(t, mockUserRepository{})
 
-	claims, err := service.ValidateToken("")
+	claims, err := service.ValidateToken(context.Background(), "")
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
 }
@@ -294,7 +313,7 @@ func TestServiceValidateTokenWrongSigningKey(t *testing.T) {
 	token, err := serviceA.GenerateToken(user)
 	require.NoError(t, err)
 
-	claims, err := serviceB.ValidateToken(token)
+	claims, err := serviceB.ValidateToken(context.Background(), token)
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
 }
@@ -313,7 +332,7 @@ func TestServiceValidateTokenInvalidRole(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	claims, err := service.ValidateToken(tokenString)
+	claims, err := service.ValidateToken(context.Background(), tokenString)
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
 }
@@ -332,7 +351,7 @@ func TestServiceValidateTokenInvalidUserIDClaim(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	claims, err := service.ValidateToken(tokenString)
+	claims, err := service.ValidateToken(context.Background(), tokenString)
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
 }
@@ -351,7 +370,7 @@ func TestServiceValidateTokenUnexpectedSigningAlgorithm(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	claims, err := service.ValidateToken(tokenString)
+	claims, err := service.ValidateToken(context.Background(), tokenString)
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
 }
@@ -370,7 +389,7 @@ func TestServiceValidateTokenExpired(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	claims, err := service.ValidateToken(tokenString)
+	claims, err := service.ValidateToken(context.Background(), tokenString)
 	require.ErrorIs(t, err, appauth.ErrInvalidToken)
 	require.Nil(t, claims)
 }

@@ -13,7 +13,7 @@ Add rate limiting to protect against abuse.
 ### Task 1: Add CORS middleware
 - [x] Configure Echo's built-in CORS middleware in `http_server.go`
 - [x] Set allowed origins (configurable via env `CORS_ALLOWED_ORIGINS`, default `*`)
-- [x] Set allowed methods: GET, POST, PUT, DELETE, OPTIONS
+- [x] Set allowed methods: GET, POST, PATCH, PUT, DELETE, OPTIONS
 - [x] Set allowed headers: Content-Type, Authorization
 - [x] Expose headers: X-Request-Id
 - [x] Add config fields to `internal/config.go`

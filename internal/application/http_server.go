@@ -54,6 +54,7 @@ func SetupHTTPServer(
 		AllowMethods: []string{
 			http.MethodGet,
 			http.MethodPost,
+			http.MethodPatch,
 			http.MethodPut,
 			http.MethodDelete,
 			http.MethodOptions,

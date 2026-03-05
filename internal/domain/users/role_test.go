@@ -104,6 +104,7 @@ func TestParseRole(t *testing.T) {
 		{"customer", domain.RoleCustomer, false},
 		{"AGENT", domain.RoleAgent, false},
 		{"  admin  ", domain.RoleAdmin, false},
+		{"user", domain.RoleCustomer, false},
 		{"invalid", "", true},
 		{"", "", true},
 	}

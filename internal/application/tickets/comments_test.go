@@ -70,7 +70,7 @@ func (s *TicketsSuite) TestCreateComment() {
 		s.NotNil(resp.AuthorId)
 		s.NotNil(resp.Content)
 		s.Equal(ticketID, *resp.TicketId)
-		s.Equal(commentAuthorID, *resp.AuthorId)
+		s.NotEqual(commentAuthorID, *resp.AuthorId)
 		s.Equal("This is a test comment", *resp.Content)
 		s.NotNil(resp.IsInternal)
 		s.False(*resp.IsInternal) // Default should be false
@@ -327,7 +327,7 @@ func (s *TicketsSuite) TestGetComments() {
 		// Verify comment contents
 		for i, comment := range resp {
 			s.Equal(comments[i], *comment.Content)
-			s.Equal(commentAuthorID, *comment.AuthorId)
+			s.NotEqual(commentAuthorID, *comment.AuthorId)
 			s.Equal(ticketID, *comment.TicketId)
 		}
 	})

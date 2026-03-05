@@ -121,7 +121,7 @@ func (s *Service) GenerateToken(user *users.User) (string, error) {
 	return tokenString, nil
 }
 
-func (s *Service) ValidateToken(tokenString string) (*authdomain.Claims, error) {
+func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*authdomain.Claims, error) {
 	if strings.TrimSpace(tokenString) == "" {
 		return nil, ErrInvalidToken
 	}
@@ -148,7 +148,7 @@ func (s *Service) ValidateToken(tokenString string) (*authdomain.Claims, error) 
 		return nil, fmt.Errorf("%w: invalid role", ErrInvalidToken)
 	}
 
-	user, userErr := s.userRepo.GetUser(context.Background(), userID)
+	user, userErr := s.userRepo.GetUser(ctx, userID)
 	if userErr != nil {
 		return nil, fmt.Errorf("%w: user not found", ErrInvalidToken)
 	}

@@ -92,7 +92,7 @@ Current snapshot:
 - `00-upgrade-go-1.26.md`: mostly complete, some validation checkboxes still open
 - `01-authentication-authorization.md`: complete
 - `02-request-validation.md`: complete (OpenAPI request validator enabled in HTTP server middleware)
-- `03-cors-rate-limiting.md`: pending
+- `03-cors-rate-limiting.md`: complete
 - `04-health-check.md`: pending
 - `05-e2e-tests.md`: pending
 - `06-update-documentation.md`: in progress
@@ -223,9 +223,11 @@ Uses environment variables (see `.env` file):
 - `SERVER_PORT`: Server port (default: `8080`)
 - `INTERRUPT_TIMEOUT`: Graceful shutdown timeout (default: `2s`)
 - `READ_HEADER_TIMEOUT`: HTTP read header timeout (default: `5s`)
+- `CORS_ALLOWED_ORIGINS`: Comma-separated allowed CORS origins (default: `*`)
+- `RATE_LIMIT_RPS`: Global HTTP rate limit in requests per second (default: `100`)
 - `MONGO_URI`: MongoDB connection string
 - `MONGO_DATABASE`: MongoDB database name
-- `JWT_SECRET`: JWT signing key (if unset, generated at startup; set explicitly in persistent environments)
+- `JWT_SECRET`: JWT signing key (required when `ENV_TYPE=production`; generated at startup in non-production when unset)
 - `JWT_EXPIRATION`: Token lifetime in Go duration format (default: `24h`)
 - `BOOTSTRAP_ADMIN_NAME`: Optional startup bootstrap admin display name
 - `BOOTSTRAP_ADMIN_EMAIL`: Optional startup bootstrap admin email (requires password)

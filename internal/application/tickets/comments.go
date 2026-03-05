@@ -6,7 +6,6 @@ import (
 
 	"simpleservicedesk/generated/openapi"
 	"simpleservicedesk/internal/domain/tickets"
-	userdomain "simpleservicedesk/internal/domain/users"
 
 	"github.com/labstack/echo/v4"
 	openapi_types "github.com/oapi-codegen/runtime/types"
@@ -36,11 +35,8 @@ func (h TicketHandlers) PostTicketsIDComments(c echo.Context, id openapi_types.U
 		return bindErr
 	}
 
-	// Convert author ID
-	authorID := req.AuthorId
-	if role == userdomain.RoleCustomer {
-		authorID = authUserID
-	}
+	// Always use authenticated actor as comment author to prevent impersonation.
+	authorID := authUserID
 
 	// Determine if comment is internal
 	isInternal := false

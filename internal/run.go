@@ -162,6 +162,10 @@ func ensureBootstrapAdminUser(ctx context.Context, userRepo *usersInfra.MongoRep
 		)
 	})
 	if err != nil {
+		if errors.Is(err, userdomain.ErrUserAlreadyExist) {
+			logger.InfoContext(ctx, "bootstrap admin already exists")
+			return nil
+		}
 		return fmt.Errorf("failed to create bootstrap admin user: %w", err)
 	}
 

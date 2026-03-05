@@ -41,6 +41,7 @@ func (s *AuthSuite) TestCORSPreflightIncludesExpectedHeaders() {
 	allowedMethods := rec.Header().Get(echo.HeaderAccessControlAllowMethods)
 	s.Require().Contains(allowedMethods, http.MethodGet)
 	s.Require().Contains(allowedMethods, http.MethodPost)
+	s.Require().Contains(allowedMethods, http.MethodPatch)
 	s.Require().Contains(allowedMethods, http.MethodPut)
 	s.Require().Contains(allowedMethods, http.MethodDelete)
 	s.Require().Contains(allowedMethods, http.MethodOptions)

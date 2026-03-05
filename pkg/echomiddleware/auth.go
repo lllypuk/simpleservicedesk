@@ -20,7 +20,7 @@ const (
 var errInvalidAuthorizationHeader = errors.New("invalid authorization header")
 
 type TokenValidator interface {
-	ValidateToken(tokenString string) (*authdomain.Claims, error)
+	ValidateToken(ctx context.Context, tokenString string) (*authdomain.Claims, error)
 }
 
 func Auth(validator TokenValidator) echo.MiddlewareFunc {
@@ -35,7 +35,7 @@ func Auth(validator TokenValidator) echo.MiddlewareFunc {
 				return c.NoContent(http.StatusUnauthorized)
 			}
 
-			claims, err := validator.ValidateToken(tokenString)
+			claims, err := validator.ValidateToken(c.Request().Context(), tokenString)
 			if err != nil || claims == nil {
 				return c.NoContent(http.StatusUnauthorized)
 			}
