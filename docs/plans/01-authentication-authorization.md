@@ -72,12 +72,12 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 6: Create auth middleware
-- [ ] Create `pkg/echomiddleware/auth.go`
-- [ ] Implement JWT extraction from `Authorization: Bearer <token>` header
-- [ ] Parse token, inject user claims into echo.Context
-- [ ] Return 401 for missing/invalid tokens
-- [ ] Add unit tests
-- [ ] Mark completed
+- [x] Create `pkg/echomiddleware/auth.go`
+- [x] Implement JWT extraction from `Authorization: Bearer <token>` header
+- [x] Parse token, inject user claims into echo.Context
+- [x] Return 401 for missing/invalid tokens
+- [x] Add unit tests
+- [x] Mark completed
 
 ### Task 7: Create authorization middleware
 - [ ] Create `pkg/echomiddleware/authorize.go`
