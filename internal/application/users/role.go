@@ -18,12 +18,7 @@ func (h UserHandlers) PatchUsersIDRole(c echo.Context, id openapi_types.UUID) er
 		return err
 	}
 
-	// Парсим роль из запроса
-	role, err := users.ParseRole(string(req.Role))
-	if err != nil {
-		msg := "invalid role"
-		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
-	}
+	role := users.Role(req.Role)
 
 	user, err := h.repo.UpdateUser(ctx, id, func(user *users.User) (bool, error) {
 		if user.Role() == role {

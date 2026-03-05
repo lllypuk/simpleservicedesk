@@ -18,12 +18,7 @@ func (h TicketHandlers) PatchTicketsIDStatus(c echo.Context, id openapi_types.UU
 		return err
 	}
 
-	// Parse and validate status
-	newStatus, err := tickets.ParseStatus(string(req.Status))
-	if err != nil {
-		msg := "invalid status: " + err.Error()
-		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
-	}
+	newStatus := tickets.Status(req.Status)
 
 	ticket, err := h.repo.UpdateTicket(ctx, id, func(ticket *tickets.Ticket) (bool, error) {
 		if statusErr := ticket.ChangeStatus(newStatus); statusErr != nil {
@@ -37,7 +32,7 @@ func (h TicketHandlers) PatchTicketsIDStatus(c echo.Context, id openapi_types.UU
 		if errors.Is(err, tickets.ErrTicketNotFound) {
 			return c.JSON(http.StatusNotFound, openapi.ErrorResponse{Message: &msg})
 		}
-		if errors.Is(err, tickets.ErrInvalidTransition) {
+		if errors.Is(err, tickets.ErrInvalidTransition) || errors.Is(err, tickets.ErrInvalidStatus) {
 			return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 		}
 		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})

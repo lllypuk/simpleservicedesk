@@ -26,10 +26,10 @@ reaching handlers, reducing boilerplate validation in handlers.
 - [x] Mark completed
 
 ### Task 3: Clean up handler validation
-- [ ] Review handlers for redundant validation now covered by middleware
-- [ ] Remove duplicate checks (required fields, type validation)
-- [ ] Keep business logic validation (domain rules not expressible in OpenAPI)
-- [ ] Mark completed
+- [x] Review handlers for redundant validation now covered by middleware
+- [x] Remove duplicate checks (required fields, type validation)
+- [x] Keep business logic validation (domain rules not expressible in OpenAPI)
+- [x] Mark completed
 
 ### Task 4: Add tests
 - [ ] Add unit test for validation middleware error responses

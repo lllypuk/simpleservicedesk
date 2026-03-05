@@ -18,12 +18,7 @@ func (h TicketHandlers) PostTickets(c echo.Context) error {
 		return err
 	}
 
-	// Parse and validate priority
-	priority, err := tickets.ParsePriority(string(req.Priority))
-	if err != nil {
-		msg := "invalid priority: " + err.Error()
-		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
-	}
+	priority := tickets.Priority(req.Priority)
 
 	// Convert OpenAPI types to uuid.UUID
 	organizationID := req.OrganizationId
@@ -49,7 +44,9 @@ func (h TicketHandlers) PostTickets(c echo.Context) error {
 	})
 	if err != nil {
 		msg := err.Error()
-		if errors.Is(err, tickets.ErrTicketValidation) || errors.Is(err, tickets.ErrInvalidTicket) {
+		if errors.Is(err, tickets.ErrTicketValidation) ||
+			errors.Is(err, tickets.ErrInvalidTicket) ||
+			errors.Is(err, tickets.ErrInvalidPriority) {
 			return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 		}
 		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})

@@ -68,10 +68,7 @@ func (h TicketHandlers) applyTicketUpdates(ticket *tickets.Ticket, req openapi.U
 }
 
 func (h TicketHandlers) updateTicketPriority(ticket *tickets.Ticket, priorityStr openapi.TicketPriority) error {
-	priority, err := tickets.ParsePriority(string(priorityStr))
-	if err != nil {
-		return err
-	}
+	priority := tickets.Priority(priorityStr)
 	return ticket.UpdatePriority(priority)
 }
 
