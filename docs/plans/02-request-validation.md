@@ -14,9 +14,9 @@ reaching handlers, reducing boilerplate validation in handlers.
 ---
 
 ### Task 1: Add validation middleware dependency
-- [ ] Add `github.com/oapi-codegen/echo-middleware` to `go.mod`
-- [ ] Run `go mod tidy`
-- [ ] Mark completed
+- [x] Add `github.com/oapi-codegen/echo-middleware` to `go.mod`
+- [x] Run `go mod tidy`
+- [x] Mark completed
 
 ### Task 2: Integrate validation middleware
 - [ ] Load OpenAPI spec using `generated/openapi/spec.go` (GetSwagger)
