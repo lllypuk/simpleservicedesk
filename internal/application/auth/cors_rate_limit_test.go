@@ -75,6 +75,25 @@ func (s *AuthSuite) TestGlobalRateLimiterReturnsTooManyRequestsWhenExceeded() {
 	s.Require().Equal("rate limit exceeded", *response.Message)
 }
 
+func (s *AuthSuite) TestGlobalRateLimiterIgnoresSpoofedForwardedForHeader() {
+	server := s.setupServerWithGlobalRateLimit(testSingleRequestPerSecond)
+
+	firstReq := httptest.NewRequest(http.MethodGet, testPingPath, nil)
+	firstReq.RemoteAddr = "203.0.113.10:12345"
+	firstReq.Header.Set(echo.HeaderXForwardedFor, "198.51.100.10")
+	firstRec := httptest.NewRecorder()
+	server.ServeHTTP(firstRec, firstReq)
+	s.Require().Equal(http.StatusOK, firstRec.Code)
+
+	secondReq := httptest.NewRequest(http.MethodGet, testPingPath, nil)
+	secondReq.RemoteAddr = "203.0.113.10:12345"
+	secondReq.Header.Set(echo.HeaderXForwardedFor, "198.51.100.11")
+	secondRec := httptest.NewRecorder()
+	server.ServeHTTP(secondRec, secondReq)
+
+	s.Require().Equal(http.StatusTooManyRequests, secondRec.Code)
+}
+
 func (s *AuthSuite) TestLoginEndpointHasStricterRateLimit() {
 	server := s.setupServerWithGlobalRateLimit(testHighRequestPerSecond)
 

@@ -45,6 +45,7 @@ func SetupHTTPServer(
 	rateLimitRPS int,
 ) (*echo.Echo, error) {
 	e := echo.New()
+	e.IPExtractor = echo.ExtractIPDirect()
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(appmiddleware.SlogLoggerMiddleware(slog.Default()))

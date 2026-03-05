@@ -18,6 +18,7 @@ import (
 	ticketsInfra "simpleservicedesk/internal/infrastructure/tickets"
 	usersInfra "simpleservicedesk/internal/infrastructure/users"
 	"simpleservicedesk/internal/queries"
+	"simpleservicedesk/pkg/environment"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -30,6 +31,8 @@ import (
 )
 
 const disconnectTimeout = 5 * time.Second
+const insecureBootstrapAdminEmail = "admin@example.com"
+const insecureBootstrapAdminPassword = "change-me"
 
 func Run(cfg Config) error {
 	g, ctx := errgroup.WithContext(context.Background())
@@ -68,7 +71,7 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 	ticketRepo := ticketsInfra.NewMongoRepo(db)
 	organizationRepo := organizationsInfra.NewMongoRepo(db)
 	categoryRepo := categoriesInfra.NewMongoRepo(db)
-	if err := ensureBootstrapAdminUser(ctx, userRepo, cfg.Auth); err != nil {
+	if err := ensureBootstrapAdminUser(ctx, userRepo, cfg.Server.Environment, cfg.Auth); err != nil {
 		return err
 	}
 
@@ -116,7 +119,12 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 	return nil
 }
 
-func ensureBootstrapAdminUser(ctx context.Context, userRepo *usersInfra.MongoRepo, authCfg Auth) error {
+func ensureBootstrapAdminUser(
+	ctx context.Context,
+	userRepo *usersInfra.MongoRepo,
+	envType environment.Type,
+	authCfg Auth,
+) error {
 	logger := slog.Default()
 
 	bootstrapName := strings.TrimSpace(authCfg.BootstrapAdminName)
@@ -129,16 +137,23 @@ func ensureBootstrapAdminUser(ctx context.Context, userRepo *usersInfra.MongoRep
 	if bootstrapEmail == "" || bootstrapPassword == "" {
 		return errors.New("bootstrap admin requires both BOOTSTRAP_ADMIN_EMAIL and BOOTSTRAP_ADMIN_PASSWORD")
 	}
+	if envType != environment.Testing {
+		if strings.EqualFold(bootstrapEmail, insecureBootstrapAdminEmail) &&
+			bootstrapPassword == insecureBootstrapAdminPassword {
+			return errors.New("bootstrap admin uses insecure default credentials")
+		}
+	}
 	if bootstrapName == "" {
 		bootstrapName = "Bootstrap Admin"
 	}
 
-	usersCount, err := userRepo.CountUsers(ctx, queries.UserFilter{})
+	adminRole := string(userdomain.RoleAdmin)
+	adminUsersCount, err := userRepo.CountUsers(ctx, queries.UserFilter{Role: &adminRole})
 	if err != nil {
-		return fmt.Errorf("failed to count users before bootstrap admin creation: %w", err)
+		return fmt.Errorf("failed to count admin users before bootstrap admin creation: %w", err)
 	}
-	if usersCount > 0 {
-		logger.InfoContext(ctx, "bootstrap admin skipped because users already exist")
+	if adminUsersCount > 0 {
+		logger.InfoContext(ctx, "bootstrap admin skipped because admin users already exist")
 		return nil
 	}
 
