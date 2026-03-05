@@ -34,7 +34,7 @@ and categorization systems through a clean RESTful API.
 ## Features
 
 ### Core Functionality ✅ FULLY IMPLEMENTED
-- **User Management**: Complete CRUD operations with role-based access control (Admin/Agent/User)
+- **User Management**: Complete CRUD operations with role-based access control (Admin/Agent/Customer)
 - **Ticket System**: Full ticket lifecycle management with status transitions and priority levels
 - **Organization Management**: Hierarchical organizational structures with user relationships  
 - **Category System**: Tree-structured categories for ticket classification
@@ -95,10 +95,12 @@ The application is configured using environment variables. Create a `.env` file 
 
 ```bash
 # Application Environment
-APP_ENV=development
+ENV_TYPE=development
 
 # HTTP Server Configuration
-HTTP_SERVER_PORT=8080
+SERVER_PORT=8080
+INTERRUPT_TIMEOUT=2s
+READ_HEADER_TIMEOUT=5s
 
 # MongoDB Configuration
 MONGO_URI=mongodb://localhost:27017
@@ -107,6 +109,11 @@ MONGO_DATABASE=servicedesk
 # Authentication (JWT)
 JWT_SECRET=change-me-in-production
 JWT_EXPIRATION=24h
+
+# Optional bootstrap admin (created only when DB has no users)
+BOOTSTRAP_ADMIN_NAME=Bootstrap Admin
+BOOTSTRAP_ADMIN_EMAIL=admin@example.com
+BOOTSTRAP_ADMIN_PASSWORD=change-me
 ```
 
 ### Code Generation
@@ -218,6 +225,10 @@ curl -X GET http://localhost:8080/users/{userId} \
 ### Complete API Coverage
 
 **All major API endpoints are fully implemented and tested:**
+
+#### Auth/Public API ✅
+- POST `/login` - Authenticate and get JWT token (public)
+- GET `/ping` - Health check ping (public)
 
 #### Users API ✅
 - POST `/users` - Create user
@@ -392,12 +403,17 @@ This command will:
 
 | Variable           | Description               | Default                     |
 |--------------------|---------------------------|-----------------------------|
-| `APP_ENV`          | Application environment   | `development`               |
-| `HTTP_SERVER_PORT` | HTTP server port          | `8080`                      |
+| `ENV_TYPE`         | Application environment   | `testing`                   |
+| `SERVER_PORT`      | HTTP server port          | `8080`                      |
+| `INTERRUPT_TIMEOUT`| Graceful shutdown timeout | `2s`                        |
+| `READ_HEADER_TIMEOUT` | HTTP read header timeout | `5s`                    |
 | `MONGO_URI`        | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE`   | MongoDB database name     | `servicedesk`               |
 | `JWT_SECRET`       | JWT signing secret (generated at startup if unset) | _generated_ |
 | `JWT_EXPIRATION`   | JWT token lifetime        | `24h`                       |
+| `BOOTSTRAP_ADMIN_NAME` | Optional bootstrap admin display name | _(unset)_ |
+| `BOOTSTRAP_ADMIN_EMAIL` | Optional bootstrap admin email | _(unset)_ |
+| `BOOTSTRAP_ADMIN_PASSWORD` | Optional bootstrap admin password | _(unset)_ |
 
 ## Contributing
 

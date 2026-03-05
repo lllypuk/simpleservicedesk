@@ -149,6 +149,22 @@ func (s *MongoRepoSuite) TestCreateUser_DuplicateEmail() {
 	s.Require().ErrorIs(err, domain.ErrUserAlreadyExist)
 }
 
+func (s *MongoRepoSuite) TestCreateUser_DuplicateEmailCaseInsensitive() {
+	ctx := context.Background()
+	passwordHash := []byte("hashedpassword")
+
+	_, err := s.repo.CreateUser(ctx, "duplicate@example.com", passwordHash, func() (*domain.User, error) {
+		return domain.CreateUser("Original User", "duplicate@example.com", passwordHash)
+	})
+	s.Require().NoError(err)
+
+	_, err = s.repo.CreateUser(ctx, "DUPLICATE@EXAMPLE.COM", passwordHash, func() (*domain.User, error) {
+		return domain.CreateUser("Another User", "DUPLICATE@EXAMPLE.COM", passwordHash)
+	})
+	s.Require().Error(err)
+	s.Require().ErrorIs(err, domain.ErrUserAlreadyExist)
+}
+
 func (s *MongoRepoSuite) TestCreateUser_InvalidUserCreation() {
 	ctx := context.Background()
 	email := "invalid@example.com"

@@ -6,6 +6,7 @@ import (
 
 	"simpleservicedesk/generated/openapi"
 	"simpleservicedesk/internal/domain/tickets"
+	userdomain "simpleservicedesk/internal/domain/users"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -23,6 +24,14 @@ func (h TicketHandlers) PostTickets(c echo.Context) error {
 	// Convert OpenAPI types to uuid.UUID
 	organizationID := req.OrganizationId
 	authorID := req.AuthorId
+
+	authUserID, role, ok := authUser(c)
+	if !ok {
+		return nil
+	}
+	if role == userdomain.RoleCustomer {
+		authorID = authUserID
+	}
 
 	// Convert optional category ID
 	var categoryID *uuid.UUID

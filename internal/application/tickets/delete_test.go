@@ -215,9 +215,14 @@ func (s *TicketsSuite) TestDeleteTicket() {
 	})
 
 	s.Run("Delete ticket with different statuses", func() {
-		statuses := []string{"open", "in_progress", "resolved", "closed"}
+		statusTransitions := map[string][]string{
+			"new":         {},
+			"in_progress": {"in_progress"},
+			"resolved":    {"in_progress", "resolved"},
+			"closed":      {"in_progress", "resolved", "closed"},
+		}
 
-		for _, status := range statuses {
+		for status, transitions := range statusTransitions {
 			// Create a test ticket
 			orgID := uuid.New()
 			authorID := uuid.New()
@@ -244,11 +249,8 @@ func (s *TicketsSuite) TestDeleteTicket() {
 			s.Require().NoError(err)
 			ticketID := *createResp.Id
 
-			// Change status if not "open" (default status)
-			if status != "open" {
-				statusReq := openapi.UpdateTicketStatusRequest{
-					Status: openapi.TicketStatus(status),
-				}
+			for _, transition := range transitions {
+				statusReq := openapi.UpdateTicketStatusRequest{Status: openapi.TicketStatus(transition)}
 
 				statusBody, _ := json.Marshal(statusReq)
 				statusReqHTTP := httptest.NewRequest(
@@ -260,7 +262,7 @@ func (s *TicketsSuite) TestDeleteTicket() {
 				statusRec := httptest.NewRecorder()
 
 				s.HTTPServer.ServeHTTP(statusRec, statusReqHTTP)
-				// Some status transitions might not be valid, so we don't assert success here
+				s.Equal(http.StatusOK, statusRec.Code, "Failed to set status %s", transition)
 			}
 
 			// Delete the ticket regardless of status

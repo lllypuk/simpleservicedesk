@@ -24,8 +24,11 @@ type Mongo struct {
 }
 
 type Auth struct {
-	JWTSigningKey string
-	JWTExpiration time.Duration
+	JWTSigningKey          string
+	JWTExpiration          time.Duration
+	BootstrapAdminName     string
+	BootstrapAdminEmail    string
+	BootstrapAdminPassword string
 }
 
 const generatedJWTSecretLength = 32
@@ -106,6 +109,9 @@ func LoadAuth() (Auth, error) {
 
 	auth.JWTSigningKey = secret
 	auth.JWTExpiration = expiration
+	auth.BootstrapAdminName = strings.TrimSpace(GetEnv("BOOTSTRAP_ADMIN_NAME", ""))
+	auth.BootstrapAdminEmail = strings.TrimSpace(GetEnv("BOOTSTRAP_ADMIN_EMAIL", ""))
+	auth.BootstrapAdminPassword = GetEnv("BOOTSTRAP_ADMIN_PASSWORD", "")
 
 	return auth, nil
 }

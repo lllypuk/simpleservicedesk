@@ -55,8 +55,10 @@ func (m *mockUserRepository) CreateUser(
 	_ []byte,
 	createFn func() (*users.User, error),
 ) (*users.User, error) {
+	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
+
 	// Check for duplicate email
-	if m.createdEmails[email] {
+	if m.createdEmails[normalizedEmail] {
 		return nil, users.ErrUserAlreadyExist
 	}
 
@@ -66,7 +68,7 @@ func (m *mockUserRepository) CreateUser(
 	}
 
 	// Track the email and store the user
-	m.createdEmails[email] = true
+	m.createdEmails[normalizedEmail] = true
 	m.users[user.ID()] = user
 
 	return user, nil

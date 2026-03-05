@@ -2,14 +2,55 @@ package organizations_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 
 	"simpleservicedesk/generated/openapi"
+	apporganizations "simpleservicedesk/internal/application/organizations"
+	domain "simpleservicedesk/internal/domain/organizations"
+	"simpleservicedesk/internal/queries"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
+
+type countFailingOrganizationRepo struct{}
+
+func (r countFailingOrganizationRepo) CreateOrganization(
+	_ context.Context, _ func() (*domain.Organization, error),
+) (*domain.Organization, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (r countFailingOrganizationRepo) UpdateOrganization(
+	_ context.Context, _ uuid.UUID, _ func(*domain.Organization) (bool, error),
+) (*domain.Organization, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (r countFailingOrganizationRepo) GetOrganization(_ context.Context, _ uuid.UUID) (*domain.Organization, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (r countFailingOrganizationRepo) ListOrganizations(
+	_ context.Context, _ queries.OrganizationFilter,
+) ([]*domain.Organization, error) {
+	return []*domain.Organization{}, nil
+}
+
+func (r countFailingOrganizationRepo) CountOrganizations(
+	_ context.Context,
+	_ queries.OrganizationFilter,
+) (int64, error) {
+	return 0, errors.New("count failed")
+}
+
+func (r countFailingOrganizationRepo) DeleteOrganization(_ context.Context, _ uuid.UUID) error {
+	return errors.New("not implemented")
+}
 
 func (s *OrganizationsSuite) TestListOrganizations() {
 	s.Run("List organizations with default pagination", func() {
@@ -107,4 +148,22 @@ func (s *OrganizationsSuite) TestListOrganizations() {
 
 		s.Require().Equal(http.StatusBadRequest, rec.Code)
 	})
+}
+
+func (s *OrganizationsSuite) TestListOrganizationsCountError() {
+	handler := apporganizations.SetupHandlers(countFailingOrganizationRepo{})
+
+	req := httptest.NewRequest(http.MethodGet, "/organizations", nil)
+	rec := httptest.NewRecorder()
+	c := echo.New().NewContext(req, rec)
+
+	err := handler.GetOrganizations(c, openapi.GetOrganizationsParams{})
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusInternalServerError, rec.Code)
+
+	var errorResp openapi.ErrorResponse
+	unmarshalErr := json.Unmarshal(rec.Body.Bytes(), &errorResp)
+	s.Require().NoError(unmarshalErr)
+	s.Require().NotNil(errorResp.Message)
+	s.Require().NotEmpty(*errorResp.Message)
 }

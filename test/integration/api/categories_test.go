@@ -95,7 +95,7 @@ func (s *CategoryAPITestSuite) TestCreateCategoryIntegration() {
 				OrganizationId: orgID,
 				ParentId:       func() *uuid.UUID { id := uuid.New(); return &id }(),
 			},
-			expectedStatus: http.StatusInternalServerError, // Causes DB error
+			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "invalid JSON",
@@ -241,6 +241,19 @@ func (s *CategoryAPITestSuite) TestListCategoriesIntegration() {
 		createdIDs = append(createdIDs, *resp.Id)
 	}
 
+	inactive := false
+	updateReqBody, err := json.Marshal(openapi.UpdateCategoryRequest{IsActive: &inactive})
+	s.Require().NoError(err)
+	updateReq := httptest.NewRequest(
+		http.MethodPut,
+		fmt.Sprintf("/categories/%s", createdIDs[2].String()),
+		bytes.NewBuffer(updateReqBody),
+	)
+	updateReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	updateRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(updateRec, updateReq)
+	s.Require().Equal(http.StatusOK, updateRec.Code)
+
 	tests := []struct {
 		name           string
 		url            string
@@ -263,13 +276,13 @@ func (s *CategoryAPITestSuite) TestListCategoriesIntegration() {
 			name:           "filter by is_active=true",
 			url:            fmt.Sprintf("/categories?organization_id=%s&is_active=true", orgID.String()),
 			expectedStatus: http.StatusOK,
-			expectedCount:  3, // API seems to return all categories regardless of is_active filter
+			expectedCount:  2,
 		},
 		{
 			name:           "filter by is_active=false",
 			url:            fmt.Sprintf("/categories?organization_id=%s&is_active=false", orgID.String()),
 			expectedStatus: http.StatusOK,
-			expectedCount:  0, // API returns no results for inactive filter
+			expectedCount:  1,
 		},
 		{
 			name:           "filter by parent_id (root categories)",
@@ -686,21 +699,21 @@ func (s *CategoryAPITestSuite) TestGetCategoryTicketsIntegration() {
 			categoryID:     categoryID.String(),
 			url:            fmt.Sprintf("/categories/%s/tickets", categoryID.String()),
 			expectedStatus: http.StatusOK,
-			expectedCount:  0, // No tickets found - category association might not be working
+			expectedCount:  1,
 		},
 		{
 			name:           "get tickets with include_subcategories=false",
 			categoryID:     categoryID.String(),
 			url:            fmt.Sprintf("/categories/%s/tickets?include_subcategories=false", categoryID.String()),
 			expectedStatus: http.StatusOK,
-			expectedCount:  0, // No tickets found
+			expectedCount:  1,
 		},
 		{
 			name:           "get tickets with include_subcategories=true",
 			categoryID:     categoryID.String(),
 			url:            fmt.Sprintf("/categories/%s/tickets?include_subcategories=true", categoryID.String()),
 			expectedStatus: http.StatusOK,
-			expectedCount:  0, // No tickets found
+			expectedCount:  1,
 		},
 		{
 			name:           "nonexistent category",

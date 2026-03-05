@@ -73,7 +73,7 @@ func SetupHTTPServer(
 
 	server.UserHandlers = users.SetupHandlers(userRepo)
 	server.TicketHandlers = tickets.SetupHandlers(ticketRepo)
-	server.CategoryHandlers = categories.SetupHandlers(categoryRepo)
+	server.CategoryHandlers = categories.SetupHandlers(categoryRepo, ticketRepo)
 	server.OrganizationHandlers = organizations.SetupHandlers(organizationRepo)
 
 	registerRoutes(e, server, authService)

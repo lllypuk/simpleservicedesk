@@ -4,39 +4,100 @@ import (
 	"net/http"
 
 	"simpleservicedesk/generated/openapi"
+	ticketdomain "simpleservicedesk/internal/domain/tickets"
+	"simpleservicedesk/internal/queries"
 
 	"github.com/labstack/echo/v4"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 func (h CategoryHandlers) GetCategoriesIDTickets(
-	c echo.Context, id openapi_types.UUID, _ openapi.GetCategoriesIDTicketsParams,
+	c echo.Context, id openapi_types.UUID, params openapi.GetCategoriesIDTicketsParams,
 ) error {
 	ctx := c.Request().Context()
 
-	// First verify the category exists
+	// First verify the category exists.
 	_, err := h.repo.GetCategory(ctx, id)
 	if err != nil {
 		return h.handleCategoryError(c, err)
 	}
 
-	// This method should ideally use a ticket repository to fetch tickets by category
-	// For now, return an empty list since we don't have direct access to ticket repo
-	// This would need to be refactored to inject ticket repository or create a service layer
-	tickets := []openapi.GetTicketResponse{}
-	total := 0
-	page := 1
-	limit := 20
-	hasNext := false
+	filter, err := queries.FromOpenAPITicketParams(openapi.GetTicketsParams{
+		Status:   params.Status,
+		Priority: params.Priority,
+		Page:     params.Page,
+		Limit:    params.Limit,
+	})
+	if err != nil {
+		msg := err.Error()
+		return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
+	}
+	filter.CategoryID = &id
 
-	response := openapi.ListTicketsResponse{
-		Tickets: &tickets,
+	ticketList, err := h.ticketRepo.ListTickets(ctx, filter)
+	if err != nil {
+		msg := err.Error()
+		return c.JSON(http.StatusInternalServerError, openapi.ErrorResponse{Message: &msg})
+	}
+
+	ticketResponses := make([]openapi.GetTicketResponse, len(ticketList))
+	for i, ticket := range ticketList {
+		ticketResponses[i] = categoryTicketToResponse(ticket)
+	}
+
+	page := 1
+	if params.Page != nil {
+		page = *params.Page
+	}
+	limit := filter.Limit
+	total := len(ticketResponses)
+	hasNext := len(ticketResponses) == limit
+
+	return c.JSON(http.StatusOK, openapi.ListTicketsResponse{
+		Tickets: &ticketResponses,
 		Pagination: &openapi.PaginationResponse{
 			Total:   &total,
 			Page:    &page,
 			Limit:   &limit,
 			HasNext: &hasNext,
 		},
+	})
+}
+
+func categoryTicketToResponse(ticket *ticketdomain.Ticket) openapi.GetTicketResponse {
+	id := ticket.ID()
+	title := ticket.Title()
+	description := ticket.Description()
+	status := openapi.TicketStatus(ticket.Status().String())
+	priority := openapi.TicketPriority(ticket.Priority().String())
+	organizationID := ticket.OrganizationID()
+	authorID := ticket.AuthorID()
+	createdAt := ticket.CreatedAt()
+	updatedAt := ticket.UpdatedAt()
+
+	response := openapi.GetTicketResponse{
+		Id:             &id,
+		Title:          &title,
+		Description:    &description,
+		Status:         &status,
+		Priority:       &priority,
+		OrganizationId: &organizationID,
+		AuthorId:       &authorID,
+		CreatedAt:      &createdAt,
+		UpdatedAt:      &updatedAt,
 	}
-	return c.JSON(http.StatusOK, response)
+	if categoryID := ticket.CategoryID(); categoryID != nil {
+		response.CategoryId = categoryID
+	}
+	if assigneeID := ticket.AssigneeID(); assigneeID != nil {
+		response.AssigneeId = assigneeID
+	}
+	if resolvedAt := ticket.ResolvedAt(); resolvedAt != nil {
+		response.ResolvedAt = resolvedAt
+	}
+	if closedAt := ticket.ClosedAt(); closedAt != nil {
+		response.ClosedAt = closedAt
+	}
+
+	return response
 }

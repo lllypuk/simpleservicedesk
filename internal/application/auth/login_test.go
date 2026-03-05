@@ -2,14 +2,23 @@ package auth_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 
 	"simpleservicedesk/generated/openapi"
+	appauth "simpleservicedesk/internal/application/auth"
 
 	"github.com/labstack/echo/v4"
 )
+
+type failingLoginService struct{}
+
+func (f failingLoginService) Login(_ context.Context, _, _ string) (string, error) {
+	return "", errors.New("repository unavailable")
+}
 
 func (s *AuthSuite) TestLogin() {
 	s.Run("Success", func() {
@@ -113,4 +122,30 @@ func (s *AuthSuite) TestLogin() {
 
 		s.Require().Equal(http.StatusBadRequest, rec.Code)
 	})
+}
+
+func (s *AuthSuite) TestLoginInternalErrorResponse() {
+	handler := appauth.SetupHandlers(failingLoginService{})
+
+	loginBody, err := json.Marshal(openapi.LoginRequest{
+		Email:    "alice@example.com",
+		Password: "correct-password",
+	})
+	s.Require().NoError(err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(loginBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	err = handler.PostLogin(c)
+	s.Require().NoError(err)
+	s.Require().Equal(http.StatusInternalServerError, rec.Code)
+
+	var response openapi.ErrorResponse
+	unmarshalErr := json.Unmarshal(rec.Body.Bytes(), &response)
+	s.Require().NoError(unmarshalErr)
+	s.Require().NotNil(response.Message)
+	s.Require().Equal("internal server error", *response.Message)
 }

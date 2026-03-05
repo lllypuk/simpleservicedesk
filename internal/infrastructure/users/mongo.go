@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	domain "simpleservicedesk/internal/domain/users"
@@ -44,7 +45,9 @@ func (r *MongoRepo) CreateUser(
 	passwordHash []byte,
 	createFn func() (*domain.User, error),
 ) (*domain.User, error) {
-	count, err := r.collection.CountDocuments(ctx, bson.M{"email": email})
+	normalizedEmail := normalizeEmail(email)
+
+	count, err := r.collection.CountDocuments(ctx, bson.M{"email": normalizedEmail})
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +63,7 @@ func (r *MongoRepo) CreateUser(
 	mu := mongoUser{
 		UserID:         u.ID(),
 		Name:           u.Name(),
-		Email:          email,
+		Email:          normalizedEmail,
 		PasswordHash:   passwordHash,
 		Role:           string(u.Role()),
 		OrganizationID: u.OrganizationID(),
@@ -240,4 +243,8 @@ func (r *MongoRepo) CountUsers(ctx context.Context, filter queries.UserFilter) (
 	}
 
 	return r.collection.CountDocuments(ctx, bsonFilter)
+}
+
+func normalizeEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
 }

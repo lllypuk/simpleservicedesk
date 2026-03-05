@@ -65,7 +65,8 @@ func (h CategoryHandlers) handleCategoryError(c echo.Context, err error) error {
 		if err != nil && (strings.Contains(err.Error(), "validation") ||
 			strings.Contains(err.Error(), "required") ||
 			strings.Contains(err.Error(), "invalid") ||
-			strings.Contains(err.Error(), "must be")) {
+			strings.Contains(err.Error(), "must be") ||
+			strings.Contains(err.Error(), "parent category not found")) {
 			msg := err.Error()
 			return c.JSON(http.StatusBadRequest, openapi.ErrorResponse{Message: &msg})
 		}

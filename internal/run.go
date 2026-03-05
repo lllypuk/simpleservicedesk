@@ -8,16 +8,21 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"simpleservicedesk/internal/application"
+	userdomain "simpleservicedesk/internal/domain/users"
 	categoriesInfra "simpleservicedesk/internal/infrastructure/categories"
 	organizationsInfra "simpleservicedesk/internal/infrastructure/organizations"
 	ticketsInfra "simpleservicedesk/internal/infrastructure/tickets"
 	usersInfra "simpleservicedesk/internal/infrastructure/users"
+	"simpleservicedesk/internal/queries"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
@@ -63,6 +68,9 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 	ticketRepo := ticketsInfra.NewMongoRepo(db)
 	organizationRepo := organizationsInfra.NewMongoRepo(db)
 	categoryRepo := categoriesInfra.NewMongoRepo(db)
+	if err := ensureBootstrapAdminUser(ctx, userRepo, cfg.Auth); err != nil {
+		return err
+	}
 
 	httpServer, err := application.SetupHTTPServer(
 		userRepo,
@@ -103,5 +111,58 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 		return nil
 	})
 
+	return nil
+}
+
+func ensureBootstrapAdminUser(ctx context.Context, userRepo *usersInfra.MongoRepo, authCfg Auth) error {
+	logger := slog.Default()
+
+	bootstrapName := strings.TrimSpace(authCfg.BootstrapAdminName)
+	bootstrapEmail := strings.ToLower(strings.TrimSpace(authCfg.BootstrapAdminEmail))
+	bootstrapPassword := strings.TrimSpace(authCfg.BootstrapAdminPassword)
+
+	if bootstrapName == "" && bootstrapEmail == "" && bootstrapPassword == "" {
+		return nil
+	}
+	if bootstrapEmail == "" || bootstrapPassword == "" {
+		return errors.New("bootstrap admin requires both BOOTSTRAP_ADMIN_EMAIL and BOOTSTRAP_ADMIN_PASSWORD")
+	}
+	if bootstrapName == "" {
+		bootstrapName = "Bootstrap Admin"
+	}
+
+	usersCount, err := userRepo.CountUsers(ctx, queries.UserFilter{})
+	if err != nil {
+		return fmt.Errorf("failed to count users before bootstrap admin creation: %w", err)
+	}
+	if usersCount > 0 {
+		logger.InfoContext(ctx, "bootstrap admin skipped because users already exist")
+		return nil
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(bootstrapPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash bootstrap admin password: %w", err)
+	}
+
+	_, err = userRepo.CreateUser(ctx, bootstrapEmail, passwordHash, func() (*userdomain.User, error) {
+		now := time.Now().UTC()
+		return userdomain.NewUserWithDetails(
+			uuid.New(),
+			bootstrapName,
+			bootstrapEmail,
+			passwordHash,
+			userdomain.RoleAdmin,
+			nil,
+			true,
+			now,
+			now,
+		)
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create bootstrap admin user: %w", err)
+	}
+
+	logger.InfoContext(ctx, "bootstrap admin user created", "email", bootstrapEmail)
 	return nil
 }

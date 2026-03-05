@@ -25,6 +25,9 @@ func TestLoadConfig(t *testing.T) {
 		"MONGO_DATABASE",
 		"JWT_SECRET",
 		"JWT_EXPIRATION",
+		"BOOTSTRAP_ADMIN_NAME",
+		"BOOTSTRAP_ADMIN_EMAIL",
+		"BOOTSTRAP_ADMIN_PASSWORD",
 	}
 
 	for _, key := range envVars {
@@ -73,6 +76,9 @@ func TestLoadConfig(t *testing.T) {
 		t.Setenv("MONGO_DATABASE", "custom_db")
 		t.Setenv("JWT_SECRET", "custom-jwt-secret")
 		t.Setenv("JWT_EXPIRATION", "12h")
+		t.Setenv("BOOTSTRAP_ADMIN_NAME", "Bootstrap Root")
+		t.Setenv("BOOTSTRAP_ADMIN_EMAIL", "root@example.com")
+		t.Setenv("BOOTSTRAP_ADMIN_PASSWORD", "bootstrap-password")
 
 		config, err := internal.LoadConfig()
 		require.NoError(t, err)
@@ -90,6 +96,9 @@ func TestLoadConfig(t *testing.T) {
 		// Test auth custom values
 		assert.Equal(t, "custom-jwt-secret", config.Auth.JWTSigningKey)
 		assert.Equal(t, 12*time.Hour, config.Auth.JWTExpiration)
+		assert.Equal(t, "Bootstrap Root", config.Auth.BootstrapAdminName)
+		assert.Equal(t, "root@example.com", config.Auth.BootstrapAdminEmail)
+		assert.Equal(t, "bootstrap-password", config.Auth.BootstrapAdminPassword)
 	})
 
 	t.Run("invalid interrupt timeout", func(t *testing.T) {
@@ -340,7 +349,13 @@ func TestLoadMongo(t *testing.T) {
 
 func TestLoadAuth(t *testing.T) {
 	originalEnv := make(map[string]string)
-	envVars := []string{"JWT_SECRET", "JWT_EXPIRATION"}
+	envVars := []string{
+		"JWT_SECRET",
+		"JWT_EXPIRATION",
+		"BOOTSTRAP_ADMIN_NAME",
+		"BOOTSTRAP_ADMIN_EMAIL",
+		"BOOTSTRAP_ADMIN_PASSWORD",
+	}
 
 	for _, key := range envVars {
 		if val, exists := os.LookupEnv(key); exists {
@@ -371,11 +386,17 @@ func TestLoadAuth(t *testing.T) {
 	t.Run("custom values", func(t *testing.T) {
 		t.Setenv("JWT_SECRET", "custom-secret")
 		t.Setenv("JWT_EXPIRATION", "6h")
+		t.Setenv("BOOTSTRAP_ADMIN_NAME", "Bootstrap Root")
+		t.Setenv("BOOTSTRAP_ADMIN_EMAIL", "root@example.com")
+		t.Setenv("BOOTSTRAP_ADMIN_PASSWORD", "bootstrap-password")
 
 		auth, err := internal.LoadAuth()
 		require.NoError(t, err)
 		assert.Equal(t, "custom-secret", auth.JWTSigningKey)
 		assert.Equal(t, 6*time.Hour, auth.JWTExpiration)
+		assert.Equal(t, "Bootstrap Root", auth.BootstrapAdminName)
+		assert.Equal(t, "root@example.com", auth.BootstrapAdminEmail)
+		assert.Equal(t, "bootstrap-password", auth.BootstrapAdminPassword)
 	})
 
 	t.Run("empty secret generates default", func(t *testing.T) {
@@ -448,6 +469,9 @@ func TestConfigurationValidation(t *testing.T) {
 		"MONGO_DATABASE",
 		"JWT_SECRET",
 		"JWT_EXPIRATION",
+		"BOOTSTRAP_ADMIN_NAME",
+		"BOOTSTRAP_ADMIN_EMAIL",
+		"BOOTSTRAP_ADMIN_PASSWORD",
 	}
 
 	for _, key := range envVars {
@@ -512,6 +536,9 @@ func testConfigurationValidation(t *testing.T, envVars map[string]string, expect
 		"MONGO_DATABASE",
 		"JWT_SECRET",
 		"JWT_EXPIRATION",
+		"BOOTSTRAP_ADMIN_NAME",
+		"BOOTSTRAP_ADMIN_EMAIL",
+		"BOOTSTRAP_ADMIN_PASSWORD",
 	}
 
 	for _, key := range configEnvVars {

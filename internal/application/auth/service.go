@@ -59,7 +59,7 @@ func NewService(userRepo UserRepository, signingKey string, tokenExpiration time
 }
 
 func (s *Service) Login(ctx context.Context, email, password string) (string, error) {
-	normalizedEmail := strings.TrimSpace(email)
+	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
 	if normalizedEmail == "" || password == "" {
 		return "", ErrInvalidCredentials
 	}

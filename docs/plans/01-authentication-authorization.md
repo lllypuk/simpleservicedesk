@@ -20,20 +20,20 @@ Authorization middleware checks user roles against endpoint requirements.
 - **Registration**: No self-registration — only Admin can create users (existing `POST /users`)
 
 ## Route Protection Matrix
-| Endpoint | Public | User | Agent | Admin |
+| Endpoint | Public | Customer | Agent | Admin |
 |----------|--------|------|-------|-------|
 | `POST /login` | x | | | |
 | `GET /users` | | | x | x |
 | `POST /users` | | | | x |
-| `PUT /users/{id}/role` | | | | x |
+| `PATCH /users/{id}/role` | | | | x |
 | `DELETE /users/{id}` | | | | x |
 | `GET /tickets` | | x* | x | x |
 | `POST /tickets` | | x | x | x |
-| `PUT /tickets/{id}/status` | | | x | x |
-| `POST /tickets/{id}/assign` | | | x | x |
+| `PATCH /tickets/{id}/status` | | | x | x |
+| `PATCH /tickets/{id}/assign` | | | x | x |
 | Other endpoints | | x | x | x |
 
-*User sees only own tickets
+*Customer sees only own tickets
 
 ---
 

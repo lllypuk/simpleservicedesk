@@ -35,7 +35,7 @@ This is a Go service desk application following clean architecture principles:
 
 ### Domain Layer (`internal/domain/`)
 Core business entities with their own validation and business logic:
-- **Users**: Role-based access control (Admin, Agent, User)
+- **Users**: Role-based access control (Admin, Agent, Customer)
 - **Tickets**: Status transitions (Open → InProgress → Resolved → Closed) and priority levels
 - **Organizations**: Hierarchical structures
 - **Categories**: Nested categorization system
@@ -91,7 +91,7 @@ Status is tracked by plan files in `docs/plans/`.
 Current snapshot:
 - `00-upgrade-go-1.26.md`: mostly complete, some validation checkboxes still open
 - `01-authentication-authorization.md`: complete
-- `02-request-validation.md`: pending
+- `02-request-validation.md`: complete (OpenAPI request validator enabled in HTTP server middleware)
 - `03-cors-rate-limiting.md`: pending
 - `04-health-check.md`: pending
 - `05-e2e-tests.md`: pending
@@ -219,12 +219,17 @@ func CreateUser(email string, password string) (*User, error) {
 ## Configuration
 
 Uses environment variables (see `.env` file):
-- `APP_ENV`: Application environment (development/production)
-- `HTTP_SERVER_PORT`: Server port (default: 8080)
+- `ENV_TYPE`: Application environment (default: `testing`)
+- `SERVER_PORT`: Server port (default: `8080`)
+- `INTERRUPT_TIMEOUT`: Graceful shutdown timeout (default: `2s`)
+- `READ_HEADER_TIMEOUT`: HTTP read header timeout (default: `5s`)
 - `MONGO_URI`: MongoDB connection string
 - `MONGO_DATABASE`: MongoDB database name
 - `JWT_SECRET`: JWT signing key (if unset, generated at startup; set explicitly in persistent environments)
 - `JWT_EXPIRATION`: Token lifetime in Go duration format (default: `24h`)
+- `BOOTSTRAP_ADMIN_NAME`: Optional startup bootstrap admin display name
+- `BOOTSTRAP_ADMIN_EMAIL`: Optional startup bootstrap admin email (requires password)
+- `BOOTSTRAP_ADMIN_PASSWORD`: Optional startup bootstrap admin password (requires email)
 
 ## Code Generation Dependencies
 
