@@ -219,6 +219,17 @@ type ListUsersResponse struct {
 	Users      *[]GetUserResponse  `json:"users,omitempty"`
 }
 
+// LoginRequest defines model for LoginRequest.
+type LoginRequest struct {
+	Email    openapi_types.Email `json:"email"`
+	Password string              `json:"password"`
+}
+
+// LoginResponse defines model for LoginResponse.
+type LoginResponse struct {
+	Token string `json:"token"`
+}
+
 // PaginationResponse defines model for PaginationResponse.
 type PaginationResponse struct {
 	// HasNext Whether there are more pages
@@ -488,6 +499,9 @@ type PostCategoriesJSONRequestBody = CreateCategoryRequest
 
 // PutCategoriesIDJSONRequestBody defines body for PutCategoriesID for application/json ContentType.
 type PutCategoriesIDJSONRequestBody = UpdateCategoryRequest
+
+// PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
+type PostLoginJSONRequestBody = LoginRequest
 
 // PostOrganizationsJSONRequestBody defines body for PostOrganizations for application/json ContentType.
 type PostOrganizationsJSONRequestBody = CreateOrganizationRequest

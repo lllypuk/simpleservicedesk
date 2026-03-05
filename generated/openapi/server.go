@@ -32,6 +32,9 @@ type ServerInterface interface {
 	// Get tickets in a category
 	// (GET /categories/{id}/tickets)
 	GetCategoriesIDTickets(ctx echo.Context, id openapi_types.UUID, params GetCategoriesIDTicketsParams) error
+	// Authenticate user and receive JWT token
+	// (POST /login)
+	PostLogin(ctx echo.Context) error
 	// List organizations with pagination
 	// (GET /organizations)
 	GetOrganizations(ctx echo.Context, params GetOrganizationsParams) error
@@ -254,6 +257,15 @@ func (w *ServerInterfaceWrapper) GetCategoriesIDTickets(ctx echo.Context) error 
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetCategoriesIDTickets(ctx, id, params)
+	return err
+}
+
+// PostLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) PostLogin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostLogin(ctx)
 	return err
 }
 
@@ -862,6 +874,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/categories/:id", wrapper.GetCategoriesID)
 	router.PUT(baseURL+"/categories/:id", wrapper.PutCategoriesID)
 	router.GET(baseURL+"/categories/:id/tickets", wrapper.GetCategoriesIDTickets)
+	router.POST(baseURL+"/login", wrapper.PostLogin)
 	router.GET(baseURL+"/organizations", wrapper.GetOrganizations)
 	router.POST(baseURL+"/organizations", wrapper.PostOrganizations)
 	router.DELETE(baseURL+"/organizations/:id", wrapper.DeleteOrganizationsID)

@@ -64,12 +64,12 @@ Authorization middleware checks user roles against endpoint requirements.
 - [x] Mark completed
 
 ### Task 5: Create login endpoint
-- [ ] Add `POST /login` to `api/openapi.yaml` (LoginRequest, LoginResponse schemas)
-- [ ] Run `make generate`
-- [ ] Implement login handler in `internal/application/auth/login.go`
-- [ ] Register route in `http_server.go`
-- [ ] Add unit tests
-- [ ] Mark completed
+- [x] Add `POST /login` to `api/openapi.yaml` (LoginRequest, LoginResponse schemas)
+- [x] Run `make generate`
+- [x] Implement login handler in `internal/application/auth/login.go`
+- [x] Register route in `http_server.go`
+- [x] Add unit tests
+- [x] Mark completed
 
 ### Task 6: Create auth middleware
 - [ ] Create `pkg/echomiddleware/auth.go`

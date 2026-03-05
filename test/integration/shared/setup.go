@@ -6,6 +6,7 @@ package shared
 import (
 	"context"
 	"testing"
+	"time"
 
 	"simpleservicedesk/internal/application"
 	"simpleservicedesk/internal/infrastructure/categories"
@@ -85,7 +86,14 @@ func (s *IntegrationSuite) SetupSuite() {
 	s.CategoriesRepo = categories.NewMongoRepo(s.MongoDB)
 
 	// Initialize HTTP server with real repositories
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
+	s.HTTPServer = application.SetupHTTPServer(
+		s.UsersRepo,
+		s.TicketsRepo,
+		s.OrganizationsRepo,
+		s.CategoriesRepo,
+		"integration-test-jwt-signing-key",
+		time.Hour,
+	)
 }
 
 // SetupTest runs before each test to ensure clean database state
@@ -101,7 +109,14 @@ func (s *IntegrationSuite) SetupTest() {
 	}
 
 	// Re-initialize HTTP server to ensure clean state
-	s.HTTPServer = application.SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
+	s.HTTPServer = application.SetupHTTPServer(
+		s.UsersRepo,
+		s.TicketsRepo,
+		s.OrganizationsRepo,
+		s.CategoriesRepo,
+		"integration-test-jwt-signing-key",
+		time.Hour,
+	)
 }
 
 // SetupSuite initializes the MongoDB integration test suite

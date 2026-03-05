@@ -3,8 +3,10 @@ package application
 import (
 	"log/slog"
 	"net/http"
+	"time"
 
 	"simpleservicedesk/generated/openapi"
+	"simpleservicedesk/internal/application/auth"
 	"simpleservicedesk/internal/application/categories"
 	"simpleservicedesk/internal/application/organizations"
 	"simpleservicedesk/internal/application/tickets"
@@ -16,6 +18,7 @@ import (
 )
 
 type httpServer struct {
+	auth.Handlers
 	users.UserHandlers
 	tickets.TicketHandlers
 	categories.CategoryHandlers
@@ -27,6 +30,8 @@ func SetupHTTPServer(
 	ticketRepo TicketRepository,
 	organizationRepo OrganizationRepository,
 	categoryRepo CategoryRepository,
+	jwtSigningKey string,
+	jwtExpiration time.Duration,
 ) *echo.Echo {
 	e := echo.New()
 
@@ -40,6 +45,11 @@ func SetupHTTPServer(
 	})
 
 	server := httpServer{}
+	authService, err := auth.NewService(userRepo, jwtSigningKey, jwtExpiration)
+	if err == nil {
+		server.Handlers = auth.SetupHandlers(authService)
+	}
+
 	server.UserHandlers = users.SetupHandlers(userRepo)
 	server.TicketHandlers = tickets.SetupHandlers(ticketRepo)
 	server.CategoryHandlers = categories.SetupHandlers(categoryRepo)

@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"strings"
+	"time"
 
 	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/organizations"
@@ -477,5 +478,12 @@ func (s *ServerSuite) SetupTest() {
 	s.CategoriesRepo = newMockCategoryRepository()
 
 	// Initialize HTTP server with mock repositories
-	s.HTTPServer = SetupHTTPServer(s.UsersRepo, s.TicketsRepo, s.OrganizationsRepo, s.CategoriesRepo)
+	s.HTTPServer = SetupHTTPServer(
+		s.UsersRepo,
+		s.TicketsRepo,
+		s.OrganizationsRepo,
+		s.CategoriesRepo,
+		"test-jwt-signing-key",
+		time.Hour,
+	)
 }
