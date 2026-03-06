@@ -93,9 +93,9 @@ Current snapshot:
 - `01-authentication-authorization.md`: complete
 - `02-request-validation.md`: complete (OpenAPI request validator enabled in HTTP server middleware)
 - `03-cors-rate-limiting.md`: complete
-- `04-health-check.md`: pending
+- `04-health-check.md`: complete
 - `05-e2e-tests.md`: complete
-- `06-update-documentation.md`: in progress
+- `06-update-documentation.md`: complete
 
 ## Test Organization
 

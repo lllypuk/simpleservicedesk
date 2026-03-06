@@ -100,12 +100,19 @@ simpleservicedesk/
 ### Environment Variables
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `APP_ENV` | Environment (development/production) | `development` |
-| `HTTP_SERVER_PORT` | Server port | `8080` |
+| `ENV_TYPE` | Environment (testing/production) | `testing` |
+| `SERVER_PORT` | Server port | `8080` |
+| `INTERRUPT_TIMEOUT` | Graceful shutdown timeout | `2s` |
+| `READ_HEADER_TIMEOUT` | HTTP read header timeout | `5s` |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed CORS origins | `*` |
+| `RATE_LIMIT_RPS` | Global HTTP rate limit (requests per second) | `100` |
 | `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGO_DATABASE` | Database name | `servicedesk` |
-| `JWT_SECRET` | JWT signing key (if unset, generated at startup) | _generated_ |
+| `JWT_SECRET` | JWT signing key (required in production; generated otherwise) | _generated_ |
 | `JWT_EXPIRATION` | JWT lifetime (Go duration) | `24h` |
+| `BOOTSTRAP_ADMIN_NAME` | Optional bootstrap admin display name | _(unset)_ |
+| `BOOTSTRAP_ADMIN_EMAIL` | Optional bootstrap admin email | _(unset)_ |
+| `BOOTSTRAP_ADMIN_PASSWORD` | Optional bootstrap admin password | _(unset)_ |
 
 ## 🔄 Code Generation Workflow
 

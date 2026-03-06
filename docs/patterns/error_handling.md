@@ -9,10 +9,12 @@
 - **HTTP errors** - преобразование в HTTP responses
 
 ### Error Categories
-1. **Validation Errors** - невалидные входные данные
-2. **Business Logic Errors** - нарушение бизнес-правил
-3. **Infrastructure Errors** - проблемы с БД, сетью и т.д.
-4. **Authorization Errors** - недостаточно прав доступа
+1. **Validation Errors** - невалидные входные данные → `400 Bad Request`
+2. **Authentication Errors** - отсутствует или невалидный JWT токен → `401 Unauthorized`
+3. **Authorization Errors** - недостаточно прав доступа → `403 Forbidden`
+4. **Business Logic Errors** - нарушение бизнес-правил → `409 Conflict` / `404 Not Found`
+5. **Rate Limit Errors** - превышен лимит запросов → `429 Too Many Requests`
+6. **Infrastructure Errors** - проблемы с БД, сетью и т.д. → `500 Internal Server Error`
 
 ## 🏗️ Architecture Patterns
 
@@ -82,6 +84,35 @@ func (c *CreateHandler) CreateUser(ctx context.Context, req CreateUserRequest) (
     return createdUser, nil
 }
 ```
+
+### Auth Error Patterns
+
+Authentication (401) and authorization (403) errors are handled by middleware before reaching handlers:
+
+```go
+// 401 Unauthorized — missing or invalid Bearer token
+// Returned by pkg/echomiddleware/auth.go
+{
+  "message": "Unauthorized"
+}
+
+// 403 Forbidden — valid token but insufficient role
+// Returned by pkg/echomiddleware/authorize.go
+{
+  "message": "Forbidden"
+}
+
+// 429 Too Many Requests — rate limit exceeded
+// Includes Retry-After header with seconds until reset
+{
+  "message": "Too Many Requests"
+}
+```
+
+Key rules:
+- Return `401` when the token is absent, malformed, expired, or has an invalid signature
+- Return `403` when the token is valid but the user lacks the required role or ownership
+- Never expose token validation details in the error message (security)
 
 ### HTTP Layer Error Mapping
 ```go

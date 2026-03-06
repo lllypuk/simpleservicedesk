@@ -20,6 +20,6 @@ Plans are numbered and should be executed in order. Some have dependencies on ea
 - [x] 01 - Authentication & Authorization
 - [x] 02 - Request Validation
 - [x] 03 - CORS & Rate Limiting
-- [ ] 04 - Health Check
+- [x] 04 - Health Check
 - [x] 05 - E2E Tests
-- [ ] 06 - Update Documentation (in progress)
+- [x] 06 - Update Documentation

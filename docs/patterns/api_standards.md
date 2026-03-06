@@ -79,10 +79,11 @@ DELETE /users/{id}         # Удаление пользователя
 
 ### Client Errors (4xx)
 - `400 Bad Request` - невалидные данные
-- `401 Unauthorized` - не авторизован
-- `403 Forbidden` - недостаточно прав
+- `401 Unauthorized` - отсутствует или невалидный Bearer токен
+- `403 Forbidden` - недостаточно прав для выполнения операции
 - `404 Not Found` - ресурс не найден
 - `409 Conflict` - конфликт данных
+- `429 Too Many Requests` - превышен rate limit; ответ включает заголовок `Retry-After`
 
 ### Server Errors (5xx)
 - `500 Internal Server Error` - внутренняя ошибка
@@ -90,13 +91,26 @@ DELETE /users/{id}         # Удаление пользователя
 ## 🔒 Security Standards
 
 ### Authentication
-- **Bearer Token** - в заголовке Authorization
-- **Role-based Access** - проверка ролей на уровне handlers
+- **Bearer Token** — передается в заголовке `Authorization: Bearer <jwt>`
+- **JWT structure** — claims: `user_id` (UUID), `role` (admin/agent/customer), standard JWT fields
+- **Login endpoint** — `POST /login` (public); все остальные эндпоинты требуют валидный токен
+- **No self-registration** — пользователей создают только Admin
+
+### Authorization
+- **Role-based Access** — проверка ролей на уровне middleware (не handlers)
+- `admin` — полный доступ ко всем ресурсам
+- `agent` — список пользователей, управление тикетами
+- `customer` — только собственные тикеты и комментарии
+- Owner-or-admin pattern для `GET/PUT /users/{id}`
+
+### Rate Limiting
+- Глобальный лимит: `RATE_LIMIT_RPS` (default 100 req/s)
+- Stricter limit на `POST /login`: 5 req/min per client
+- При превышении: `429 Too Many Requests` + `Retry-After` header
 
 ### Input Validation
-- **Schema validation** - через OpenAPI generated code
-- **Sanitization** - очистка пользовательского ввода
-- **SQL/NoSQL Injection** - защита через параметризованные запросы
+- **Schema validation** - через OpenAPI generated code (middleware)
+- **SQL/NoSQL Injection** - защита через параметризованные запросы MongoDB
 
 ## 📝 Documentation Standards
 
