@@ -22,11 +22,11 @@ use the full stack (HTTP server + MongoDB) and simulate real user journeys.
 - [x] Mark completed
 
 ### Task 2: Ticket lifecycle workflow
-- [ ] Test: Admin creates user (Agent) -> Agent logs in -> Agent creates ticket ->
+- [x] Test: Admin creates user (Agent) -> Agent logs in -> Agent creates ticket ->
       Agent changes status to in_progress -> Agent resolves ticket -> Admin closes ticket
-- [ ] Verify status transitions follow domain rules
-- [ ] Verify timestamps are set correctly (resolvedAt, closedAt)
-- [ ] Mark completed
+- [x] Verify status transitions follow domain rules
+- [x] Verify timestamps are set correctly (resolvedAt, closedAt)
+- [x] Mark completed
 
 ### Task 3: User management workflow
 - [ ] Test: Admin creates users with different roles -> Users login ->
