@@ -62,7 +62,7 @@ func (s *IntegrationSuite) MustCreateTestUser(role userdomain.Role) TestAuthUser
 	}
 }
 
-func (s *IntegrationSuite) LoginAndGetToken(email, passphrase string) (string, *httptest.ResponseRecorder) {
+func (s *IntegrationSuite) Login(email, passphrase string) *httptest.ResponseRecorder {
 	reqBody, err := json.Marshal(openapi.LoginRequest{
 		Email:    openapi_types.Email(email),
 		Password: passphrase,
@@ -73,16 +73,24 @@ func (s *IntegrationSuite) LoginAndGetToken(email, passphrase string) (string, *
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	s.HTTPServer.ServeHTTP(rec, req)
+	return rec
+}
 
+func (s *IntegrationSuite) GetTokenFromLoginResponse(rec *httptest.ResponseRecorder) string {
 	if rec.Code != http.StatusOK {
-		return "", rec
+		return ""
 	}
 
 	var resp openapi.LoginResponse
-	err = json.Unmarshal(rec.Body.Bytes(), &resp)
+	err := json.Unmarshal(rec.Body.Bytes(), &resp)
 	s.Require().NoError(err)
 
-	return resp.Token, rec
+	return resp.Token
+}
+
+func (s *IntegrationSuite) LoginAndGetToken(email, passphrase string) (string, *httptest.ResponseRecorder) {
+	rec := s.Login(email, passphrase)
+	return s.GetTokenFromLoginResponse(rec), rec
 }
 
 func (s *IntegrationSuite) DefaultAdminToken() string {

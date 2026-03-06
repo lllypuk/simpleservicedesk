@@ -16,10 +16,10 @@ use the full stack (HTTP server + MongoDB) and simulate real user journeys.
 ---
 
 ### Task 1: Set up E2E test infrastructure
-- [ ] Create `test/integration/e2e/suite_test.go` with test setup
-- [ ] Extend `shared.IntegrationSuite` with auth helpers (login, get token)
-- [ ] Add helper to create seeded data (admin user, test organization, categories)
-- [ ] Mark completed
+- [x] Create `test/integration/e2e/suite_test.go` with test setup
+- [x] Extend `shared.IntegrationSuite` with auth helpers (login, get token)
+- [x] Add helper to create seeded data (admin user, test organization, categories)
+- [x] Mark completed
 
 ### Task 2: Ticket lifecycle workflow
 - [ ] Test: Admin creates user (Agent) -> Agent logs in -> Agent creates ticket ->
