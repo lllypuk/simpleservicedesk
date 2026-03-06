@@ -35,10 +35,10 @@ use the full stack (HTTP server + MongoDB) and simulate real user journeys.
 - [x] Mark completed
 
 ### Task 4: Organization workflow
-- [ ] Test: Admin creates organization -> Admin adds users ->
+- [x] Test: Admin creates organization -> Admin adds users ->
       Create tickets under organization -> Filter tickets by organization ->
       Verify organization users see org tickets
-- [ ] Mark completed
+- [x] Mark completed
 
 ### Task 5: Category and ticket classification
 - [ ] Test: Create category tree -> Create tickets in categories ->

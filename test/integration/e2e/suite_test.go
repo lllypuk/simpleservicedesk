@@ -296,6 +296,95 @@ func (s *E2ETestSuite) TestUserManagementWorkflow() {
 	s.Require().Equal(http.StatusOK, agentGetsCustomerBTicketResponse.Code, "response: %s", agentGetsCustomerBTicketResponse.Body.String())
 }
 
+func (s *E2ETestSuite) TestOrganizationWorkflow() {
+	orgName := fmt.Sprintf("E2E Organization %s", s.seedData.OrganizationID.String()[:8])
+	orgDomain := fmt.Sprintf("e2e-org-%s.example.com", s.seedData.OrganizationID.String()[:8])
+	organizationID := s.mustCreateOrganizationWithAdmin(orgName, orgDomain)
+	categoryID := s.mustCreateCategoryWithAdmin(organizationID, "E2E Organization Category")
+
+	customer := s.mustCreateUserWithAdmin("E2E Org Customer", "org.customer", "orgCustomerPass123")
+	agent := s.mustCreateUserWithAdmin("E2E Org Agent", "org.agent", "orgAgentPass123")
+	s.mustUpdateUserRoleWithAdmin(agent.ID, openapi.Agent)
+
+	s.mustAssignUserToOrganizationWithAdmin(customer.ID, organizationID)
+	s.mustAssignUserToOrganizationWithAdmin(agent.ID, organizationID)
+
+	customerRec := s.mustGetUserWithAdmin(customer.ID)
+	var customerResp openapi.GetUserResponse
+	err := json.Unmarshal(customerRec.Body.Bytes(), &customerResp)
+	s.Require().NoError(err)
+	s.Require().NotNil(customerResp.OrganizationId)
+	s.Equal(organizationID, *customerResp.OrganizationId)
+
+	agentRec := s.mustGetUserWithAdmin(agent.ID)
+	var agentResp openapi.GetUserResponse
+	err = json.Unmarshal(agentRec.Body.Bytes(), &agentResp)
+	s.Require().NoError(err)
+	s.Require().NotNil(agentResp.OrganizationId)
+	s.Equal(organizationID, *agentResp.OrganizationId)
+
+	customerToken, customerLoginRec := s.LoginAndGetToken(customer.Email, customer.Password)
+	s.Require().Equal(http.StatusOK, customerLoginRec.Code, "response: %s", customerLoginRec.Body.String())
+	s.Require().NotEmpty(customerToken)
+
+	agentToken, agentLoginRec := s.LoginAndGetToken(agent.Email, agent.Password)
+	s.Require().Equal(http.StatusOK, agentLoginRec.Code, "response: %s", agentLoginRec.Body.String())
+	s.Require().NotEmpty(agentToken)
+
+	orgTicketBody, err := json.Marshal(openapi.CreateTicketRequest{
+		Title:          "E2E organization workflow ticket",
+		Description:    "Ticket created under dedicated organization",
+		Priority:       openapi.Normal,
+		OrganizationId: organizationID,
+		AuthorId:       customer.ID,
+		CategoryId:     &categoryID,
+	})
+	s.Require().NoError(err)
+
+	orgTicketReq := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewReader(orgTicketBody))
+	orgTicketReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	orgTicketReq.Header.Set(echo.HeaderAuthorization, "Bearer "+customerToken)
+	orgTicketRec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(orgTicketRec, orgTicketReq)
+	s.Require().Equal(http.StatusCreated, orgTicketRec.Code, "response: %s", orgTicketRec.Body.String())
+
+	var orgTicketResp openapi.GetTicketResponse
+	err = json.Unmarshal(orgTicketRec.Body.Bytes(), &orgTicketResp)
+	s.Require().NoError(err)
+	s.Require().NotNil(orgTicketResp.Id)
+	s.Require().NotNil(orgTicketResp.OrganizationId)
+	s.Equal(organizationID, *orgTicketResp.OrganizationId)
+
+	otherOrgTicketBody, err := json.Marshal(openapi.CreateTicketRequest{
+		Title:          "E2E other organization ticket",
+		Description:    "Ticket created in seed organization for filtering checks",
+		Priority:       openapi.Normal,
+		OrganizationId: s.seedData.OrganizationID,
+		AuthorId:       customer.ID,
+		CategoryId:     &s.seedData.CategoryIDs[0],
+	})
+	s.Require().NoError(err)
+
+	otherOrgTicketReq := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewReader(otherOrgTicketBody))
+	otherOrgTicketReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	otherOrgTicketReq.Header.Set(echo.HeaderAuthorization, "Bearer "+customerToken)
+	otherOrgTicketRec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(otherOrgTicketRec, otherOrgTicketReq)
+	s.Require().Equal(http.StatusCreated, otherOrgTicketRec.Code, "response: %s", otherOrgTicketRec.Body.String())
+
+	filteredByOrganizationRec := s.mustListTicketsByOrganizationWithToken(agentToken, organizationID)
+	s.Require().Equal(http.StatusOK, filteredByOrganizationRec.Code, "response: %s", filteredByOrganizationRec.Body.String())
+	var filteredByOrganization openapi.ListTicketsResponse
+	err = json.Unmarshal(filteredByOrganizationRec.Body.Bytes(), &filteredByOrganization)
+	s.Require().NoError(err)
+	s.Require().NotNil(filteredByOrganization.Tickets)
+	s.Require().Len(*filteredByOrganization.Tickets, 1)
+	s.Require().NotNil((*filteredByOrganization.Tickets)[0].Id)
+	s.Require().NotNil((*filteredByOrganization.Tickets)[0].OrganizationId)
+	s.Equal(*orgTicketResp.Id, *(*filteredByOrganization.Tickets)[0].Id)
+	s.Equal(organizationID, *(*filteredByOrganization.Tickets)[0].OrganizationId)
+}
+
 func (s *E2ETestSuite) mustCreateUserWithAdmin(name, emailPrefix, password string) e2eUserCredentials {
 	email := openapi_types.Email(fmt.Sprintf("%s-%s@example.com", emailPrefix, s.seedData.OrganizationID.String()[:8]))
 	reqBody, err := json.Marshal(openapi.CreateUserRequest{
@@ -359,6 +448,94 @@ func (s *E2ETestSuite) mustListTicketsWithToken(token, authorID string) *httptes
 	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 	rec := httptest.NewRecorder()
 	s.HTTPServer.ServeHTTP(rec, req)
+	return rec
+}
+
+func (s *E2ETestSuite) mustListTicketsByOrganizationWithToken(
+	token string,
+	organizationID openapi_types.UUID,
+) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodGet, "/tickets?organization_id="+organizationID.String(), nil)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+	rec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(rec, req)
+	return rec
+}
+
+func (s *E2ETestSuite) mustCreateOrganizationWithAdmin(name, domain string) openapi_types.UUID {
+	reqBody, err := json.Marshal(openapi.CreateOrganizationRequest{
+		Name:   name,
+		Domain: &domain,
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewReader(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusCreated, rec.Code, "response: %s", rec.Body.String())
+
+	var resp openapi.CreateOrganizationResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &resp)
+	s.Require().NoError(err)
+	s.Require().NotNil(resp.Id)
+	return *resp.Id
+}
+
+func (s *E2ETestSuite) mustCreateCategoryWithAdmin(
+	organizationID openapi_types.UUID,
+	name string,
+) openapi_types.UUID {
+	reqBody, err := json.Marshal(openapi.CreateCategoryRequest{
+		Name:           name,
+		OrganizationId: organizationID,
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/categories", bytes.NewReader(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusCreated, rec.Code, "response: %s", rec.Body.String())
+
+	var resp openapi.CreateCategoryResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &resp)
+	s.Require().NoError(err)
+	s.Require().NotNil(resp.Id)
+	return *resp.Id
+}
+
+func (s *E2ETestSuite) mustAssignUserToOrganizationWithAdmin(userID, organizationID openapi_types.UUID) {
+	reqBody, err := json.Marshal(openapi.UpdateUserRequest{
+		OrganizationId: &organizationID,
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPut, "/users/"+userID.String(), bytes.NewReader(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "response: %s", rec.Body.String())
+}
+
+func (s *E2ETestSuite) mustUpdateUserRoleWithAdmin(userID openapi_types.UUID, role openapi.UserRole) {
+	reqBody, err := json.Marshal(openapi.UpdateUserRoleRequest{
+		Role: role,
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPatch, "/users/"+userID.String()+"/role", bytes.NewReader(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "response: %s", rec.Body.String())
+}
+
+func (s *E2ETestSuite) mustGetUserWithAdmin(userID openapi_types.UUID) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodGet, "/users/"+userID.String(), nil)
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "response: %s", rec.Body.String())
 	return rec
 }
 
