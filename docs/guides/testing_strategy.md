@@ -95,7 +95,7 @@ func TestCreateHandler_Success(t *testing.T) {
 
 ### Database Integration Tests
 ```go
-// integration_test/infrastructure/users/mongo_test.go
+// test/integration/infrastructure/users/mongo_test.go
 func TestMongoUserRepository_CreateUser(t *testing.T) {
     // Setup test container
     ctx := context.Background()
@@ -149,7 +149,7 @@ func TestMongoUserRepository_CreateUser(t *testing.T) {
 
 ### API Integration Tests
 ```go
-// integration_test/api/users_test.go
+// test/integration/api/users_test.go
 func TestUsersAPI_CreateAndGet(t *testing.T) {
     // Setup test server with real dependencies
     suite := setupTestSuite(t)
@@ -184,11 +184,45 @@ func TestUsersAPI_CreateAndGet(t *testing.T) {
 }
 ```
 
+## 🔐 Auth Testing
+
+Authentication and authorization are tested at multiple levels:
+
+### Unit Tests
+- `internal/application/auth/` — login handler, token generation, token validation
+
+### Integration Tests (`test/integration/api/`)
+- `POST /login` — valid credentials return JWT; invalid return 401
+- Protected endpoints without token → 401
+- Protected endpoints with wrong role → 403
+- Rate limiting on `POST /login` — 6th request returns 429
+
+### E2E Tests (`test/integration/e2e/`)
+- User role change workflow: token issued with old role is rejected after role change
+- Token refresh behavior: user must re-login after role change
+
+## 🔄 E2E Tests
+
+End-to-end tests verify complete user workflows:
+
+```
+test/integration/e2e/
+├── ticket_lifecycle_test.go   # Open → InProgress → Resolved → Closed + timestamps
+├── user_management_test.go    # Role changes, token refresh behavior
+├── organization_test.go       # Org-scoped ticket filtering
+├── category_test.go           # Tree changes, ticket association after parent move
+└── error_scenarios_test.go    # Invalid transitions, duplicate emails, circular refs, 404s
+```
+
+Build tags: `//go:build integration,e2e`
+
+Run with: `make test-e2e`
+
 ## 🏗️ Test Infrastructure
 
 ### Test Suite Setup
 ```go
-// integration_test/suite.go
+// test/integration/suite.go
 type TestSuite struct {
     Server    *echo.Echo
     Client    *TestClient
@@ -346,7 +380,7 @@ func BenchmarkValidateEmail(b *testing.B) {
 
 ### Load Testing (Future)
 ```go
-// integration_test/load/users_test.go
+// test/integration/load/users_test.go
 func TestUsersAPI_Load(t *testing.T) {
     if testing.Short() {
         t.Skip("Skipping load test in short mode")

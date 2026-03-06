@@ -43,7 +43,7 @@ and continued toolchain/module improvements.
 - [x] Run `make generate` to regenerate OpenAPI code
 - [x] Run `make lint` — ensure no new linter warnings
 - [x] Run `make test` — all unit tests pass
-- [ ] Run `make test-integration` — all integration tests pass
+- [x] Run `make test-integration` — all integration tests pass
 - [x] Mark completed
 
 ### Task 6: Update documentation

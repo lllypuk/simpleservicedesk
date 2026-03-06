@@ -9,7 +9,14 @@ services:
       - MONGO_URI=mongodb://mongodb:27017
       - MONGO_DATABASE=servicedesk
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:8080/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   mongodb:
     image: mongodb/mongodb-community-server:latest
@@ -17,6 +24,12 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   mongo-data:

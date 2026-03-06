@@ -11,6 +11,7 @@ import (
 	"simpleservicedesk/internal/application"
 	userdomain "simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/internal/infrastructure/categories"
+	healthInfra "simpleservicedesk/internal/infrastructure/health"
 	"simpleservicedesk/internal/infrastructure/organizations"
 	"simpleservicedesk/internal/infrastructure/tickets"
 	userrepo "simpleservicedesk/internal/infrastructure/users"
@@ -95,6 +96,7 @@ func (s *IntegrationSuite) SetupSuite() {
 		s.TicketsRepo,
 		s.OrganizationsRepo,
 		s.CategoriesRepo,
+		healthInfra.NewMongoPinger(s.MongoClient),
 		"integration-test-jwt-signing-key",
 		time.Hour,
 		[]string{"*"},
@@ -122,6 +124,7 @@ func (s *IntegrationSuite) SetupTest() {
 		s.TicketsRepo,
 		s.OrganizationsRepo,
 		s.CategoriesRepo,
+		healthInfra.NewMongoPinger(s.MongoClient),
 		"integration-test-jwt-signing-key",
 		time.Hour,
 		[]string{"*"},

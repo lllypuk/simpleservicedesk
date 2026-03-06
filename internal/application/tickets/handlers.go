@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"simpleservicedesk/internal/domain/tickets"
+	"simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/internal/queries"
 
 	"github.com/google/uuid"
@@ -21,12 +22,23 @@ type TicketRepository interface {
 	DeleteTicket(ctx context.Context, id uuid.UUID) error
 }
 
-type TicketHandlers struct {
-	repo TicketRepository
+type UserRepository interface {
+	GetUser(ctx context.Context, id uuid.UUID) (*users.User, error)
 }
 
-func SetupHandlers(repo TicketRepository) TicketHandlers {
+type TicketHandlers struct {
+	repo     TicketRepository
+	userRepo UserRepository
+}
+
+func SetupHandlers(repo TicketRepository, userRepo ...UserRepository) TicketHandlers {
+	var usersRepo UserRepository
+	if len(userRepo) > 0 {
+		usersRepo = userRepo[0]
+	}
+
 	return TicketHandlers{
-		repo: repo,
+		repo:     repo,
+		userRepo: usersRepo,
 	}
 }

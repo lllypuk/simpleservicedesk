@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"simpleservicedesk/internal/application/health"
 	authdomain "simpleservicedesk/internal/domain/auth"
 	"simpleservicedesk/internal/domain/categories"
 	"simpleservicedesk/internal/domain/organizations"
@@ -510,6 +511,7 @@ func (s *ServerSuite) SetupTest() {
 		s.TicketsRepo,
 		s.OrganizationsRepo,
 		s.CategoriesRepo,
+		health.NoopPinger{},
 		"test-jwt-signing-key",
 		time.Hour,
 		[]string{"*"},

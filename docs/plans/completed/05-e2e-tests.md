@@ -16,39 +16,39 @@ use the full stack (HTTP server + MongoDB) and simulate real user journeys.
 ---
 
 ### Task 1: Set up E2E test infrastructure
-- [ ] Create `test/integration/e2e/suite_test.go` with test setup
-- [ ] Extend `shared.IntegrationSuite` with auth helpers (login, get token)
-- [ ] Add helper to create seeded data (admin user, test organization, categories)
-- [ ] Mark completed
+- [x] Create `test/integration/e2e/suite_test.go` with test setup
+- [x] Extend `shared.IntegrationSuite` with auth helpers (login, get token)
+- [x] Add helper to create seeded data (admin user, test organization, categories)
+- [x] Mark completed
 
 ### Task 2: Ticket lifecycle workflow
-- [ ] Test: Admin creates user (Agent) -> Agent logs in -> Agent creates ticket ->
+- [x] Test: Admin creates user (Agent) -> Agent logs in -> Agent creates ticket ->
       Agent changes status to in_progress -> Agent resolves ticket -> Admin closes ticket
-- [ ] Verify status transitions follow domain rules
-- [ ] Verify timestamps are set correctly (resolvedAt, closedAt)
-- [ ] Mark completed
+- [x] Verify status transitions follow domain rules
+- [x] Verify timestamps are set correctly (resolvedAt, closedAt)
+- [x] Mark completed
 
 ### Task 3: User management workflow
-- [ ] Test: Admin creates users with different roles -> Users login ->
+- [x] Test: Admin creates users with different roles -> Users login ->
       Users see only their own tickets -> Admin changes user role ->
       Verify new permissions take effect
-- [ ] Mark completed
+- [x] Mark completed
 
 ### Task 4: Organization workflow
-- [ ] Test: Admin creates organization -> Admin adds users ->
+- [x] Test: Admin creates organization -> Admin adds users ->
       Create tickets under organization -> Filter tickets by organization ->
       Verify organization users see org tickets
-- [ ] Mark completed
+- [x] Mark completed
 
 ### Task 5: Category and ticket classification
-- [ ] Test: Create category tree -> Create tickets in categories ->
+- [x] Test: Create category tree -> Create tickets in categories ->
       Filter tickets by category -> Move category (change parent) ->
       Verify ticket associations remain correct
-- [ ] Mark completed
+- [x] Mark completed
 
 ### Task 6: Error scenarios
-- [ ] Test: Invalid status transitions return proper errors
-- [ ] Test: Duplicate email on user creation returns 409
-- [ ] Test: Circular parent references in categories/organizations return errors
-- [ ] Test: Accessing nonexistent resources returns 404
-- [ ] Mark completed
+- [x] Test: Invalid status transitions return proper errors
+- [x] Test: Duplicate email on user creation returns 409
+- [x] Test: Circular parent references in categories/organizations return errors
+- [x] Test: Accessing nonexistent resources returns 404
+- [x] Mark completed

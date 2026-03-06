@@ -93,9 +93,9 @@ Current snapshot:
 - `01-authentication-authorization.md`: complete
 - `02-request-validation.md`: complete (OpenAPI request validator enabled in HTTP server middleware)
 - `03-cors-rate-limiting.md`: complete
-- `04-health-check.md`: pending
-- `05-e2e-tests.md`: pending
-- `06-update-documentation.md`: in progress
+- `04-health-check.md`: complete
+- `05-e2e-tests.md`: complete
+- `06-update-documentation.md`: complete
 
 ## Test Organization
 
@@ -132,10 +132,12 @@ internal/
 - ✅ testcontainers-go for real MongoDB instances
 - Tagged with `//go:build integration`
 
-**End-to-End Tests** (`test/integration/e2e/`) - ✅ READY FOR WORKFLOWS:
-- Infrastructure ready for full workflow testing
-- User journey simulation capabilities  
-- Multiple service interaction testing
+**End-to-End Tests** (`test/integration/e2e/`) - ✅ WORKFLOWS IMPLEMENTED:
+- Ticket lifecycle workflow (creation, status transitions, resolved/closed timestamps)
+- User management workflow (role changes, token refresh behavior, visibility checks)
+- Organization workflow (organization-scoped ticket filtering)
+- Category workflow (tree changes and ticket association checks after parent move)
+- Error scenarios (invalid transitions, duplicate email conflicts, circular references, 404 handling)
 - Tagged with `//go:build integration,e2e`
 
 ### Test Build Tags
