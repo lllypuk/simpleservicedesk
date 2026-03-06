@@ -16,7 +16,7 @@ Plans are numbered and should be executed in order. Some have dependencies on ea
 
 ## Status
 
-- [ ] 00 - Upgrade Go 1.26 (in progress; remaining validation checkboxes open)
+- [x] 00 - Upgrade Go 1.26 (in progress; remaining validation checkboxes open)
 - [x] 01 - Authentication & Authorization
 - [x] 02 - Request Validation
 - [x] 03 - CORS & Rate Limiting
