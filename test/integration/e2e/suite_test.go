@@ -385,6 +385,88 @@ func (s *E2ETestSuite) TestOrganizationWorkflow() {
 	s.Equal(organizationID, *(*filteredByOrganization.Tickets)[0].OrganizationId)
 }
 
+func (s *E2ETestSuite) TestCategoryAndTicketClassificationWorkflow() {
+	organizationID := s.mustCreateOrganizationWithAdmin(
+		fmt.Sprintf("E2E Category Org %s", s.seedData.OrganizationID.String()[:8]),
+		fmt.Sprintf("e2e-category-org-%s.example.com", s.seedData.OrganizationID.String()[:8]),
+	)
+	rootCategoryA := s.mustCreateCategoryWithAdmin(organizationID, "E2E Root Category A")
+	rootCategoryB := s.mustCreateCategoryWithAdmin(organizationID, "E2E Root Category B")
+	childCategory := s.mustCreateCategoryWithParentWithAdmin(organizationID, rootCategoryA, "E2E Child Category")
+
+	customer := s.mustCreateUserWithAdmin("E2E Category Customer", "category.customer", "categoryCustomerPass123")
+	s.mustAssignUserToOrganizationWithAdmin(customer.ID, organizationID)
+
+	customerToken, customerLoginRec := s.LoginAndGetToken(customer.Email, customer.Password)
+	s.Require().Equal(http.StatusOK, customerLoginRec.Code, "response: %s", customerLoginRec.Body.String())
+	s.Require().NotEmpty(customerToken)
+
+	ticketInRootA := s.mustCreateTicketWithCategoryAndOrganization(
+		customerToken,
+		customer.ID,
+		organizationID,
+		rootCategoryA,
+		"E2E ticket in root category A",
+	)
+	ticketInChild := s.mustCreateTicketWithCategoryAndOrganization(
+		customerToken,
+		customer.ID,
+		organizationID,
+		childCategory,
+		"E2E ticket in child category",
+	)
+	ticketInRootB := s.mustCreateTicketWithCategoryAndOrganization(
+		customerToken,
+		customer.ID,
+		organizationID,
+		rootCategoryB,
+		"E2E ticket in root category B",
+	)
+
+	rootADirectRec := s.mustListTicketsByCategoryWithToken(customerToken, rootCategoryA)
+	s.Require().Equal(http.StatusOK, rootADirectRec.Code, "response: %s", rootADirectRec.Body.String())
+	rootADirectTickets := s.mustDecodeTicketsResponse(rootADirectRec)
+	s.Require().Len(rootADirectTickets, 1)
+	s.Require().NotNil(rootADirectTickets[0].Id)
+	s.Equal(*ticketInRootA.Id, *rootADirectTickets[0].Id)
+
+	rootAWithChildrenBeforeMoveRec := s.mustListCategoryTicketsWithToken(customerToken, rootCategoryA, true)
+	s.Require().Equal(http.StatusOK, rootAWithChildrenBeforeMoveRec.Code, "response: %s", rootAWithChildrenBeforeMoveRec.Body.String())
+	rootAWithChildrenBeforeMove := s.mustDecodeTicketsResponse(rootAWithChildrenBeforeMoveRec)
+	s.Require().Len(rootAWithChildrenBeforeMove, 2)
+	s.Contains(s.ticketIDs(rootAWithChildrenBeforeMove), *ticketInRootA.Id)
+	s.Contains(s.ticketIDs(rootAWithChildrenBeforeMove), *ticketInChild.Id)
+
+	s.mustUpdateCategoryParentWithAdmin(childCategory, rootCategoryB)
+
+	childCategoryRec := s.mustGetCategoryWithAdmin(childCategory)
+	var childCategoryResp openapi.GetCategoryResponse
+	err := json.Unmarshal(childCategoryRec.Body.Bytes(), &childCategoryResp)
+	s.Require().NoError(err)
+	s.Require().NotNil(childCategoryResp.ParentId)
+	s.Equal(rootCategoryB, *childCategoryResp.ParentId)
+
+	childDirectRec := s.mustListTicketsByCategoryWithToken(customerToken, childCategory)
+	s.Require().Equal(http.StatusOK, childDirectRec.Code, "response: %s", childDirectRec.Body.String())
+	childDirectTickets := s.mustDecodeTicketsResponse(childDirectRec)
+	s.Require().Len(childDirectTickets, 1)
+	s.Require().NotNil(childDirectTickets[0].Id)
+	s.Equal(*ticketInChild.Id, *childDirectTickets[0].Id)
+
+	rootAWithChildrenAfterMoveRec := s.mustListCategoryTicketsWithToken(customerToken, rootCategoryA, true)
+	s.Require().Equal(http.StatusOK, rootAWithChildrenAfterMoveRec.Code, "response: %s", rootAWithChildrenAfterMoveRec.Body.String())
+	rootAWithChildrenAfterMove := s.mustDecodeTicketsResponse(rootAWithChildrenAfterMoveRec)
+	s.Require().Len(rootAWithChildrenAfterMove, 1)
+	s.Contains(s.ticketIDs(rootAWithChildrenAfterMove), *ticketInRootA.Id)
+
+	rootBWithChildrenAfterMoveRec := s.mustListCategoryTicketsWithToken(customerToken, rootCategoryB, true)
+	s.Require().Equal(http.StatusOK, rootBWithChildrenAfterMoveRec.Code, "response: %s", rootBWithChildrenAfterMoveRec.Body.String())
+	rootBWithChildrenAfterMove := s.mustDecodeTicketsResponse(rootBWithChildrenAfterMoveRec)
+	s.Require().Len(rootBWithChildrenAfterMove, 2)
+	s.Contains(s.ticketIDs(rootBWithChildrenAfterMove), *ticketInRootB.Id)
+	s.Contains(s.ticketIDs(rootBWithChildrenAfterMove), *ticketInChild.Id)
+}
+
 func (s *E2ETestSuite) mustCreateUserWithAdmin(name, emailPrefix, password string) e2eUserCredentials {
 	email := openapi_types.Email(fmt.Sprintf("%s-%s@example.com", emailPrefix, s.seedData.OrganizationID.String()[:8]))
 	reqBody, err := json.Marshal(openapi.CreateUserRequest{
@@ -503,6 +585,128 @@ func (s *E2ETestSuite) mustCreateCategoryWithAdmin(
 	s.Require().NoError(err)
 	s.Require().NotNil(resp.Id)
 	return *resp.Id
+}
+
+func (s *E2ETestSuite) mustCreateCategoryWithParentWithAdmin(
+	organizationID openapi_types.UUID,
+	parentID openapi_types.UUID,
+	name string,
+) openapi_types.UUID {
+	reqBody, err := json.Marshal(openapi.CreateCategoryRequest{
+		Name:           name,
+		OrganizationId: organizationID,
+		ParentId:       &parentID,
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/categories", bytes.NewReader(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusCreated, rec.Code, "response: %s", rec.Body.String())
+
+	var resp openapi.CreateCategoryResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &resp)
+	s.Require().NoError(err)
+	s.Require().NotNil(resp.Id)
+	return *resp.Id
+}
+
+func (s *E2ETestSuite) mustUpdateCategoryParentWithAdmin(categoryID, parentID openapi_types.UUID) {
+	reqBody, err := json.Marshal(openapi.UpdateCategoryRequest{
+		ParentId: &parentID,
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPut, "/categories/"+categoryID.String(), bytes.NewReader(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "response: %s", rec.Body.String())
+}
+
+func (s *E2ETestSuite) mustGetCategoryWithAdmin(categoryID openapi_types.UUID) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodGet, "/categories/"+categoryID.String(), nil)
+	rec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(rec, req)
+	s.Require().Equal(http.StatusOK, rec.Code, "response: %s", rec.Body.String())
+	return rec
+}
+
+func (s *E2ETestSuite) mustCreateTicketWithCategoryAndOrganization(
+	token string,
+	authorID openapi_types.UUID,
+	organizationID openapi_types.UUID,
+	categoryID openapi_types.UUID,
+	title string,
+) openapi.GetTicketResponse {
+	reqBody, err := json.Marshal(openapi.CreateTicketRequest{
+		Title:          title,
+		Description:    "E2E category workflow ticket",
+		Priority:       openapi.Normal,
+		OrganizationId: organizationID,
+		AuthorId:       authorID,
+		CategoryId:     &categoryID,
+	})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewReader(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+	rec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(rec, req)
+	s.Require().Equal(http.StatusCreated, rec.Code, "response: %s", rec.Body.String())
+
+	var ticketResp openapi.GetTicketResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &ticketResp)
+	s.Require().NoError(err)
+	s.Require().NotNil(ticketResp.Id)
+
+	return ticketResp
+}
+
+func (s *E2ETestSuite) mustListTicketsByCategoryWithToken(
+	token string,
+	categoryID openapi_types.UUID,
+) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodGet, "/tickets?category_id="+categoryID.String(), nil)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+	rec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(rec, req)
+	return rec
+}
+
+func (s *E2ETestSuite) mustListCategoryTicketsWithToken(
+	token string,
+	categoryID openapi_types.UUID,
+	includeSubcategories bool,
+) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/categories/%s/tickets?include_subcategories=%t", categoryID.String(), includeSubcategories),
+		nil,
+	)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+	rec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(rec, req)
+	return rec
+}
+
+func (s *E2ETestSuite) mustDecodeTicketsResponse(rec *httptest.ResponseRecorder) []openapi.GetTicketResponse {
+	var ticketsResp openapi.ListTicketsResponse
+	err := json.Unmarshal(rec.Body.Bytes(), &ticketsResp)
+	s.Require().NoError(err)
+	s.Require().NotNil(ticketsResp.Tickets)
+	return *ticketsResp.Tickets
+}
+
+func (s *E2ETestSuite) ticketIDs(tickets []openapi.GetTicketResponse) []openapi_types.UUID {
+	ids := make([]openapi_types.UUID, 0, len(tickets))
+	for _, ticket := range tickets {
+		s.Require().NotNil(ticket.Id)
+		ids = append(ids, *ticket.Id)
+	}
+	return ids
 }
 
 func (s *E2ETestSuite) mustAssignUserToOrganizationWithAdmin(userID, organizationID openapi_types.UUID) {

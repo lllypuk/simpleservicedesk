@@ -41,10 +41,10 @@ use the full stack (HTTP server + MongoDB) and simulate real user journeys.
 - [x] Mark completed
 
 ### Task 5: Category and ticket classification
-- [ ] Test: Create category tree -> Create tickets in categories ->
+- [x] Test: Create category tree -> Create tickets in categories ->
       Filter tickets by category -> Move category (change parent) ->
       Verify ticket associations remain correct
-- [ ] Mark completed
+- [x] Mark completed
 
 ### Task 6: Error scenarios
 - [ ] Test: Invalid status transitions return proper errors
