@@ -29,10 +29,10 @@ use the full stack (HTTP server + MongoDB) and simulate real user journeys.
 - [x] Mark completed
 
 ### Task 3: User management workflow
-- [ ] Test: Admin creates users with different roles -> Users login ->
+- [x] Test: Admin creates users with different roles -> Users login ->
       Users see only their own tickets -> Admin changes user role ->
       Verify new permissions take effect
-- [ ] Mark completed
+- [x] Mark completed
 
 ### Task 4: Organization workflow
 - [ ] Test: Admin creates organization -> Admin adds users ->
