@@ -17,7 +17,6 @@ import (
 )
 
 type E2ESeedData struct {
-	AdminToken     string
 	OrganizationID uuid.UUID
 	CategoryIDs    []uuid.UUID
 }
@@ -46,17 +45,19 @@ func (s *IntegrationSuite) MustSeedE2EData() E2ESeedData {
 	s.Require().NoError(err)
 	s.Require().NotNil(orgResp.Id)
 
-	categoryNames := []string{"General Support", "Platform Incidents"}
-	categoryDescriptions := []string{
-		"Default category for general requests",
-		"Default category for incident tickets",
+	defaultCategories := []struct {
+		name        string
+		description string
+	}{
+		{name: "General Support", description: "Default category for general requests"},
+		{name: "Platform Incidents", description: "Default category for incident tickets"},
 	}
-	categoryIDs := make([]uuid.UUID, 0, len(categoryNames))
+	categoryIDs := make([]uuid.UUID, 0, len(defaultCategories))
 
-	for i := range categoryNames {
+	for _, category := range defaultCategories {
 		createCategoryReq := openapi.CreateCategoryRequest{
-			Name:           categoryNames[i],
-			Description:    &categoryDescriptions[i],
+			Name:           category.name,
+			Description:    &category.description,
 			OrganizationId: *orgResp.Id,
 		}
 		categoryReqBody, marshalErr := json.Marshal(createCategoryReq)
@@ -76,7 +77,6 @@ func (s *IntegrationSuite) MustSeedE2EData() E2ESeedData {
 	}
 
 	return E2ESeedData{
-		AdminToken:     s.defaultAdminToken,
 		OrganizationID: *orgResp.Id,
 		CategoryIDs:    categoryIDs,
 	}

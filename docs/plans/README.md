@@ -21,5 +21,5 @@ Plans are numbered and should be executed in order. Some have dependencies on ea
 - [x] 02 - Request Validation
 - [x] 03 - CORS & Rate Limiting
 - [ ] 04 - Health Check
-- [ ] 05 - E2E Tests
+- [x] 05 - E2E Tests
 - [ ] 06 - Update Documentation (in progress)

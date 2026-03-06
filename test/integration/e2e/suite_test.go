@@ -93,6 +93,10 @@ func (s *E2ETestSuite) TestLoginAndTokenHelpers() {
 
 	s.HTTPServer.ServeHTTP(createTicketRec, createTicketReq)
 	s.Require().Equal(http.StatusCreated, createTicketRec.Code, "response: %s", createTicketRec.Body.String())
+
+	invalidLoginRec := s.Login(customer.Email, customer.Passphrase+"-wrong")
+	s.Require().Equal(http.StatusUnauthorized, invalidLoginRec.Code, "response: %s", invalidLoginRec.Body.String())
+	s.Empty(s.GetTokenFromLoginResponse(invalidLoginRec))
 }
 
 func (s *E2ETestSuite) TestTicketLifecycleWorkflow() {
@@ -191,8 +195,9 @@ func (s *E2ETestSuite) TestTicketLifecycleWorkflow() {
 	s.Equal(openapi.Resolved, *resolvedTicket.Status)
 	s.Require().NotNil(resolvedTicket.ResolvedAt)
 	s.Nil(resolvedTicket.ClosedAt)
+	resolvedAt := resolvedTicket.ResolvedAt.UTC()
 
-	closeResp := s.mustUpdateTicketStatusWithToken(*createdTicket.Id, openapi.Closed, s.seedData.AdminToken)
+	closeResp := s.mustUpdateTicketStatusWithToken(*createdTicket.Id, openapi.Closed, s.DefaultAdminToken())
 	s.Require().Equal(http.StatusOK, closeResp.Code, "response: %s", closeResp.Body.String())
 	var closedTicket openapi.GetTicketResponse
 	err = json.Unmarshal(closeResp.Body.Bytes(), &closedTicket)
@@ -201,6 +206,10 @@ func (s *E2ETestSuite) TestTicketLifecycleWorkflow() {
 	s.Equal(openapi.Closed, *closedTicket.Status)
 	s.Require().NotNil(closedTicket.ResolvedAt)
 	s.Require().NotNil(closedTicket.ClosedAt)
+	closedResolvedAt := closedTicket.ResolvedAt.UTC()
+	closedAt := closedTicket.ClosedAt.UTC()
+	s.Equal(resolvedAt, closedResolvedAt)
+	s.False(closedAt.Before(resolvedAt))
 }
 
 func (s *E2ETestSuite) TestUserManagementWorkflow() {
@@ -236,7 +245,7 @@ func (s *E2ETestSuite) TestUserManagementWorkflow() {
 	customerBTicketForVisibility := s.mustCreateTicketWithToken(customerBToken, customerB.ID, "E2E visibility ticket B")
 	customerBTicketForRoleChange := s.mustCreateTicketWithToken(customerBToken, customerB.ID, "E2E role update ticket B")
 
-	customerAListRec := s.mustListTicketsWithToken(customerAToken, customerB.ID.String())
+	customerAListRec := s.mustListOwnTicketsWithToken(customerAToken)
 	s.Require().Equal(http.StatusOK, customerAListRec.Code, "response: %s", customerAListRec.Body.String())
 	var customerAList openapi.ListTicketsResponse
 	err = json.Unmarshal(customerAListRec.Body.Bytes(), &customerAList)
@@ -248,7 +257,17 @@ func (s *E2ETestSuite) TestUserManagementWorkflow() {
 	s.Equal(*customerATicket.Id, *(*customerAList.Tickets)[0].Id)
 	s.Equal(customerA.ID, *(*customerAList.Tickets)[0].AuthorId)
 
-	customerBListRec := s.mustListTicketsWithToken(customerBToken, customerA.ID.String())
+	customerAFilteredAsOtherRec := s.mustListTicketsWithToken(customerAToken, customerB.ID.String())
+	s.Require().Equal(http.StatusOK, customerAFilteredAsOtherRec.Code, "response: %s", customerAFilteredAsOtherRec.Body.String())
+	var customerAFilteredAsOther openapi.ListTicketsResponse
+	err = json.Unmarshal(customerAFilteredAsOtherRec.Body.Bytes(), &customerAFilteredAsOther)
+	s.Require().NoError(err)
+	s.Require().NotNil(customerAFilteredAsOther.Tickets)
+	s.Len(*customerAFilteredAsOther.Tickets, 1)
+	s.Require().NotNil((*customerAFilteredAsOther.Tickets)[0].AuthorId)
+	s.Equal(customerA.ID, *(*customerAFilteredAsOther.Tickets)[0].AuthorId)
+
+	customerBListRec := s.mustListOwnTicketsWithToken(customerBToken)
 	s.Require().Equal(http.StatusOK, customerBListRec.Code, "response: %s", customerBListRec.Body.String())
 	var customerBList openapi.ListTicketsResponse
 	err = json.Unmarshal(customerBListRec.Body.Bytes(), &customerBList)
@@ -275,6 +294,18 @@ func (s *E2ETestSuite) TestUserManagementWorkflow() {
 	s.ServeAuthenticatedHTTP(customerARoleRec, customerARoleReq)
 	s.Require().Equal(http.StatusOK, customerARoleRec.Code, "response: %s", customerARoleRec.Body.String())
 
+	customerAOldTokenAfterRoleChangeRec := s.mustUpdateTicketStatusWithToken(
+		*customerBTicketForRoleChange.Id,
+		openapi.InProgress,
+		customerAToken,
+	)
+	s.Require().Equal(
+		http.StatusForbidden,
+		customerAOldTokenAfterRoleChangeRec.Code,
+		"response: %s",
+		customerAOldTokenAfterRoleChangeRec.Body.String(),
+	)
+
 	customerANewToken, customerANewLoginRec := s.LoginAndGetToken(customerA.Email, customerA.Password)
 	s.Require().Equal(http.StatusOK, customerANewLoginRec.Code, "response: %s", customerANewLoginRec.Body.String())
 	s.Require().NotEmpty(customerANewToken)
@@ -295,6 +326,22 @@ func (s *E2ETestSuite) TestUserManagementWorkflow() {
 	agentGetsCustomerBTicketResponse := httptest.NewRecorder()
 	s.HTTPServer.ServeHTTP(agentGetsCustomerBTicketResponse, agentGetsCustomerBTicketRec)
 	s.Require().Equal(http.StatusOK, agentGetsCustomerBTicketResponse.Code, "response: %s", agentGetsCustomerBTicketResponse.Body.String())
+
+	customerAGetsCustomerBTicketReq := httptest.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/tickets/%s", customerBTicketForVisibility.Id.String()),
+		nil,
+	)
+	customerAGetsCustomerBTicketReq.Header.Set(echo.HeaderAuthorization, "Bearer "+customerAToken)
+	customerAGetsCustomerBTicketRec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(customerAGetsCustomerBTicketRec, customerAGetsCustomerBTicketReq)
+	s.Require().Equal(http.StatusForbidden, customerAGetsCustomerBTicketRec.Code, "response: %s", customerAGetsCustomerBTicketRec.Body.String())
+
+	customerBGetsCustomerATicketReq := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/tickets/%s", customerATicket.Id.String()), nil)
+	customerBGetsCustomerATicketReq.Header.Set(echo.HeaderAuthorization, "Bearer "+customerBToken)
+	customerBGetsCustomerATicketRec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(customerBGetsCustomerATicketRec, customerBGetsCustomerATicketReq)
+	s.Require().Equal(http.StatusForbidden, customerBGetsCustomerATicketRec.Code, "response: %s", customerBGetsCustomerATicketRec.Body.String())
 }
 
 func (s *E2ETestSuite) TestOrganizationWorkflow() {
@@ -438,6 +485,18 @@ func (s *E2ETestSuite) TestCategoryAndTicketClassificationWorkflow() {
 	s.Contains(s.ticketIDs(rootAWithChildrenBeforeMove), *ticketInRootA.Id)
 	s.Contains(s.ticketIDs(rootAWithChildrenBeforeMove), *ticketInChild.Id)
 
+	rootADefaultBeforeMoveRec := s.mustListCategoryTicketsDefaultWithToken(customerToken, rootCategoryA)
+	s.Require().Equal(http.StatusOK, rootADefaultBeforeMoveRec.Code, "response: %s", rootADefaultBeforeMoveRec.Body.String())
+	rootADefaultBeforeMove := s.mustDecodeTicketsResponse(rootADefaultBeforeMoveRec)
+	s.Require().Len(rootADefaultBeforeMove, 1)
+	s.Contains(s.ticketIDs(rootADefaultBeforeMove), *ticketInRootA.Id)
+
+	rootAWithoutChildrenBeforeMoveRec := s.mustListCategoryTicketsWithToken(customerToken, rootCategoryA, false)
+	s.Require().Equal(http.StatusOK, rootAWithoutChildrenBeforeMoveRec.Code, "response: %s", rootAWithoutChildrenBeforeMoveRec.Body.String())
+	rootAWithoutChildrenBeforeMove := s.mustDecodeTicketsResponse(rootAWithoutChildrenBeforeMoveRec)
+	s.Require().Len(rootAWithoutChildrenBeforeMove, 1)
+	s.Contains(s.ticketIDs(rootAWithoutChildrenBeforeMove), *ticketInRootA.Id)
+
 	s.mustUpdateCategoryParentWithAdmin(childCategory, rootCategoryB)
 
 	childCategoryRec := s.mustGetCategoryWithAdmin(childCategory)
@@ -466,6 +525,12 @@ func (s *E2ETestSuite) TestCategoryAndTicketClassificationWorkflow() {
 	s.Require().Len(rootBWithChildrenAfterMove, 2)
 	s.Contains(s.ticketIDs(rootBWithChildrenAfterMove), *ticketInRootB.Id)
 	s.Contains(s.ticketIDs(rootBWithChildrenAfterMove), *ticketInChild.Id)
+
+	rootBWithoutChildrenAfterMoveRec := s.mustListCategoryTicketsWithToken(customerToken, rootCategoryB, false)
+	s.Require().Equal(http.StatusOK, rootBWithoutChildrenAfterMoveRec.Code, "response: %s", rootBWithoutChildrenAfterMoveRec.Body.String())
+	rootBWithoutChildrenAfterMove := s.mustDecodeTicketsResponse(rootBWithoutChildrenAfterMoveRec)
+	s.Require().Len(rootBWithoutChildrenAfterMove, 1)
+	s.Contains(s.ticketIDs(rootBWithoutChildrenAfterMove), *ticketInRootB.Id)
 }
 
 func (s *E2ETestSuite) TestErrorScenariosWorkflow() {
@@ -475,7 +540,7 @@ func (s *E2ETestSuite) TestErrorScenariosWorkflow() {
 	s.Require().NotEmpty(customerToken)
 
 	ticketResp := s.mustCreateTicketWithToken(customerToken, customer.UserID, "E2E error scenario ticket")
-	invalidTransitionRec := s.mustUpdateTicketStatusWithToken(*ticketResp.Id, openapi.Resolved, s.seedData.AdminToken)
+	invalidTransitionRec := s.mustUpdateTicketStatusWithToken(*ticketResp.Id, openapi.Resolved, s.DefaultAdminToken())
 	s.Require().Equal(http.StatusBadRequest, invalidTransitionRec.Code, "response: %s", invalidTransitionRec.Body.String())
 	s.Contains(strings.ToLower(invalidTransitionRec.Body.String()), "invalid status transition")
 
@@ -503,12 +568,10 @@ func (s *E2ETestSuite) TestErrorScenariosWorkflow() {
 		fmt.Sprintf("E2E Circular Parent Org %s", s.seedData.OrganizationID.String()[:8]),
 		fmt.Sprintf("e2e-circular-parent-%s.example.com", s.seedData.OrganizationID.String()[:8]),
 	)
+	childOrgDomain := fmt.Sprintf("e2e-circular-child-%s.example.com", s.seedData.OrganizationID.String()[:8])
 	childOrgBody, err := json.Marshal(openapi.CreateOrganizationRequest{
-		Name: fmt.Sprintf("E2E Circular Child Org %s", s.seedData.OrganizationID.String()[:8]),
-		Domain: func() *string {
-			d := fmt.Sprintf("e2e-circular-child-%s.example.com", s.seedData.OrganizationID.String()[:8])
-			return &d
-		}(),
+		Name:     fmt.Sprintf("E2E Circular Child Org %s", s.seedData.OrganizationID.String()[:8]),
+		Domain:   &childOrgDomain,
 		ParentId: &parentOrgID,
 	})
 	s.Require().NoError(err)
@@ -629,6 +692,14 @@ func (s *E2ETestSuite) mustCreateTicketWithToken(
 
 func (s *E2ETestSuite) mustListTicketsWithToken(token, authorID string) *httptest.ResponseRecorder {
 	req := httptest.NewRequest(http.MethodGet, "/tickets?author_id="+authorID, nil)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+	rec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(rec, req)
+	return rec
+}
+
+func (s *E2ETestSuite) mustListOwnTicketsWithToken(token string) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodGet, "/tickets", nil)
 	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
 	rec := httptest.NewRecorder()
 	s.HTTPServer.ServeHTTP(rec, req)
@@ -794,6 +865,17 @@ func (s *E2ETestSuite) mustListCategoryTicketsWithToken(
 	return rec
 }
 
+func (s *E2ETestSuite) mustListCategoryTicketsDefaultWithToken(
+	token string,
+	categoryID openapi_types.UUID,
+) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/categories/%s/tickets", categoryID.String()), nil)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+	rec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(rec, req)
+	return rec
+}
+
 func (s *E2ETestSuite) mustDecodeTicketsResponse(rec *httptest.ResponseRecorder) []openapi.GetTicketResponse {
 	var ticketsResp openapi.ListTicketsResponse
 	err := json.Unmarshal(rec.Body.Bytes(), &ticketsResp)
@@ -846,7 +928,7 @@ func (s *E2ETestSuite) mustGetUserWithAdmin(userID openapi_types.UUID) *httptest
 }
 
 func (s *E2ETestSuite) mustUpdateTicketStatusWithToken(
-	ticketID fmt.Stringer,
+	ticketID openapi_types.UUID,
 	status openapi.TicketStatus,
 	token string,
 ) *httptest.ResponseRecorder {
