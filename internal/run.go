@@ -14,6 +14,7 @@ import (
 	"simpleservicedesk/internal/application"
 	userdomain "simpleservicedesk/internal/domain/users"
 	categoriesInfra "simpleservicedesk/internal/infrastructure/categories"
+	healthInfra "simpleservicedesk/internal/infrastructure/health"
 	organizationsInfra "simpleservicedesk/internal/infrastructure/organizations"
 	ticketsInfra "simpleservicedesk/internal/infrastructure/tickets"
 	usersInfra "simpleservicedesk/internal/infrastructure/users"
@@ -56,7 +57,7 @@ func Run(cfg Config) error {
 
 	db := mongoClient.Database(cfg.Mongo.Database)
 
-	if err = startServer(ctx, g, cfg, db); err != nil {
+	if err = startServer(ctx, g, cfg, db, mongoClient); err != nil {
 		return err
 	}
 
@@ -66,11 +67,18 @@ func Run(cfg Config) error {
 	return nil
 }
 
-func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.Database) error {
+func startServer(
+	ctx context.Context,
+	g *errgroup.Group,
+	cfg Config,
+	db *mongo.Database,
+	mongoClient *mongo.Client,
+) error {
 	userRepo := usersInfra.NewMongoRepo(db)
 	ticketRepo := ticketsInfra.NewMongoRepo(db)
 	organizationRepo := organizationsInfra.NewMongoRepo(db)
 	categoryRepo := categoriesInfra.NewMongoRepo(db)
+	pinger := healthInfra.NewMongoPinger(mongoClient)
 	if err := ensureBootstrapAdminUser(ctx, userRepo, cfg.Server.Environment, cfg.Auth); err != nil {
 		return err
 	}
@@ -80,6 +88,7 @@ func startServer(ctx context.Context, g *errgroup.Group, cfg Config, db *mongo.D
 		ticketRepo,
 		organizationRepo,
 		categoryRepo,
+		pinger,
 		cfg.Auth.JWTSigningKey,
 		cfg.Auth.JWTExpiration,
 		cfg.Server.CORSAllowedOrigins,

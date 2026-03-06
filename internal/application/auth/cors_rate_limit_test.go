@@ -10,6 +10,7 @@ import (
 
 	"simpleservicedesk/generated/openapi"
 	"simpleservicedesk/internal/application"
+	"simpleservicedesk/internal/application/health"
 
 	"github.com/labstack/echo/v4"
 )
@@ -128,6 +129,7 @@ func (s *AuthSuite) setupServerWithGlobalRateLimit(requestsPerSecond int) *echo.
 		s.TicketsRepo,
 		s.OrganizationsRepo,
 		s.CategoriesRepo,
+		health.NoopPinger{},
 		"test-jwt-signing-key",
 		time.Hour,
 		[]string{"*"},

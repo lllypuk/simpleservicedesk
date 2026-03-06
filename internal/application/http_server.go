@@ -13,6 +13,7 @@ import (
 	"simpleservicedesk/generated/openapi"
 	"simpleservicedesk/internal/application/auth"
 	"simpleservicedesk/internal/application/categories"
+	"simpleservicedesk/internal/application/health"
 	"simpleservicedesk/internal/application/organizations"
 	"simpleservicedesk/internal/application/tickets"
 	"simpleservicedesk/internal/application/users"
@@ -39,6 +40,7 @@ func SetupHTTPServer(
 	ticketRepo TicketRepository,
 	organizationRepo OrganizationRepository,
 	categoryRepo CategoryRepository,
+	pinger health.Pinger,
 	jwtSigningKey string,
 	jwtExpiration time.Duration,
 	corsAllowedOrigins []string,
@@ -92,6 +94,10 @@ func SetupHTTPServer(
 	e.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
 	})
+
+	healthHandlers := health.NewHandlers(pinger)
+	e.GET("/health/live", healthHandlers.LiveHandler)
+	e.GET("/health/ready", healthHandlers.ReadyHandler)
 
 	server := httpServer{}
 	authService, err := auth.NewService(userRepo, jwtSigningKey, jwtExpiration)
@@ -208,7 +214,7 @@ func shouldSkipOpenAPIValidation(c echo.Context) bool {
 		path = "/"
 	}
 
-	return path == "/ping" || path == "/login"
+	return path == "/ping" || path == "/login" || path == "/health/live" || path == "/health/ready"
 }
 
 func openAPIValidationErrorHandler(c echo.Context, err *echo.HTTPError) error {
