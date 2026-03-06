@@ -43,7 +43,7 @@ func (s *E2ETestSuite) SetupTest() {
 }
 
 func (s *E2ETestSuite) TestSeedDataIncludesAdminOrganizationAndCategories() {
-	s.Require().NotEmpty(s.seedData.AdminToken)
+	s.Require().NotEmpty(s.DefaultAdminToken())
 	s.Require().NotZero(s.seedData.OrganizationID)
 	s.Require().Len(s.seedData.CategoryIDs, 2)
 
