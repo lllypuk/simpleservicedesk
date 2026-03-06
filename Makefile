@@ -29,6 +29,7 @@ test-e2e:
 test-all:
 	go test -v ./internal/... -tags=!integration
 	go test -v ./test/integration/... -tags=integration
+	go test -v ./test/integration/e2e/... -tags=integration,e2e
 
 generate:
 	go generate ./...

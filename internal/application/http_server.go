@@ -101,7 +101,7 @@ func SetupHTTPServer(
 	server.Handlers = auth.SetupHandlers(authService)
 
 	server.UserHandlers = users.SetupHandlers(userRepo)
-	server.TicketHandlers = tickets.SetupHandlers(ticketRepo)
+	server.TicketHandlers = tickets.SetupHandlers(ticketRepo, userRepo)
 	server.CategoryHandlers = categories.SetupHandlers(categoryRepo, ticketRepo)
 	server.OrganizationHandlers = organizations.SetupHandlers(organizationRepo)
 

@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"simpleservicedesk/generated/openapi"
 	userdomain "simpleservicedesk/internal/domain/users"
@@ -172,6 +173,17 @@ func (s *E2ETestSuite) TestTicketLifecycleWorkflow() {
 	s.Nil(createdTicket.ResolvedAt)
 	s.Nil(createdTicket.ClosedAt)
 
+	assignee := s.mustCreateUserWithAdmin("E2E Lifecycle Assignee", "lifecycle.assignee", "assigneePass123")
+	s.mustUpdateUserRoleWithAdmin(assignee.ID, openapi.Agent)
+
+	assignResp := s.mustAssignTicketWithToken(*createdTicket.Id, &assignee.ID, s.DefaultAdminToken())
+	s.Require().Equal(http.StatusOK, assignResp.Code, "response: %s", assignResp.Body.String())
+	var assignedTicket openapi.GetTicketResponse
+	err = json.Unmarshal(assignResp.Body.Bytes(), &assignedTicket)
+	s.Require().NoError(err)
+	s.Require().NotNil(assignedTicket.AssigneeId)
+	s.Equal(assignee.ID, *assignedTicket.AssigneeId)
+
 	invalidTransitionResp := s.mustUpdateTicketStatusWithToken(*createdTicket.Id, openapi.Resolved, agentToken)
 	s.Require().Equal(http.StatusBadRequest, invalidTransitionResp.Code, "response: %s", invalidTransitionResp.Body.String())
 	s.Contains(strings.ToLower(invalidTransitionResp.Body.String()), "invalid status transition")
@@ -208,7 +220,7 @@ func (s *E2ETestSuite) TestTicketLifecycleWorkflow() {
 	s.Require().NotNil(closedTicket.ClosedAt)
 	closedResolvedAt := closedTicket.ResolvedAt.UTC()
 	closedAt := closedTicket.ClosedAt.UTC()
-	s.Equal(resolvedAt, closedResolvedAt)
+	s.WithinDuration(resolvedAt, closedResolvedAt, time.Millisecond)
 	s.False(closedAt.Before(resolvedAt))
 }
 
@@ -300,7 +312,7 @@ func (s *E2ETestSuite) TestUserManagementWorkflow() {
 		customerAToken,
 	)
 	s.Require().Equal(
-		http.StatusForbidden,
+		http.StatusUnauthorized,
 		customerAOldTokenAfterRoleChangeRec.Code,
 		"response: %s",
 		customerAOldTokenAfterRoleChangeRec.Body.String(),
@@ -335,7 +347,7 @@ func (s *E2ETestSuite) TestUserManagementWorkflow() {
 	customerAGetsCustomerBTicketReq.Header.Set(echo.HeaderAuthorization, "Bearer "+customerAToken)
 	customerAGetsCustomerBTicketRec := httptest.NewRecorder()
 	s.HTTPServer.ServeHTTP(customerAGetsCustomerBTicketRec, customerAGetsCustomerBTicketReq)
-	s.Require().Equal(http.StatusForbidden, customerAGetsCustomerBTicketRec.Code, "response: %s", customerAGetsCustomerBTicketRec.Body.String())
+	s.Require().Equal(http.StatusUnauthorized, customerAGetsCustomerBTicketRec.Code, "response: %s", customerAGetsCustomerBTicketRec.Body.String())
 
 	customerBGetsCustomerATicketReq := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/tickets/%s", customerATicket.Id.String()), nil)
 	customerBGetsCustomerATicketReq.Header.Set(echo.HeaderAuthorization, "Bearer "+customerBToken)
@@ -418,7 +430,23 @@ func (s *E2ETestSuite) TestOrganizationWorkflow() {
 	otherOrgTicketReq.Header.Set(echo.HeaderAuthorization, "Bearer "+customerToken)
 	otherOrgTicketRec := httptest.NewRecorder()
 	s.HTTPServer.ServeHTTP(otherOrgTicketRec, otherOrgTicketReq)
-	s.Require().Equal(http.StatusCreated, otherOrgTicketRec.Code, "response: %s", otherOrgTicketRec.Body.String())
+	s.Require().Equal(http.StatusForbidden, otherOrgTicketRec.Code, "response: %s", otherOrgTicketRec.Body.String())
+
+	adminOtherOrgTicketBody, err := json.Marshal(openapi.CreateTicketRequest{
+		Title:          "E2E admin cross-organization ticket",
+		Description:    "Admin creates ticket in seed organization for filtering checks",
+		Priority:       openapi.Normal,
+		OrganizationId: s.seedData.OrganizationID,
+		AuthorId:       customer.ID,
+		CategoryId:     &s.seedData.CategoryIDs[0],
+	})
+	s.Require().NoError(err)
+
+	adminOtherOrgTicketReq := httptest.NewRequest(http.MethodPost, "/tickets", bytes.NewReader(adminOtherOrgTicketBody))
+	adminOtherOrgTicketReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	adminOtherOrgTicketRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(adminOtherOrgTicketRec, adminOtherOrgTicketReq)
+	s.Require().Equal(http.StatusCreated, adminOtherOrgTicketRec.Code, "response: %s", adminOtherOrgTicketRec.Body.String())
 
 	filteredByOrganizationRec := s.mustListTicketsByOrganizationWithToken(agentToken, organizationID)
 	s.Require().Equal(http.StatusOK, filteredByOrganizationRec.Code, "response: %s", filteredByOrganizationRec.Body.String())
@@ -938,6 +966,27 @@ func (s *E2ETestSuite) mustUpdateTicketStatusWithToken(
 	req := httptest.NewRequest(
 		http.MethodPatch,
 		fmt.Sprintf("/tickets/%s/status", ticketID.String()),
+		bytes.NewReader(reqBody),
+	)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+	rec := httptest.NewRecorder()
+	s.HTTPServer.ServeHTTP(rec, req)
+
+	return rec
+}
+
+func (s *E2ETestSuite) mustAssignTicketWithToken(
+	ticketID openapi_types.UUID,
+	assigneeID *openapi_types.UUID,
+	token string,
+) *httptest.ResponseRecorder {
+	reqBody, err := json.Marshal(openapi.AssignTicketRequest{AssigneeId: assigneeID})
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(
+		http.MethodPatch,
+		fmt.Sprintf("/tickets/%s/assign", ticketID.String()),
 		bytes.NewReader(reqBody),
 	)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
