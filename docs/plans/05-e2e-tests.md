@@ -47,8 +47,8 @@ use the full stack (HTTP server + MongoDB) and simulate real user journeys.
 - [x] Mark completed
 
 ### Task 6: Error scenarios
-- [ ] Test: Invalid status transitions return proper errors
-- [ ] Test: Duplicate email on user creation returns 409
-- [ ] Test: Circular parent references in categories/organizations return errors
-- [ ] Test: Accessing nonexistent resources returns 404
-- [ ] Mark completed
+- [x] Test: Invalid status transitions return proper errors
+- [x] Test: Duplicate email on user creation returns 409
+- [x] Test: Circular parent references in categories/organizations return errors
+- [x] Test: Accessing nonexistent resources returns 404
+- [x] Mark completed

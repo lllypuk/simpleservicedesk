@@ -16,6 +16,7 @@ import (
 	userdomain "simpleservicedesk/internal/domain/users"
 	"simpleservicedesk/test/integration/shared"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/stretchr/testify/suite"
@@ -465,6 +466,107 @@ func (s *E2ETestSuite) TestCategoryAndTicketClassificationWorkflow() {
 	s.Require().Len(rootBWithChildrenAfterMove, 2)
 	s.Contains(s.ticketIDs(rootBWithChildrenAfterMove), *ticketInRootB.Id)
 	s.Contains(s.ticketIDs(rootBWithChildrenAfterMove), *ticketInChild.Id)
+}
+
+func (s *E2ETestSuite) TestErrorScenariosWorkflow() {
+	customer := s.MustCreateTestUser(userdomain.RoleCustomer)
+	customerToken, loginRec := s.LoginAndGetToken(customer.Email, customer.Passphrase)
+	s.Require().Equal(http.StatusOK, loginRec.Code, "response: %s", loginRec.Body.String())
+	s.Require().NotEmpty(customerToken)
+
+	ticketResp := s.mustCreateTicketWithToken(customerToken, customer.UserID, "E2E error scenario ticket")
+	invalidTransitionRec := s.mustUpdateTicketStatusWithToken(*ticketResp.Id, openapi.Resolved, s.seedData.AdminToken)
+	s.Require().Equal(http.StatusBadRequest, invalidTransitionRec.Code, "response: %s", invalidTransitionRec.Body.String())
+	s.Contains(strings.ToLower(invalidTransitionRec.Body.String()), "invalid status transition")
+
+	email := openapi_types.Email(fmt.Sprintf("duplicate-%s@example.com", s.seedData.OrganizationID.String()[:8]))
+	createUserBody, err := json.Marshal(openapi.CreateUserRequest{
+		Name:     "Duplicate Email User",
+		Email:    email,
+		Password: "duplicatePass123",
+	})
+	s.Require().NoError(err)
+
+	firstCreateReq := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(createUserBody))
+	firstCreateReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	firstCreateRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(firstCreateRec, firstCreateReq)
+	s.Require().Equal(http.StatusCreated, firstCreateRec.Code, "response: %s", firstCreateRec.Body.String())
+
+	secondCreateReq := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(createUserBody))
+	secondCreateReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	secondCreateRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(secondCreateRec, secondCreateReq)
+	s.Require().Equal(http.StatusConflict, secondCreateRec.Code, "response: %s", secondCreateRec.Body.String())
+
+	parentOrgID := s.mustCreateOrganizationWithAdmin(
+		fmt.Sprintf("E2E Circular Parent Org %s", s.seedData.OrganizationID.String()[:8]),
+		fmt.Sprintf("e2e-circular-parent-%s.example.com", s.seedData.OrganizationID.String()[:8]),
+	)
+	childOrgBody, err := json.Marshal(openapi.CreateOrganizationRequest{
+		Name: fmt.Sprintf("E2E Circular Child Org %s", s.seedData.OrganizationID.String()[:8]),
+		Domain: func() *string {
+			d := fmt.Sprintf("e2e-circular-child-%s.example.com", s.seedData.OrganizationID.String()[:8])
+			return &d
+		}(),
+		ParentId: &parentOrgID,
+	})
+	s.Require().NoError(err)
+
+	createChildOrgReq := httptest.NewRequest(http.MethodPost, "/organizations", bytes.NewReader(childOrgBody))
+	createChildOrgReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	createChildOrgRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(createChildOrgRec, createChildOrgReq)
+	s.Require().Equal(http.StatusCreated, createChildOrgRec.Code, "response: %s", createChildOrgRec.Body.String())
+
+	var childOrgResp openapi.CreateOrganizationResponse
+	err = json.Unmarshal(createChildOrgRec.Body.Bytes(), &childOrgResp)
+	s.Require().NoError(err)
+	s.Require().NotNil(childOrgResp.Id)
+
+	makeParentChildBody, err := json.Marshal(openapi.UpdateOrganizationRequest{
+		ParentId: childOrgResp.Id,
+	})
+	s.Require().NoError(err)
+	makeParentChildReq := httptest.NewRequest(
+		http.MethodPut,
+		"/organizations/"+parentOrgID.String(),
+		bytes.NewReader(makeParentChildBody),
+	)
+	makeParentChildReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	makeParentChildRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(makeParentChildRec, makeParentChildReq)
+	s.Require().Equal(http.StatusBadRequest, makeParentChildRec.Code, "response: %s", makeParentChildRec.Body.String())
+	s.Contains(strings.ToLower(makeParentChildRec.Body.String()), "circular")
+
+	rootCategoryID := s.mustCreateCategoryWithAdmin(parentOrgID, "E2E Circular Root Category")
+	childCategoryID := s.mustCreateCategoryWithParentWithAdmin(parentOrgID, rootCategoryID, "E2E Circular Child Category")
+
+	makeCategoryParentChildBody, err := json.Marshal(openapi.UpdateCategoryRequest{
+		ParentId: &childCategoryID,
+	})
+	s.Require().NoError(err)
+	makeCategoryParentChildReq := httptest.NewRequest(
+		http.MethodPut,
+		"/categories/"+rootCategoryID.String(),
+		bytes.NewReader(makeCategoryParentChildBody),
+	)
+	makeCategoryParentChildReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	makeCategoryParentChildRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(makeCategoryParentChildRec, makeCategoryParentChildReq)
+	s.Require().Equal(http.StatusBadRequest, makeCategoryParentChildRec.Code, "response: %s", makeCategoryParentChildRec.Body.String())
+	s.Contains(strings.ToLower(makeCategoryParentChildRec.Body.String()), "circular")
+
+	nonExistentID := uuid.NewString()
+	getNonExistentTicketReq := httptest.NewRequest(http.MethodGet, "/tickets/"+nonExistentID, nil)
+	getNonExistentTicketRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(getNonExistentTicketRec, getNonExistentTicketReq)
+	s.Require().Equal(http.StatusNotFound, getNonExistentTicketRec.Code, "response: %s", getNonExistentTicketRec.Body.String())
+
+	getNonExistentUserReq := httptest.NewRequest(http.MethodGet, "/users/"+uuid.NewString(), nil)
+	getNonExistentUserRec := httptest.NewRecorder()
+	s.ServeAuthenticatedHTTP(getNonExistentUserRec, getNonExistentUserReq)
+	s.Require().Equal(http.StatusNotFound, getNonExistentUserRec.Code, "response: %s", getNonExistentUserRec.Body.String())
 }
 
 func (s *E2ETestSuite) mustCreateUserWithAdmin(name, emailPrefix, password string) e2eUserCredentials {
